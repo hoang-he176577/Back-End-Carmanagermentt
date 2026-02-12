@@ -19,6 +19,8 @@ namespace Models.DTO.Auth
 
         [Required]
         public UserInfoDto User { get; set; } = new UserInfoDto();
+
+        public string? Warning { get; set; }
     }
     public class UserInfoDto
     {

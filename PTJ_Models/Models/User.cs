@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+
 namespace Models.Models;
 
 public partial class User
@@ -36,6 +38,8 @@ public partial class User
     public virtual ICollection<DisposalProposal> DisposalProposalManagers { get; set; } = new List<DisposalProposal>();
 
     public virtual ICollection<DisposalProposal> DisposalProposalProposers { get; set; } = new List<DisposalProposal>();
+
+    public virtual ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
 
     public virtual ICollection<MaintenanceRequest> MaintenanceRequests { get; set; } = new List<MaintenanceRequest>();
 

@@ -1,9 +1,8 @@
-﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace Models.DTO.Auth
 {
-    public class LoginRequestDto
+    public class RegisterRequestDto
     {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]
@@ -15,7 +14,13 @@ namespace Models.DTO.Auth
         [StringLength(100, ErrorMessage = "Password must not exceed 100 characters.")]
         public string Password { get; set; } = string.Empty;
 
-        [StringLength(250, ErrorMessage = "DeviceInfo must not exceed 250 characters.")]
-        public string? DeviceInfo { get; set; }
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100, ErrorMessage = "Name must not exceed 100 characters.")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(20, ErrorMessage = "Phone must not exceed 20 characters.")]
+        public string? Phone { get; set; }
+
+        public int? BranchId { get; set; }
     }
 }

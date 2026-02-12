@@ -31,6 +31,8 @@ public partial class CarManagerContext : DbContext
 
     public virtual DbSet<Driver> Drivers { get; set; }
 
+    public virtual DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
+
     public virtual DbSet<InsuranceRecord> InsuranceRecords { get; set; }
 
     public virtual DbSet<MaintenanceRequest> MaintenanceRequests { get; set; }
@@ -56,8 +58,8 @@ public partial class CarManagerContext : DbContext
     public virtual DbSet<VehicleModel> VehicleModels { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("server =(local); database = CarManager; uid=sa; pwd=123456;Trusted_Connection=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -302,6 +304,28 @@ public partial class CarManagerContext : DbContext
             entity.HasOne(d => d.Branch).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.BranchId)
                 .HasConstraintName("FK__driver__branch_i__4BAC3F29");
+        });
+
+        modelBuilder.Entity<EmailVerificationToken>(entity =>
+        {
+            entity.HasKey(e => e.EvtokenId);
+
+            entity.HasIndex(e => e.Token, "IX_EmailVerificationTokens_Token").IsUnique();
+
+            entity.HasIndex(e => e.UserId, "IX_EmailVerificationTokens_User_Active").HasFilter("([UsedAt] IS NULL)");
+
+            entity.Property(e => e.EvtokenId).HasColumnName("EVTokenID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
+            entity.Property(e => e.Token).HasMaxLength(255);
+            entity.Property(e => e.UsedAt).HasColumnType("datetime");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.User).WithMany(p => p.EmailVerificationTokens)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_EmailVerificationTokens_User");
         });
 
         modelBuilder.Entity<InsuranceRecord>(entity =>
