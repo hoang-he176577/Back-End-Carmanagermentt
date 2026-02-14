@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Data.Repositories.Interfaces;
+using Data.Repositories.VehicleAssets.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.Vehicles;
 using Models.Models;
 
-namespace Data.Repositories.Implementations;
+namespace Data.Repositories.VehicleAssets.Implementations;
 
 public sealed class VehicleAssetRepository : IVehicleAssetRepository
 {
@@ -71,10 +71,21 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
             .FirstOrDefaultAsync();
     }
 
+    public Task<Vehicle?> GetVehicleEntityByIdAsync(int id)
+    {
+        return _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id && v.DeletedAt == null);
+    }
+
     public Task<bool> LicensePlateExistsAsync(string licensePlate)
     {
         return _context.Vehicles.AsNoTracking()
             .AnyAsync(v => v.LicensePlate == licensePlate);
+    }
+
+    public Task<bool> LicensePlateExistsForOtherVehicleAsync(string licensePlate, int vehicleId)
+    {
+        return _context.Vehicles.AsNoTracking()
+            .AnyAsync(v => v.Id != vehicleId && v.LicensePlate == licensePlate);
     }
 
     public Task<bool> ModelExistsAsync(int modelId)
@@ -95,10 +106,23 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
             .AnyAsync(d => d.Id == driverId && d.DeletedAt == null);
     }
 
+    public Task<int?> GetUserBranchIdAsync(int userId)
+    {
+        return _context.Users.AsNoTracking()
+            .Where(u => u.Id == userId && u.DeletedAt == null)
+            .Select(u => u.BranchId)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Vehicle> AddVehicleAsync(Vehicle vehicle)
     {
         _context.Vehicles.Add(vehicle);
         await _context.SaveChangesAsync();
         return vehicle;
+    }
+
+    public Task SaveChangesAsync()
+    {
+        return _context.SaveChangesAsync();
     }
 }

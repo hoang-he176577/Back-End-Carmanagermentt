@@ -4,12 +4,12 @@ using Models.Models;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Service.Exceptions;
-using Service.Services.Interfaces;
-using Service.Services.Interfaces.Repository;
+using Service.Services.Auth.Interfaces;
+using Data.Repositories.Auth.Interfaces;
 using System.Net;
 using System.Security.Cryptography;
 
-namespace Service.Services.Implementations
+namespace Service.Services.Auth.Implementations
 {
     public class AuthService : IAuthService
     {

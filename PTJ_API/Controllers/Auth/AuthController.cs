@@ -1,13 +1,13 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTO.Auth;
-using Service.Services.Interfaces;
+using Service.Services.Auth.Interfaces;
 using System.Net;
 using System.Security.Claims;
 
-namespace API.Controllers
+namespace API.Controllers.Auth
 {
-    public class AuthController : BaseController
+    public class AuthController : API.Controllers.BaseController
     {
         private readonly IAuthService _authService;
         private readonly IConfiguration _config;

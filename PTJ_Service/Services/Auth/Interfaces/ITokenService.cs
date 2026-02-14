@@ -1,7 +1,7 @@
-using Models.DTO.Auth;
+﻿using Models.DTO.Auth;
 using Models.Models;
 
-namespace Service.Services.Interfaces
+namespace Service.Services.Auth.Interfaces
 {
     public interface ITokenService
     {

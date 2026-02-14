@@ -1,4 +1,4 @@
-﻿namespace Service.Services;
+﻿namespace Service.Services.Common;
 
 public sealed class ServiceResult<T>
 {

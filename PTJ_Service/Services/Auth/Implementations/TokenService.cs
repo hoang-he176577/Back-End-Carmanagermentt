@@ -1,15 +1,15 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Models.DTO.Auth;
 using Models.Models;
 using Service.Exceptions;
-using Service.Services.Interfaces;
-using Service.Services.Interfaces.Repository;
+using Service.Services.Auth.Interfaces;
+using Data.Repositories.Auth.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Service.Services.Implementations
+namespace Service.Services.Auth.Implementations
 {
     public class TokenService : ITokenService
     {

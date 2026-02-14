@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Service.Exceptions;
-using Service.Services.Interfaces;
+using Service.Services.Auth.Interfaces;
 using System.Net;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 
-namespace Service.Services.Implementations
+namespace Service.Services.Auth.Implementations
 {
     public class SmtpEmailSender : IEmailSender
     {
