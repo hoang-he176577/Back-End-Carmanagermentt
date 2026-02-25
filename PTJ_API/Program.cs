@@ -2,6 +2,8 @@
 using API.Middlewares;
 using Data.Repositories.Auth.Implementations;
 using Data.Repositories.Auth.Interfaces;
+using Data.Repositories.MaintenanceRequests.Implementations;
+using Data.Repositories.MaintenanceRequests.Interfaces;
 using Data.Repositories.VehicleAssets.Implementations;
 using Data.Repositories.VehicleAssets.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,6 +13,8 @@ using Microsoft.OpenApi.Models;
 using Models.Models;
 using Service.Services.Auth.Implementations;
 using Service.Services.Auth.Interfaces;
+using Service.Services.MaintenanceRequests.Implementations;
+using Service.Services.MaintenanceRequests.Interfaces;
 using Service.Services.VehicleAssets.Implementations;
 using Service.Services.VehicleAssets.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -61,6 +65,8 @@ builder.Services.AddDbContext<CarManagerContext>(options =>
 
 builder.Services.AddScoped<IVehicleAssetRepository, VehicleAssetRepository>();
 builder.Services.AddScoped<IVehicleAssetService, VehicleAssetService>();
+builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
+builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
