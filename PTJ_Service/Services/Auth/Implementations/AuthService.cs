@@ -54,6 +54,12 @@ namespace Service.Services.Auth.Implementations
                 }
             }
 
+            var requestedRole = dto.Role?.Trim();
+            if (string.IsNullOrWhiteSpace(requestedRole))
+            {
+                throw BusinessErrors.BadRequest("Role is required.");
+            }
+
             var user = new User
             {
                 Email = normalizedEmail,
@@ -68,8 +74,11 @@ namespace Service.Services.Auth.Implementations
 
             var created = await _repo.CreateUserAsync(user);
 
-            const string DefaultRole = "Operator";
-            await _repo.AddRoleToUserAsync(created.Id, DefaultRole);
+            var added = await _repo.AddRoleToUserAsync(created.Id, requestedRole);
+            if (!added)
+            {
+                throw BusinessErrors.BadRequest($"Invalid role '{requestedRole}'.");
+            }
             string? warning = null;
             try
             {
