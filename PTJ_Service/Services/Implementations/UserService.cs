@@ -1,3 +1,4 @@
+using Data.Repositories.Auth.Interfaces;
 using Models.DTO.User;
 using Service.Exceptions;
 using Service.Services.Interfaces;

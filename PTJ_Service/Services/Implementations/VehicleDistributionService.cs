@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Data.Repositories.Interfaces;
 using Models.DTO.VehicleDistribution;
 using Models.Models;
+using Service.Services.Common;
 using Service.Services.Interfaces;
 
 namespace Service.Services.Implementations;

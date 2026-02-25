@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Models.DTO.VehicleDistribution;
-using Service.Services;
+using Service.Services.Common;
 
 namespace Service.Services.Interfaces;
 
