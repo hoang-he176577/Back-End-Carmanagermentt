@@ -67,6 +67,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
+// 🔥 ADD USER REPO & SERVICE
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// 🔥 ADD PENDING REQUEST REPO & SERVICE
+builder.Services.AddScoped<IPendingRequestRepository, PendingRequestRepository>();
+builder.Services.AddScoped<IPendingRequestService, PendingRequestService>();
+
+// 🔥 ADD VEHICLE DISTRIBUTION REPO & SERVICE
+builder.Services.AddScoped<IVehicleDistributionRepository, VehicleDistributionRepository>();
+builder.Services.AddScoped<IVehicleDistributionService, VehicleDistributionService>();
+
 builder.Services.AddHttpContextAccessor();
 
 var jwtSecret = builder.Configuration["Jwt:Secret"];
