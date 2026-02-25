@@ -19,7 +19,7 @@ namespace API.Controllers.Auth
         }
 
         [HttpPost("register")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
