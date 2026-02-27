@@ -39,7 +39,7 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
     // ───────────────────────────── Transfer Plans ─────────────────────────────
 
     public async Task<List<TransferPlanDto>> GetTransferPlansAsync(
-        int? fromBranchId, int? toBranchId, string? status)
+        int? fromBranchId, int? toBranchId, string? status, int? userBranchId = null)
     {
         var query = _context.TransferPlans.AsNoTracking()
             .Where(t => t.DeletedAt == null);
@@ -54,6 +54,12 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         {
             var trimmed = status.Trim();
             query = query.Where(t => t.Status == trimmed);
+        }
+
+        // Filter by user's branch: show transfers FROM or TO user's branch
+        if (userBranchId.HasValue)
+        {
+            query = query.Where(t => t.FromBranchId == userBranchId.Value || t.ToBranchId == userBranchId.Value);
         }
 
         return await query
@@ -140,5 +146,13 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
             vehicle.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<int?> GetUserBranchIdAsync(int userId)
+    {
+        return await _context.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.BranchId)
+            .FirstOrDefaultAsync();
     }
 }

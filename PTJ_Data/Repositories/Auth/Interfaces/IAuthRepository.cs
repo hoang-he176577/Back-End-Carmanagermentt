@@ -16,5 +16,6 @@ public interface IAuthRepository
     Task AddEmailVerificationTokenAsync(EmailVerificationToken token);
     Task<EmailVerificationToken?> GetActiveEmailVerificationTokenAsync(string token);
     Task<EmailVerificationToken?> GetLatestActiveVerificationTokenByUserIdAsync(int userId);
+    Task<string?> GetBranchNameAsync(int branchId);
     Task SaveChangesAsync();
 }

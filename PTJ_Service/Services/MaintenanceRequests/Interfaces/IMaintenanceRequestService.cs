@@ -5,7 +5,7 @@ namespace Service.Services.MaintenanceRequests.Interfaces;
 
 public interface IMaintenanceRequestService
 {
-    Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted);
+    Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int userId, string userRole);
     Task<ServiceResult<MaintenanceRequestDto>> GetByIdAsync(int id, bool includeDeleted);
     Task<ServiceResult<MaintenanceRequestDto>> CreateAsync(int actorUserId, MaintenanceCreateRequestDto request);
     Task<ServiceResult<MaintenanceRequestDto>> UpdateAsync(int id, MaintenanceUpdateRequestDto request);

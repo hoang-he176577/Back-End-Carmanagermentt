@@ -7,7 +7,7 @@ namespace Service.Services.Interfaces;
 
 public interface IVehicleDistributionService
 {
-    Task<List<TransferPlanDto>> GetTransferPlansAsync(int? fromBranchId, int? toBranchId, string? status);
+    Task<List<TransferPlanDto>> GetTransferPlansAsync(int? fromBranchId, int? toBranchId, string? status, int userId, string userRole);
     Task<TransferPlanDto?> GetTransferPlanByIdAsync(int id);
     Task<ServiceResult<TransferPlanDto>> CreateTransferPlanAsync(TransferPlanCreateRequestDto request, int managerId);
     Task<ServiceResult<TransferPlanDto>> UpdateTransferPlanStatusAsync(int id, TransferPlanUpdateStatusDto request, int userId, string userRole);

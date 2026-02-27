@@ -25,7 +25,11 @@ public sealed class MaintenanceRequestsController : ControllerBase
         [FromQuery] string? maintenanceType,
         [FromQuery] bool includeDeleted = false)
     {
-        var result = await _service.GetListAsync(status, maintenanceType, includeDeleted);
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        int.TryParse(userIdClaim, out var userId);
+        var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+
+        var result = await _service.GetListAsync(status, maintenanceType, includeDeleted, userId, userRole);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });

@@ -14,7 +14,7 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
         _context = context;
     }
 
-    public async Task<List<MaintenanceRequestDto>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted)
+    public async Task<List<MaintenanceRequestDto>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int? branchId = null)
     {
         var query = _context.MaintenanceRequests.AsQueryable();
 
@@ -33,6 +33,12 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
         {
             var normalizedType = maintenanceType.Trim();
             query = query.Where(x => x.MaintenanceType == normalizedType);
+        }
+
+        // Filter by branch: join with Vehicle to check CurrentBranchId
+        if (branchId.HasValue)
+        {
+            query = query.Where(x => x.Vehicle != null && x.Vehicle.CurrentBranchId == branchId.Value);
         }
 
         return await query
@@ -108,6 +114,14 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
         _context.MaintenanceRequests.Add(entity);
         await _context.SaveChangesAsync();
         return entity;
+    }
+
+    public async Task<int?> GetUserBranchIdAsync(int userId)
+    {
+        return await _context.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.BranchId)
+            .FirstOrDefaultAsync();
     }
 
     public Task SaveChangesAsync()

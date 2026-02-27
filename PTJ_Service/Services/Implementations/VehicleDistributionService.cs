@@ -25,10 +25,18 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
     // ───────────────── Queries ─────────────────
 
-    public Task<List<TransferPlanDto>> GetTransferPlansAsync(
-        int? fromBranchId, int? toBranchId, string? status)
+    public async Task<List<TransferPlanDto>> GetTransferPlansAsync(
+        int? fromBranchId, int? toBranchId, string? status, int userId, string userRole)
     {
-        return _repository.GetTransferPlansAsync(fromBranchId, toBranchId, status);
+        // Executive Management sees all; others see only their branch
+        int? userBranchId = null;
+        var isExec = string.Equals(userRole, "Executive Management", StringComparison.OrdinalIgnoreCase);
+        if (!isExec && userId > 0)
+        {
+            userBranchId = await _repository.GetUserBranchIdAsync(userId);
+        }
+
+        return await _repository.GetTransferPlansAsync(fromBranchId, toBranchId, status, userBranchId);
     }
 
     public Task<TransferPlanDto?> GetTransferPlanByIdAsync(int id)
@@ -70,6 +78,11 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
         if (!await _repository.BranchExistsAsync(request.ToBranchId.Value))
             return ServiceResult<TransferPlanDto>.Fail(400, "ToBranch not found.");
+
+        // Validate that the creator belongs to the fromBranch
+        var userBranchId = await _repository.GetUserBranchIdAsync(managerId);
+        if (userBranchId == null || userBranchId != request.FromBranchId)
+            return ServiceResult<TransferPlanDto>.Fail(403, "You can only create transfer plans from your own branch.");
 
         // Check no active transfer for this vehicle
         if (await _repository.HasActiveTransferAsync(request.VehicleId.Value))
@@ -145,6 +158,7 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
     {
         var isExec = string.Equals(userRole, "Executive Management", StringComparison.OrdinalIgnoreCase);
         var isAccountant = string.Equals(userRole, "Branch Asset Accountant", StringComparison.OrdinalIgnoreCase);
+        var isOperator = string.Equals(userRole, "Operator", StringComparison.OrdinalIgnoreCase);
 
         switch (currentStatus)
         {
@@ -166,8 +180,8 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
             case "Approved":
                 if (newStatus == "Executed")
                 {
-                    if (!isExec)
-                        return "Only Executive Management can execute a transfer.";
+                    if (!isOperator)
+                        return "Only Operator can execute a transfer.";
                     return null;
                 }
                 if (newStatus == "Cancelled")

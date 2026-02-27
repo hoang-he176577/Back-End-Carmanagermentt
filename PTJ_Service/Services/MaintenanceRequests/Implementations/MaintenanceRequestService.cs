@@ -30,7 +30,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         _repository = repository;
     }
 
-    public async Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted)
+    public async Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int userId, string userRole)
     {
         if (!string.IsNullOrWhiteSpace(status) && !AllowedStatuses.Contains(status.Trim()))
         {
@@ -42,7 +42,15 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<List<MaintenanceRequestDto>>.Fail(400, "Invalid maintenanceType.");
         }
 
-        var items = await _repository.GetListAsync(status, maintenanceType, includeDeleted);
+        // Executive Management can see all branches; others see only their branch
+        int? branchId = null;
+        var isExec = string.Equals(userRole, "Executive Management", StringComparison.OrdinalIgnoreCase);
+        if (!isExec && userId > 0)
+        {
+            branchId = await _repository.GetUserBranchIdAsync(userId);
+        }
+
+        var items = await _repository.GetListAsync(status, maintenanceType, includeDeleted, branchId);
         return ServiceResult<List<MaintenanceRequestDto>>.SuccessResult(items);
     }
 

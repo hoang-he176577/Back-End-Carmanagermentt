@@ -7,7 +7,7 @@ namespace Data.Repositories.Interfaces;
 
 public interface IVehicleDistributionRepository
 {
-    Task<List<TransferPlanDto>> GetTransferPlansAsync(int? fromBranchId, int? toBranchId, string? status);
+    Task<List<TransferPlanDto>> GetTransferPlansAsync(int? fromBranchId, int? toBranchId, string? status, int? userBranchId = null);
     Task<TransferPlanDto?> GetTransferPlanByIdAsync(int id);
     Task<TransferPlan?> GetTransferPlanEntityAsync(int id);
     Task<TransferPlan> AddTransferPlanAsync(TransferPlan plan);
@@ -17,4 +17,5 @@ public interface IVehicleDistributionRepository
     Task<bool> BranchExistsAsync(int branchId);
     Task<bool> HasActiveTransferAsync(int vehicleId);
     Task UpdateVehicleBranchAsync(int vehicleId, int newBranchId);
+    Task<int?> GetUserBranchIdAsync(int userId);
 }

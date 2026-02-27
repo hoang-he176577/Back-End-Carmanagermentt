@@ -19,7 +19,7 @@ namespace API.Controllers.Auth
         }
 
         [HttpPost("register")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Executive Management")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -93,7 +93,7 @@ namespace API.Controllers.Auth
 
         [HttpGet("me")]
         [Authorize]
-        public IActionResult Me()
+        public async Task<IActionResult> Me()
         {
             var id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
             var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
@@ -101,13 +101,28 @@ namespace API.Controllers.Auth
             var verified = User.FindFirstValue("verified");
             var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value);
 
+            // Fetch branch info from DB
+            int? branchId = null;
+            string? branchName = null;
+            if (int.TryParse(id, out var userId))
+            {
+                var userInfo = await _authService.GetUserBranchInfoAsync(userId);
+                if (userInfo != null)
+                {
+                    branchId = userInfo.Value.branchId;
+                    branchName = userInfo.Value.branchName;
+                }
+            }
+
             return Ok(new
             {
                 id,
                 email,
                 fullName,
                 verified,
-                roles
+                roles,
+                branchId,
+                branchName
             });
         }
     }

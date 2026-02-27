@@ -175,5 +175,19 @@ namespace Service.Services.Auth.Implementations
                 "CarManagement - Verify your email",
                 html);
         }
+
+        public async Task<(int? branchId, string? branchName)?> GetUserBranchInfoAsync(int userId)
+        {
+            var user = await _repo.GetByIdAsync(userId);
+            if (user == null) return null;
+
+            string? branchName = null;
+            if (user.BranchId.HasValue)
+            {
+                branchName = (await _repo.GetBranchNameAsync(user.BranchId.Value));
+            }
+
+            return (user.BranchId, branchName);
+        }
     }
 }

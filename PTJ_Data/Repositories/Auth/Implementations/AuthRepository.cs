@@ -114,6 +114,14 @@ public class AuthRepository : IAuthRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<string?> GetBranchNameAsync(int branchId)
+    {
+        return await _context.Branches.AsNoTracking()
+            .Where(b => b.Id == branchId)
+            .Select(b => b.Name)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

@@ -43,7 +43,9 @@ public sealed class VehicleDistributionController : BaseController
         [FromQuery] int? toBranchId,
         [FromQuery] string? status)
     {
-        var result = await _service.GetTransferPlansAsync(fromBranchId, toBranchId, status);
+        var userId = GetCurrentUserId();
+        var userRole = GetCurrentUserRole();
+        var result = await _service.GetTransferPlansAsync(fromBranchId, toBranchId, status, userId, userRole);
         return HandleResult(result, "Transfer plans retrieved successfully.");
     }
 
@@ -85,7 +87,7 @@ public sealed class VehicleDistributionController : BaseController
     /// Cập nhật trạng thái kế hoạch điều chuyển (phê duyệt/từ chối/thực hiện/hủy).
     /// </summary>
     [HttpPut("transfers/{id:int}/status")]
-    [Authorize(Roles = "Executive Management,Branch Asset Accountant")]
+    [Authorize(Roles = "Executive Management,Branch Asset Accountant,Operator")]
     [ProducesResponseType(typeof(TransferPlanDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
