@@ -1,4 +1,4 @@
-﻿using API.Middlewares;
+using API.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using Models.Common;
 using Models.Models;
@@ -11,12 +11,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public abstract class BaseController : ControllerBase
     {
-        // ===== USER ID FROM JWT =====
-        protected Guid GetUserId()
+        // ===== USER ID FROM JWT (int) =====
+        protected int GetUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (!Guid.TryParse(userIdClaim, out var userId))
+            if (!int.TryParse(userIdClaim, out var userId))
                 throw BusinessErrors.Unauthorized("Invalid user ID in token.");
 
             return userId;
