@@ -1,105 +1,130 @@
-﻿using Azure.Core;
-using Data.Repositories.Interfaces;
+﻿    using Data.Repositories.Interfaces;
+    using Models.Models;
+    using Service.Services.Interfaces;
+
 using Models.DTO.PurchaseProposal;
-using Models.Models;
-using Service.Services.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
 
-namespace Service.Services.Implementations
-{
 
-    public class PurchaseProposalService : IPurchaseProposalService
+    namespace Service.Services.Implementations
     {
-        private readonly IPurchaseProposalRepository _repository;
 
-        public PurchaseProposalService(IPurchaseProposalRepository repository)
+        public class PurchaseProposalService : IPurchaseProposalService
         {
-            _repository = repository;
-        }
+            private readonly IPurchaseProposalRepository _repository;
 
-        public async Task<List<PurchaseProposalListDto>> GetAllAsync()
-        {
-            var entities = await _repository.GetAllAsync();
-
-            return entities.Select(x => new PurchaseProposalListDto
+            public PurchaseProposalService(IPurchaseProposalRepository repository)
             {
-                Id = x.Id,
-                Description = x.Description,
-                Status = x.Status,
-                CreatedDate = x.CreatedDate,
-                ProposedCost = x.ProposedCost,
-                ManagerName = x.Manager != null ? x.Manager.Name : null
-            }).ToList();
-        }
-
-        public async Task<PurchaseProposal?> GetByIdAsync(int id)
-        {
-            return await _repository.GetByIdAsync(id);
-        }
-
-        public async Task<object> CreateAsync(CreatePurchaseProposalDto dto)
-        {
-            if (dto.Details == null || !dto.Details.Any())
-                throw new Exception("At least one detail is required");
-
-            var proposal = new PurchaseProposal();
-
-            proposal.InitCreate(dto.Description);
-
-            foreach (var item in dto.Details)
-            {
-                var detail = new BulkPurchaseDetail();
-                detail.InitCreate(item.BranchId, item.Quantity, item.UnitPrice , item.Notes);
-
-                proposal.AddDetail(detail);
+                _repository = repository;
             }
 
-            await _repository.AddAsync(proposal);
-            await _repository.SaveChangesAsync();
-
-            return new
+            public async Task<List<PurchaseProposal>> GetAllAsync()
             {
-                proposal.Id,
-                proposal.Status
-            };
-        }
+                return await _repository.GetAllAsync();
+            }
 
-        public async Task ApproveByManagerAsync(int proposalId, int managerId)
+            public async Task<PurchaseProposal?> GetByIdAsync(int id)
+            {
+                return await _repository.GetByIdAsync(id);
+            }
+
+            public async Task<PurchaseProposal> CreateAsync( string description)
+            {
+                var proposal = new PurchaseProposal();
+                proposal.InitCreate(description);
+
+                await _repository.AddAsync(proposal);
+                await _repository.SaveChangesAsync();
+
+                return proposal;
+            }
+
+            public async Task ApproveByManagerAsync(int proposalId, int managerId)
+            {
+                var proposal = await _repository.GetByIdAsync(proposalId)
+                    ?? throw new Exception("Proposal not found");
+
+                proposal.ApproveByManager(managerId);
+
+                _repository.Update(proposal);
+                await _repository.SaveChangesAsync();
+            }
+
+            public async Task ApproveByChiefAccountantAsync(int proposalId, int accountantId)
+            {
+                var proposal = await _repository.GetByIdAsync(proposalId)
+                    ?? throw new Exception("Proposal not found");
+
+                proposal.ApproveByChiefAccountant(accountantId);
+
+                _repository.Update(proposal);
+                await _repository.SaveChangesAsync();
+            }
+
+            public async Task RejectAsync(int proposalId, string reason)
+            {
+                var proposal = await _repository.GetByIdAsync(proposalId)
+                    ?? throw new Exception("Proposal not found");
+
+                proposal.Reject(reason);
+
+                _repository.Update(proposal);
+                await _repository.SaveChangesAsync();
+            }
+
+            public async Task DeleteAsync(int proposalId)
+            {
+                var proposal = await _repository.GetByIdAsync(proposalId)
+                    ?? throw new Exception("Proposal not found");
+
+                proposal.SoftDelete();
+
+                _repository.Update(proposal);
+                await _repository.SaveChangesAsync();
+            }
+
+        public async Task<List<PurchaseProposal>> GetPendingForManagerAsync()
+        {
+            var all = await _repository.GetAllAsync();
+            // Lọc những cái có Status là Pending và chưa bị xóa
+            return all.Where(x => x.Status == "Pending" && x.DeletedAt == null).ToList();
+        }
+        public async Task<List<PurchaseProposalDto>> GetApprovedByBranchAsync(int branchId)
+        {
+            var proposals = await _repository.GetAllAsync();
+
+            return proposals
+                .Where(p => p.Status == "Approved" &&
+                            p.BulkPurchaseDetails.Any(d => d.BranchId == branchId)) // Lọc theo chi nhánh
+                .Select(p => new PurchaseProposalDto
+                {
+                    Id = p.Id,
+                    
+                    Description = p.Description ?? "",
+                    Status = p.Status ?? "Approved",
+                    ProposedCost = p.ProposedCost,
+                    CreatedAt = p.CreatedAt,
+                    
+                    BranchNote = p.BulkPurchaseDetails
+                                  .FirstOrDefault(d => d.BranchId == branchId)?.BranchNotes
+                })
+                .ToList();
+        }
+        public async Task ConfirmReceiptAsync(int proposalId, string notes)
         {
             var proposal = await _repository.GetByIdAsync(proposalId)
-                ?? throw new Exception("Proposal not found");
+                           ?? throw new Exception("Không tìm thấy đề xuất");
 
-            proposal.ApproveByManager(managerId);
-
-            _repository.Update(proposal);
-            await _repository.SaveChangesAsync();
-        }
-
-
-        public async Task RejectAsync(int proposalId, string reason)
-        {
-            var proposal = await _repository.GetByIdAsync(proposalId)
-                ?? throw new Exception("Proposal not found");
-
-            proposal.Reject(reason);
-
-            _repository.Update(proposal);
-            await _repository.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int proposalId)
-        {
-            var proposal = await _repository.GetByIdAsync(proposalId)
-                ?? throw new Exception("Proposal not found");
-
-            proposal.SoftDelete();
+            proposal.Description += $"\n[Xác nhận từ chi nhánh]: {notes} vào ngày {DateTime.Now}";
+            // Có thể đổi status thành "Received" nếu quy trình của bạn cho phép
+            proposal.Status = "Completed";
 
             _repository.Update(proposal);
             await _repository.SaveChangesAsync();
         }
     }
-}
+    }

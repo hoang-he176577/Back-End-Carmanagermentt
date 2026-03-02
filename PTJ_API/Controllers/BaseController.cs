@@ -21,7 +21,18 @@ namespace API.Controllers
 
             return userId;
         }
+        // ===== BRANCH ID FROM JWT (THÊM MỚI ĐỂ HẾT LỖI CS0103) =====
+        protected int GetBranchId()
+        {
+           
+            var branchIdClaim = User.FindFirst("branchId")?.Value;
 
+            if (!int.TryParse(branchIdClaim, out var branchId))
+                
+                throw BusinessErrors.Unauthorized("Chi nhánh không hợp lệ hoặc không tồn tại trong token.");
+
+            return branchId;
+        }
         // ===== STANDARD RESPONSE =====
         protected IActionResult HandleResult<T>(T result, string? message = null)
         {

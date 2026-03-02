@@ -2,6 +2,7 @@
 using Models.DTO.PurchaseProposal;
 using Service.Services.Interfaces;
 
+
 namespace API.Controllers
 {
 
@@ -75,5 +76,30 @@ namespace API.Controllers
             await _service.DeleteAsync(id);
             return HandleSuccess("Deleted");
         }
+        // ==============================
+        // GET PENDING FOR MANAGER
+        // ==============================
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPending()
+        {
+            
+            var data = await _service.GetPendingForManagerAsync();
+
+      
+            return HandleResult(data);
+        }
+        // ==============================
+        // GET APPROVED LIST FOR OPERATOR (BY BRANCH)
+        // ==============================
+        [HttpGet("branch-approved")]
+        public async Task<IActionResult> GetBranchApproved()
+        {
+            
+            var branchId = GetBranchId();
+
+            var data = await _service.GetApprovedByBranchAsync(branchId);
+            return HandleResult(data);
+        }
+
     }
 }

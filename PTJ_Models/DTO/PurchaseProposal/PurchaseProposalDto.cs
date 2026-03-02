@@ -7,18 +7,11 @@ public class PurchaseProposalDto
     public int Id { get; set; }
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; }
-    public decimal ProposedCost { get; set; }
-
-    public List<BulkPurchaseDetailDto> Details { get; set; } = new();
-}
-
-public class BulkPurchaseDetailDto
-{
-    public int Id { get; set; }
-    public string ItemName { get; set; } = string.Empty;
-    public int Quantity { get; set; }
-    public decimal Price { get; set; }
+    public string? Description { get; set; }
+    public decimal? ProposedCost { get; set; }
+    public string? ProposerName { get; set; } 
+    public DateTime? CreatedAt { get; set; }
+    public string? BranchNote { get; set; }
 }
 public class PurchaseProposalListDto
 {
