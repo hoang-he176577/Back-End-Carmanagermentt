@@ -1,4 +1,6 @@
-﻿using Data.Repositories.Interfaces;
+﻿using Azure.Core;
+using Data.Repositories.Interfaces;
+using Models.DTO.PurchaseProposal;
 using Models.Models;
 using Service.Services.Interfaces;
 using System;
@@ -19,9 +21,19 @@ namespace Service.Services.Implementations
             _repository = repository;
         }
 
-        public async Task<List<PurchaseProposal>> GetAllAsync()
+        public async Task<List<PurchaseProposalListDto>> GetAllAsync()
         {
-            return await _repository.GetAllAsync();
+            var entities = await _repository.GetAllAsync();
+
+            return entities.Select(x => new PurchaseProposalListDto
+            {
+                Id = x.Id,
+                Description = x.Description,
+                Status = x.Status,
+                CreatedDate = x.CreatedDate,
+                ProposedCost = x.ProposedCost,
+                ManagerName = x.Manager != null ? x.Manager.Name : null
+            }).ToList();
         }
 
         public async Task<PurchaseProposal?> GetByIdAsync(int id)
@@ -29,15 +41,31 @@ namespace Service.Services.Implementations
             return await _repository.GetByIdAsync(id);
         }
 
-        public async Task<PurchaseProposal> CreateAsync( string description)
+        public async Task<object> CreateAsync(CreatePurchaseProposalDto dto)
         {
+            if (dto.Details == null || !dto.Details.Any())
+                throw new Exception("At least one detail is required");
+
             var proposal = new PurchaseProposal();
-            proposal.InitCreate(description);
+
+            proposal.InitCreate(dto.Description);
+
+            foreach (var item in dto.Details)
+            {
+                var detail = new BulkPurchaseDetail();
+                detail.InitCreate(item.BranchId, item.Quantity, item.UnitPrice , item.Notes);
+
+                proposal.AddDetail(detail);
+            }
 
             await _repository.AddAsync(proposal);
             await _repository.SaveChangesAsync();
 
-            return proposal;
+            return new
+            {
+                proposal.Id,
+                proposal.Status
+            };
         }
 
         public async Task ApproveByManagerAsync(int proposalId, int managerId)
@@ -51,16 +79,6 @@ namespace Service.Services.Implementations
             await _repository.SaveChangesAsync();
         }
 
-        public async Task ApproveByChiefAccountantAsync(int proposalId, int accountantId)
-        {
-            var proposal = await _repository.GetByIdAsync(proposalId)
-                ?? throw new Exception("Proposal not found");
-
-            proposal.ApproveByChiefAccountant(accountantId);
-
-            _repository.Update(proposal);
-            await _repository.SaveChangesAsync();
-        }
 
         public async Task RejectAsync(int proposalId, string reason)
         {

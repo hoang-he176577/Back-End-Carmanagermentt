@@ -6,25 +6,25 @@ public partial class PurchaseProposal
 
     public int? ProposerId { get; set; }
 
-    public int? ManagerId { get; set; }
+    public int? ManagerId { get; private set; }
 
-    public int? ChiefAccountantId { get; set; }
+    public int? ChiefAccountantId { get; set; } // giữ nguyên vì bạn yêu cầu không đổi entity
 
-    public DateOnly? CreatedDate { get; set; }
+    public DateOnly? CreatedDate { get; private set; }
 
-    public DateOnly? ApprovedDate { get; set; }
+    public DateOnly? ApprovedDate { get; private set; }
 
-    public string? Status { get; set; }
+    public string? Status { get; private set; }
 
-    public decimal? ProposedCost { get; set; }
+    public decimal? ProposedCost { get; private set; }
 
-    public string? Description { get; set; }
+    public string? Description { get; private set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; private set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; private set; }
 
-    public DateTime? DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; private set; }
 
     public virtual ICollection<BulkPurchaseDetail> BulkPurchaseDetails { get; set; } = new List<BulkPurchaseDetail>();
 
@@ -35,13 +35,22 @@ public partial class PurchaseProposal
     public virtual User? Proposer { get; set; }
 
     // =============================
+    // STATUS CONSTANTS
+    // =============================
+
+    private const string PendingStatus = "Pending";
+    private const string ApprovedStatus = "Approved";
+    private const string RejectedStatus = "Rejected";
+    private const string DeletedStatus = "Deleted";
+
+    // =============================
     // METHODS
     // =============================
 
-    public void InitCreate( string? description)
+    public void InitCreate(string? description)
     {
         Description = description;
-        Status = "Pending";
+        Status = PendingStatus;
         CreatedDate = DateOnly.FromDateTime(DateTime.Now);
         CreatedAt = DateTime.Now;
         ProposedCost = 0;
@@ -49,13 +58,27 @@ public partial class PurchaseProposal
 
     public void AddDetail(BulkPurchaseDetail detail)
     {
+        if (!IsPending())
+            throw new Exception("Cannot modify proposal when not pending");
+
+        if (detail == null)
+            throw new Exception("Detail is required");
+
+        if (!detail.IsValid())
+            throw new Exception("Invalid detail");
+
         BulkPurchaseDetails.Add(detail);
+
         RecalculateCost();
     }
 
     public void RemoveDetail(BulkPurchaseDetail detail)
     {
+        if (!IsPending())
+            throw new Exception("Cannot modify proposal when not pending");
+
         BulkPurchaseDetails.Remove(detail);
+
         RecalculateCost();
     }
 
@@ -65,53 +88,60 @@ public partial class PurchaseProposal
         UpdatedAt = DateTime.Now;
     }
 
+    // ✅ CHỈ MANAGER APPROVE
     public void ApproveByManager(int managerId)
     {
-        if (Status != "Pending")
+        if (Status != PendingStatus)
             throw new Exception("Proposal is not pending");
 
+        if (managerId <= 0)
+            throw new Exception("Invalid managerId");
+
         ManagerId = managerId;
-        Status = "ManagerApproved";
-        UpdatedAt = DateTime.Now;
-    }
-
-    public void ApproveByChiefAccountant(int accountantId)
-    {
-        if (Status != "ManagerApproved")
-            throw new Exception("Manager must approve first");
-
-        ChiefAccountantId = accountantId;
-        Status = "Approved";
+        Status = ApprovedStatus;
         ApprovedDate = DateOnly.FromDateTime(DateTime.Now);
         UpdatedAt = DateTime.Now;
     }
 
     public void Reject(string reason)
     {
-        Status = "Rejected";
-        Description += $"\nRejected: {reason}";
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new Exception("Reject reason is required");
+
+        if (Status == ApprovedStatus)
+            throw new Exception("Cannot reject approved proposal");
+
+        Status = RejectedStatus;
+        Description = (Description ?? "") + $"\nRejected: {reason}";
         UpdatedAt = DateTime.Now;
     }
 
     public void UpdateDescription(string description)
     {
+        if (!IsPending())
+            throw new Exception("Cannot update description when not pending");
+
         Description = description;
         UpdatedAt = DateTime.Now;
     }
 
     public void SoftDelete()
     {
+        if (Status == ApprovedStatus)
+            throw new Exception("Cannot delete approved proposal");
+
         DeletedAt = DateTime.Now;
-        Status = "Deleted";
+        Status = DeletedStatus;
+        UpdatedAt = DateTime.Now;
     }
 
     public bool IsApproved()
     {
-        return Status == "Approved";
+        return Status == ApprovedStatus;
     }
 
     public bool IsPending()
     {
-        return Status == "Pending";
+        return Status == PendingStatus;
     }
 }

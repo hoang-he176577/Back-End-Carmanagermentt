@@ -1,16 +1,19 @@
 ﻿namespace Models.Models;
-
+using System.ComponentModel.DataAnnotations.Schema;
 public partial class BulkPurchaseDetail
 {
     public int Id { get; set; }
 
-    public int? PurchaseProposalId { get; set; }
+    public int PurchaseProposalId { get; private set; }
 
-    public int? BranchId { get; set; }
+    public int BranchId { get; private set; }
 
-    public int? ProposedQuantity { get; set; }
+    public int ProposedQuantity { get; private set; }
 
-    public string? BranchNotes { get; set; }
+    [Column("unit_price")]
+    public decimal UnitPrice { get; set; }
+
+    public string? BranchNotes { get; private set; }
 
     public virtual Branch? Branch { get; set; }
 
@@ -20,13 +23,20 @@ public partial class BulkPurchaseDetail
     // METHODS
     // =============================
 
-    public void InitCreate(int branchId, int quantity, string? notes = null)
+    public void InitCreate(int branchId, int quantity, decimal unitPrice, string? notes = null)
     {
+        if (branchId <= 0)
+            throw new Exception("Invalid branchId");
+
         if (quantity <= 0)
             throw new Exception("Quantity must be > 0");
 
+        if (unitPrice <= 0)
+            throw new Exception("Unit price must be > 0");
+
         BranchId = branchId;
         ProposedQuantity = quantity;
+        UnitPrice = unitPrice;
         BranchNotes = notes;
     }
 
@@ -38,25 +48,28 @@ public partial class BulkPurchaseDetail
         ProposedQuantity = quantity;
     }
 
+    public void UpdateUnitPrice(decimal unitPrice)
+    {
+        if (unitPrice <= 0)
+            throw new Exception("Unit price must be > 0");
+
+        UnitPrice = unitPrice;
+    }
+
     public void UpdateNotes(string? notes)
     {
         BranchNotes = notes;
     }
 
-    public void AssignProposal(int proposalId)
-    {
-        PurchaseProposalId = proposalId;
-    }
-
-    // Nếu sau này bạn có UnitPrice thì sửa lại
     public decimal GetTotalPrice()
     {
-        // hiện tại chưa có price → tạm tính theo quantity
-        return ProposedQuantity ?? 0;
+        return ProposedQuantity * UnitPrice;
     }
 
     public bool IsValid()
     {
-        return BranchId != null && ProposedQuantity > 0;
+        return BranchId > 0
+            && ProposedQuantity > 0
+            && UnitPrice > 0;
     }
 }
