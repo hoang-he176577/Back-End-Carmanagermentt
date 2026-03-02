@@ -40,15 +40,10 @@ namespace API.Controllers
         // CREATE
         // ==============================
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateProposalRequest request)
+        public async Task<IActionResult> Create([FromBody] CreatePurchaseProposalDto dto)
         {
-            var userId = GetUserId();
-
-            var proposal = await _service.CreateAsync(
-                description: request.Description ?? ""
-            );
-
-            return HandleCreated(proposal, "Created successfully");
+            var result = await _service.CreateAsync(dto);
+            return HandleCreated(result,"Create proposal successfully");
         }
 
         // ==============================
@@ -62,19 +57,6 @@ namespace API.Controllers
             await _service.ApproveByManagerAsync(id, GetUserId());
             return HandleSuccess("Manager approved");
         }
-
-        // ==============================
-        // ACCOUNTANT APPROVE
-        // ==============================
-        [HttpPost("{id}/accountant-approve")]
-        public async Task<IActionResult> AccountantApprove(int id)
-        {
-            var userId = GetUserId();
-
-            await _service.ApproveByChiefAccountantAsync(id, 0);
-            return HandleSuccess("Accountant approved");
-        }
-
         // ==============================
         // REJECT
         // ==============================

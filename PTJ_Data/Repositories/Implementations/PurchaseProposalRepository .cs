@@ -28,9 +28,10 @@ namespace Data.Repositories.Implementations
 
         public async Task<List<PurchaseProposal>> GetAllAsync()
         {
-            return await _context.PurchaseProposals
-                .Include(x => x.BulkPurchaseDetails)
-                .ToListAsync();
+            return await _context.PurchaseProposals.Where(x => x.Status != "Deleted")
+            .Include(x => x.BulkPurchaseDetails)
+            .AsNoTracking()
+            .ToListAsync();
         }
 
         public async Task AddAsync(PurchaseProposal proposal)
