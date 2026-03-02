@@ -6,4 +6,9 @@ public class PurchaseProposalDto
 {
     public int Id { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal? ProposedCost { get; set; }
+    public string? ProposerName { get; set; } 
+    public DateTime? CreatedAt { get; set; }
+    public string? BranchNote { get; set; }
 }

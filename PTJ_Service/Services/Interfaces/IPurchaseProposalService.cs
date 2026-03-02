@@ -1,4 +1,5 @@
-﻿using Models.Models;
+﻿using Models.DTO.PurchaseProposal;
+using Models.Models;
 using System;
 
 
@@ -13,5 +14,10 @@ namespace Service.Services.Interfaces
         Task ApproveByChiefAccountantAsync(int proposalId, int accountantId);
         Task RejectAsync(int proposalId, string reason);
         Task DeleteAsync(int proposalId);
+
+        Task<List<PurchaseProposal>> GetPendingForManagerAsync();
+
+        Task<List<PurchaseProposalDto>> GetApprovedByBranchAsync(int branchId);
+
     }
 }

@@ -192,6 +192,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<IPostPurchaseService, PostPurchaseService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
