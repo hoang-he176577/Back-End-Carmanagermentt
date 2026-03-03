@@ -23,13 +23,6 @@ namespace Service.Services.Implementations
 
             if (proposal.Status != "Approved")
                 throw new Exception("Proposal must be approved before reception.");
-
-            // Update status to pending payment
-            proposal.Status = "Received_Pending_Payment";
-            proposal.Description += $"\n[Reception Confirmed]: License Plate {request.LicensePlate} by User {operatorId}";
-
-            _proposalRepository.Update(proposal);
-            await _proposalRepository.SaveChangesAsync();
         }
 
         public async Task ConfirmPaymentAndActivateAssetAsync(int proposalId, int accountantId)
@@ -37,11 +30,10 @@ namespace Service.Services.Implementations
             var proposal = await _proposalRepository.GetByIdAsync(proposalId)
                            ?? throw new Exception("Purchase proposal not found.");
 
-            // 1. Complete the proposal workflow
-            proposal.Status = "Completed";
-            proposal.ApproveByChiefAccountant(accountantId);
+            if (proposal.Status != "Approved")
+                throw new Exception("Proposal must be approved before payment confirmation.");
 
-            // 2. Automatically create and activate the new Vehicle asset
+            // Create and activate a new vehicle after payment is confirmed.
             var detail = proposal.BulkPurchaseDetails.FirstOrDefault();
             var newVehicle = new Vehicle
             {
@@ -54,8 +46,7 @@ namespace Service.Services.Implementations
             };
 
             await _context.Vehicles.AddAsync(newVehicle);
-            _proposalRepository.Update(proposal);
-            await _proposalRepository.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
     }
 }
