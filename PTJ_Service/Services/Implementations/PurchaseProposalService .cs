@@ -22,9 +22,21 @@ using System;
                 _repository = repository;
             }
 
-            public async Task<List<PurchaseProposal>> GetAllAsync()
+            public async Task<List<PurchaseProposalListDto>> GetAllAsync()
             {
-                return await _repository.GetAllAsync();
+                var proposals = await _repository.GetAllAsync();
+                return proposals
+                    .Where(p => p.DeletedAt == null)
+                    .Select(p => new PurchaseProposalListDto
+                    {
+                        Id = p.Id,
+                        Description = p.Description,
+                        Status = p.Status,
+                        CreatedDate = p.CreatedDate,
+                        ProposedCost = p.ProposedCost,
+                        ManagerName = p.Manager?.Name
+                    })
+                    .ToList();
             }
 
             public async Task<PurchaseProposal?> GetByIdAsync(int id)
@@ -32,10 +44,20 @@ using System;
                 return await _repository.GetByIdAsync(id);
             }
 
-            public async Task<PurchaseProposal> CreateAsync( string description)
+            public async Task<object> CreateAsync(CreatePurchaseProposalDto dto)
             {
                 var proposal = new PurchaseProposal();
-                proposal.InitCreate(description);
+                proposal.InitCreate(dto.Description);
+
+                if (dto.Details != null)
+                {
+                    foreach (var detail in dto.Details)
+                    {
+                        var bulkDetail = new BulkPurchaseDetail();
+                        bulkDetail.InitCreate(detail.BranchId, detail.Quantity, detail.UnitPrice, detail.Notes);
+                        proposal.AddDetail(bulkDetail);
+                    }
+                }
 
                 await _repository.AddAsync(proposal);
                 await _repository.SaveChangesAsync();
@@ -119,9 +141,7 @@ using System;
             var proposal = await _repository.GetByIdAsync(proposalId)
                            ?? throw new Exception("Không tìm thấy đề xuất");
 
-            proposal.Description += $"\n[Xác nhận từ chi nhánh]: {notes} vào ngày {DateTime.Now}";
-            // Có thể đổi status thành "Received" nếu quy trình của bạn cho phép
-            proposal.Status = "Completed";
+            proposal.ConfirmReceipt(notes);
 
             _repository.Update(proposal);
             await _repository.SaveChangesAsync();
