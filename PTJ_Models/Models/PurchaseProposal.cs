@@ -144,4 +144,36 @@ public partial class PurchaseProposal
     {
         return Status == PendingStatus;
     }
+
+    public void ApproveByChiefAccountant(int accountantId)
+    {
+        if (accountantId <= 0)
+            throw new Exception("Invalid accountantId");
+
+        ChiefAccountantId = accountantId;
+        UpdatedAt = DateTime.Now;
+    }
+
+    public void MarkAsReceived(string licensePlate, int operatorId)
+    {
+        if (Status != ApprovedStatus)
+            throw new Exception("Proposal must be approved before reception.");
+
+        Status = "Received_Pending_Payment";
+        Description = (Description ?? "") + $"\n[Reception Confirmed]: License Plate {licensePlate} by User {operatorId}";
+        UpdatedAt = DateTime.Now;
+    }
+
+    public void MarkAsCompleted()
+    {
+        Status = "Completed";
+        UpdatedAt = DateTime.Now;
+    }
+
+    public void ConfirmReceipt(string notes)
+    {
+        Description = (Description ?? "") + $"\n[Xác nhận từ chi nhánh]: {notes} vào ngày {DateTime.Now}";
+        Status = "Completed";
+        UpdatedAt = DateTime.Now;
+    }
 }

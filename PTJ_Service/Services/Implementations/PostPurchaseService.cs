@@ -21,8 +21,10 @@ namespace Service.Services.Implementations
             var proposal = await _proposalRepository.GetByIdAsync(request.ProposalId)
                            ?? throw new Exception("Purchase proposal not found.");
 
-            if (proposal.Status != "Approved")
-                throw new Exception("Proposal must be approved before reception.");
+            proposal.MarkAsReceived(request.LicensePlate, operatorId);
+
+            _proposalRepository.Update(proposal);
+            await _proposalRepository.SaveChangesAsync();
         }
 
         public async Task ConfirmPaymentAndActivateAssetAsync(int proposalId, int accountantId)
@@ -30,8 +32,9 @@ namespace Service.Services.Implementations
             var proposal = await _proposalRepository.GetByIdAsync(proposalId)
                            ?? throw new Exception("Purchase proposal not found.");
 
-            if (proposal.Status != "Approved")
-                throw new Exception("Proposal must be approved before payment confirmation.");
+            // 1. Complete the proposal workflow
+            proposal.MarkAsCompleted();
+            proposal.ApproveByChiefAccountant(accountantId);
 
             // Create and activate a new vehicle after payment is confirmed.
             var detail = proposal.BulkPurchaseDetails.FirstOrDefault();
