@@ -17,15 +17,17 @@ namespace Service.Services.Implementations
         public async Task<List<PurchaseProposalListDto>> GetAllAsync()
         {
             var proposals = await _repository.GetAllAsync();
-            return proposals.Select(p => new PurchaseProposalListDto
-            {
-                Id = p.Id,
-                Description = p.Description,
-                Status = p.Status,
-                CreatedDate = p.CreatedDate,
-                ProposedCost = p.ProposedCost,
-                ManagerName = p.Manager?.Name
-            }).ToList();
+            return proposals
+                .Select(p => new PurchaseProposalListDto
+                {
+                    Id = p.Id,
+                    Description = p.Description,
+                    Status = p.Status,
+                    CreatedDate = p.CreatedDate,
+                    ProposedCost = p.ProposedCost,
+                    ManagerName = p.Manager?.Name
+                })
+                .ToList();
         }
 
         public async Task<PurchaseProposal?> GetByIdAsync(int id)
@@ -38,54 +40,40 @@ namespace Service.Services.Implementations
             var proposal = new PurchaseProposal();
             proposal.InitCreate(dto.Description);
 
-            foreach (var item in dto.Details)
+            if (dto.Details != null)
             {
-                var detail = new BulkPurchaseDetail();
-                detail.InitCreate(
-                    item.BranchId,
-                    item.Quantity,
-                    item.UnitPrice,
-                    item.Notes ?? item.Description
-                );
-                proposal.AddDetail(detail);
+                foreach (var detail in dto.Details)
+                {
+                    var bulkDetail = new BulkPurchaseDetail();
+                    bulkDetail.InitCreate(
+                        detail.BranchId,
+                        detail.Quantity,
+                        detail.UnitPrice,
+                        detail.Notes ?? detail.Description);
+                    proposal.AddDetail(bulkDetail);
+                }
             }
 
-            public async Task<List<PurchaseProposalListDto>> GetAllAsync()
+            await _repository.AddAsync(proposal);
+            await _repository.SaveChangesAsync();
+
+            return new
             {
-                var proposals = await _repository.GetAllAsync();
-                return proposals
-                    .Where(p => p.DeletedAt == null)
-                    .Select(p => new PurchaseProposalListDto
-                    {
-                        Id = p.Id,
-                        Description = p.Description,
-                        Status = p.Status,
-                        CreatedDate = p.CreatedDate,
-                        ProposedCost = p.ProposedCost,
-                        ManagerName = p.Manager?.Name
-                    })
-                    .ToList();
-            }
+                proposal.Id,
+                proposal.Status,
+                proposal.ProposedCost
+            };
+        }
 
         public async Task ApproveByManagerAsync(int proposalId, int managerId)
         {
             var proposal = await _repository.GetByIdAsync(proposalId)
                 ?? throw new Exception("Proposal not found");
 
-            public async Task<object> CreateAsync(CreatePurchaseProposalDto dto)
-            {
-                var proposal = new PurchaseProposal();
-                proposal.InitCreate(dto.Description);
-
-                if (dto.Details != null)
-                {
-                    foreach (var detail in dto.Details)
-                    {
-                        var bulkDetail = new BulkPurchaseDetail();
-                        bulkDetail.InitCreate(detail.BranchId, detail.Quantity, detail.UnitPrice, detail.Notes);
-                        proposal.AddDetail(bulkDetail);
-                    }
-                }
+            proposal.ApproveByManager(managerId);
+            _repository.Update(proposal);
+            await _repository.SaveChangesAsync();
+        }
 
         public async Task RejectAsync(int proposalId, string reason)
         {
@@ -129,16 +117,5 @@ namespace Service.Services.Implementations
                 })
                 .ToList();
         }
-        public async Task ConfirmReceiptAsync(int proposalId, string notes)
-        {
-            var proposal = await _repository.GetByIdAsync(proposalId)
-                           ?? throw new Exception("Không tìm thấy đề xuất");
-
-            proposal.ConfirmReceipt(notes);
-
-            _repository.Update(proposal);
-            await _repository.SaveChangesAsync();
-        }
-    }
     }
 }
