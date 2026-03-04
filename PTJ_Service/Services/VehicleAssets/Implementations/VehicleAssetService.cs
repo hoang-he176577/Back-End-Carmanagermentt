@@ -380,4 +380,21 @@ public sealed class VehicleAssetService : IVehicleAssetService
     }
 
     private sealed record AccessScope(int? RestrictedBranchId, bool CanManage);
+
+    // ===== DROPDOWN DATA METHODS =====
+
+    public async Task<List<VehicleModelDto>> GetVehicleModelsAsync()
+    {
+        return await _repository.GetVehicleModelsAsync();
+    }
+
+    public async Task<List<BranchDto>> GetBranchesAsync()
+    {
+        return await _repository.GetBranchesAsync();
+    }
+
+    public async Task<List<DriverDto>> GetDriversAsync()
+    {
+        return await _repository.GetDriversAsync();
+    }
 }
