@@ -56,24 +56,7 @@ public sealed class VehicleAssetsController : BaseController
         return Ok(vehicle);
     }
 
-    // ===== SIMPLE CREATE (demo) =====
-
-    [HttpPost]
-    [ProducesResponseType(typeof(VehicleAssetDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreateVehicle([FromBody] VehicleCreateRequestDto request)
-    {
-        var result = await _service.CreateVehicleAsync(request);
-        if (!result.Success)
-        {
-            return StatusCode(result.StatusCode, new { message = result.Message });
-        }
-
-        var created = result.Data!;
-        return CreatedAtAction(nameof(GetVehicleById), new { id = created.Id }, created);
-    }
-
+  
     // ===== ASSET MANAGEMENT (CREATE) - ONLY ACCOUNTANT =====
 
     [HttpPost("asset-create")]
