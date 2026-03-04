@@ -27,6 +27,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
@@ -78,7 +79,7 @@ builder.Services.AddDbContext<CarManagerContext>(options =>
 
 
 builder.Services.AddScoped<IVehicleAssetRepository, VehicleAssetRepository>();
-builder.Services.AddScoped<IVehicleAssetService, VehicleAssetService>();
+builder.Services.AddScoped<Service.Services.VehicleAssets.Interfaces.IVehicleAssetService, Service.Services.VehicleAssets.Implementations.VehicleAssetService>();
 builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalRepository>();
 
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();

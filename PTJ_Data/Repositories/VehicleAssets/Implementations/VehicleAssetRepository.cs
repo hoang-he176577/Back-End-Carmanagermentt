@@ -181,5 +181,57 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
     {
         return _context.SaveChangesAsync();
     }
+
+    // ===== DROPDOWN DATA METHODS =====
+
+    public async Task<List<VehicleModelDto>> GetVehicleModelsAsync()
+    {
+        return await _context.VehicleModels
+            .AsNoTracking()
+            .Where(m => m.DeletedAt == null)
+            .OrderBy(m => m.Manufacturer)
+            .ThenBy(m => m.ModelName)
+            .Select(m => new VehicleModelDto
+            {
+                Id = m.Id,
+                Manufacturer = m.Manufacturer ?? "Unknown",
+                ModelName = m.ModelName ?? "Unknown",
+                Seats = m.Seats,
+                EngineType = m.EngineType,
+                DefaultPrice = m.DefaultPrice
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<BranchDto>> GetBranchesAsync()
+    {
+        return await _context.Branches
+            .AsNoTracking()
+            .Where(b => b.DeletedAt == null)
+            .OrderBy(b => b.Name)
+            .Select(b => new BranchDto
+            {
+                Id = b.Id,
+                Name = b.Name ?? "Unknown",
+                Address = b.Address
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<DriverDto>> GetDriversAsync()
+    {
+        return await _context.Drivers
+            .AsNoTracking()
+            .Where(d => d.DeletedAt == null && d.Status == "Active")
+            .OrderBy(d => d.Name)
+            .Select(d => new DriverDto
+            {
+                Id = d.Id,
+                Name = d.Name ?? "Unknown",
+                LicenseNumber = d.LicenseNumber,
+                Phone = d.Phone
+            })
+            .ToListAsync();
+    }
 }
 

@@ -34,3 +34,4 @@ dist-ssr
 
 # Frontend folder (separate repo)
 CarManagements-frontend/
+/.vs
