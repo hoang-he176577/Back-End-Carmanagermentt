@@ -385,6 +385,9 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.ActualCost)
                 .HasColumnType("decimal(15, 2)")
                 .HasColumnName("actual_cost");
+            entity.Property(e => e.ApprovalNote)
+                .HasMaxLength(500)
+                .HasColumnName("approval_note");
             entity.Property(e => e.ApprovedDate).HasColumnName("approved_date");
             entity.Property(e => e.CompletionDate).HasColumnName("completion_date");
             entity.Property(e => e.CreatedAt)
@@ -404,6 +407,9 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("maintenance_type");
             entity.Property(e => e.OperatorId).HasColumnName("operator_id");
             entity.Property(e => e.RequestDate).HasColumnName("request_date");
+            entity.Property(e => e.RejectionReason)
+                .HasMaxLength(500)
+                .HasColumnName("rejection_reason");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");

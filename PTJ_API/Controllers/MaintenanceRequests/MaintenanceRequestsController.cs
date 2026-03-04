@@ -91,7 +91,7 @@ public sealed class MaintenanceRequestsController : ControllerBase
     }
 
     [HttpPatch("{id:int}/approval")]
-    [Authorize(Roles = "BranchAssetAccountant")]
+    [Authorize(Roles = "BranchAssetAccountant,Branch Asset Accountant")]
     [ProducesResponseType(typeof(MaintenanceRequestDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

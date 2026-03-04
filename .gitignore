@@ -1,97 +1,37 @@
-# ===============================
-# Visual Studio & .NET ignore list
-# ===============================
-
-# Visual Studio user-specific files
-.vs/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# Build results
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
+# Logs
+logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# ASP.NET Core
-wwwroot/lib/
-node_modules/
-bower_components/
-bundleconfig.json
+# Dependencies
+node_modules
 
-# Entity Framework
-[Mm]igrations/
-*.mdf
-*.ldf
-*.db
+# Build
+dist
+dist-ssr
 
-# Configuration & secrets
-*.env
-appsettings.Development.json
-appsettings.Local.json
+# Env
+.env
+.env.*
 
-# Rider / JetBrains
-.idea/
-*.iml
+# Local
+*.local
 
-# VS Code
-.vscode/
-.history/
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# ReSharper
-_ReSharper*/
-*.DotSettings.user
-
-# Test results
-[Tt]est[Rr]esult*/
-*.VisualState.xml
-*.vsp
-*.vspx
-*.coverage
-*.coveragexml
-
-# Temporary files
-~$*
-*.tmp
-*.bak
-*.swp
-*.swo
-
-# Publish output
-publish/
-*.Publish.xml
-
-# Docker
-docker-compose.override.yml
-*.dockerfile
-.docker/
-
-# NuGet packages
-*.nupkg
-*.snupkg
-packages/
-project.lock.json
-project.fragment.lock.json
-
-# Logs & Cache
-*.pidb
-*.seed
-*.psess
-*.vsp
-*.vspx
-*.sdf
-*.cache
-*.pdb
-
-# ===============================
-# End of .gitignore
-# ===============================
+# Frontend folder (separate repo)
+CarManagements-frontend/
+/.vs
