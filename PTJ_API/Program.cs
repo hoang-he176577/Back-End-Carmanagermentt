@@ -1,12 +1,24 @@
 ﻿using API.Json;
 using API.Middlewares;
-using Data.Repositories.Implementations;
-using Data.Repositories.Interfaces;
+using Data.Repositories.Auth.Implementations;
+using Data.Repositories.Auth.Interfaces;
+using Data.Repositories.MaintenanceRequests.Implementations;
+using Data.Repositories.MaintenanceRequests.Interfaces;
+using Data.Repositories.VehicleAssets.Implementations;
+using Data.Repositories.VehicleAssets.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Models.Models;
+using Service.Services.Auth.Implementations;
+using Service.Services.Auth.Interfaces;
+using Service.Services.MaintenanceRequests.Implementations;
+using Service.Services.MaintenanceRequests.Interfaces;
+using Service.Services.VehicleAssets.Implementations;
+using Service.Services.VehicleAssets.Interfaces;
+using Data.Repositories.Implementations;
+using Data.Repositories.Interfaces;
 using Service.Services.Implementations;
 using Service.Services.Implementations.Repository;
 using Service.Services.Interfaces;
@@ -17,13 +29,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =============================
-// Controllers + JSON
-// =============================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -31,7 +42,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Nhập JWT token.",
+        Description = "Nhap JWT token.",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -55,32 +66,45 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// =============================
-// DbContext
-// =============================
 var connectionString = builder.Configuration.GetConnectionString("CarManager");
 
 builder.Services.AddDbContext<CarManagerContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("CarManager"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure();
+        }));
 
-// =============================
-// Repositories
-// =============================
+
 builder.Services.AddScoped<IVehicleAssetRepository, VehicleAssetRepository>();
 builder.Services.AddScoped<IVehicleAssetService, VehicleAssetService>();
+builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalRepository>();
 
-// 🔥 ADD AUTH REPO
+builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
+builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
+
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-// 🔥 ADD AUTH SERVICE
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
+
+
+// 🔥 ADD USER REPO & SERVICE
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// 🔥 ADD PENDING REQUEST REPO & SERVICE
+builder.Services.AddScoped<IPendingRequestRepository, PendingRequestRepository>();
+builder.Services.AddScoped<IPendingRequestService, PendingRequestService>();
+
+// 🔥 ADD VEHICLE DISTRIBUTION REPO & SERVICE
+builder.Services.AddScoped<IVehicleDistributionRepository, VehicleDistributionRepository>();
+builder.Services.AddScoped<IVehicleDistributionService, VehicleDistributionService>();
 
 builder.Services.AddHttpContextAccessor();
 
-// =============================
-// JWT CONFIG
-// =============================
 var jwtSecret = builder.Configuration["Jwt:Secret"];
 if (string.IsNullOrEmpty(jwtSecret))
     throw new Exception("Jwt:Secret missing in appsettings");
@@ -158,24 +182,32 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// =============================
-// BUILD APP
-// =============================
+// 🔥 CORS – cho phép frontend gọi API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+builder.Services.AddScoped<IPostPurchaseService, PostPurchaseService>();
+
 var app = builder.Build();
 
-// =============================
-// MIDDLEWARE
-// =============================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // tắt để tránh redirect CORS khi dev
+app.UseCors("AllowFrontend");
 app.UseCustomExceptionHandler();
 
-// 🔥 QUAN TRỌNG
 app.UseAuthentication();
 app.UseAuthorization();
 

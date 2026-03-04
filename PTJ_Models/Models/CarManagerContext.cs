@@ -58,8 +58,9 @@ public partial class CarManagerContext : DbContext
     public virtual DbSet<VehicleModel> VehicleModels { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("server =(local); database = CarManager; uid=sa; pwd=123456;Trusted_Connection=True;Encrypt=False");
+    {
+
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -373,7 +374,22 @@ public partial class CarManagerContext : DbContext
 
             entity.ToTable("maintenance_request");
 
+            entity.HasIndex(e => e.AccountantId, "IX_maintenance_accountant");
+
+            entity.HasIndex(e => e.Status, "IX_maintenance_status");
+
+            entity.HasIndex(e => e.VehicleId, "IX_maintenance_vehicle");
+
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.AccountantId).HasColumnName("accountant_id");
+            entity.Property(e => e.ActualCost)
+                .HasColumnType("decimal(15, 2)")
+                .HasColumnName("actual_cost");
+            entity.Property(e => e.ApprovalNote)
+                .HasMaxLength(500)
+                .HasColumnName("approval_note");
+            entity.Property(e => e.ApprovedDate).HasColumnName("approved_date");
+            entity.Property(e => e.CompletionDate).HasColumnName("completion_date");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -385,8 +401,15 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.EstimatedCost)
                 .HasColumnType("decimal(15, 2)")
                 .HasColumnName("estimated_cost");
+            entity.Property(e => e.MaintenanceType)
+                .HasMaxLength(20)
+                .HasDefaultValue("Breakdown")
+                .HasColumnName("maintenance_type");
             entity.Property(e => e.OperatorId).HasColumnName("operator_id");
             entity.Property(e => e.RequestDate).HasColumnName("request_date");
+            entity.Property(e => e.RejectionReason)
+                .HasMaxLength(500)
+                .HasColumnName("rejection_reason");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
@@ -396,7 +419,11 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
 
-            entity.HasOne(d => d.Operator).WithMany(p => p.MaintenanceRequests)
+            entity.HasOne(d => d.Accountant).WithMany(p => p.MaintenanceRequestAccountants)
+                .HasForeignKey(d => d.AccountantId)
+                .HasConstraintName("FK_maintenance_request_accountant");
+
+            entity.HasOne(d => d.Operator).WithMany(p => p.MaintenanceRequestOperators)
                 .HasForeignKey(d => d.OperatorId)
                 .HasConstraintName("FK__maintenan__opera__71D1E811");
 
