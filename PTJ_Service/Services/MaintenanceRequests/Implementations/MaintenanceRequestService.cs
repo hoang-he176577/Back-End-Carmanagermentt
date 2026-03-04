@@ -79,6 +79,12 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "Vehicle not found.");
         }
 
+        var vehicleStatus = await _repository.GetVehicleStatusAsync(request.VehicleId.Value);
+        if (string.Equals(vehicleStatus, "Disposed", StringComparison.OrdinalIgnoreCase))
+        {
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "Xe đã được thanh lý, không thể tạo yêu cầu bảo trì.");
+        }
+
         var type = request.MaintenanceType?.Trim();
         if (string.IsNullOrWhiteSpace(type) || !AllowedTypes.Contains(type))
         {
@@ -132,6 +138,12 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             if (request.VehicleId.Value <= 0 || !await _repository.VehicleExistsAsync(request.VehicleId.Value))
             {
                 return ServiceResult<MaintenanceRequestDto>.Fail(400, "Vehicle not found.");
+            }
+
+            var vehicleStatus = await _repository.GetVehicleStatusAsync(request.VehicleId.Value);
+            if (string.Equals(vehicleStatus, "Disposed", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<MaintenanceRequestDto>.Fail(400, "Xe đã được thanh lý, không thể tạo yêu cầu bảo trì.");
             }
 
             entity.VehicleId = request.VehicleId.Value;

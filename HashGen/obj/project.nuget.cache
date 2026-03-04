@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "VRQqhIUrrYU=",
+  "success": true,
+  "projectFilePath": "c:\\swp\\swpp\\Back-End-Carmanagermentt\\HashGen\\HashGen.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
