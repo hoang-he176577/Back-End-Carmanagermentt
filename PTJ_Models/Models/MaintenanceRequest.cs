@@ -19,12 +19,6 @@ public partial class MaintenanceRequest
 
     public string? Status { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
-
-    public DateTime? UpdatedAt { get; set; }
-
-    public DateTime? DeletedAt { get; set; }
-
     public string MaintenanceType { get; set; } = null!;
 
     public int? AccountantId { get; set; }
@@ -38,6 +32,12 @@ public partial class MaintenanceRequest
     public string? ApprovalNote { get; set; }
 
     public string? RejectionReason { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 
     public virtual User? Accountant { get; set; }
 
