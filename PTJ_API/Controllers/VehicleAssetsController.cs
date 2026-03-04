@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.DTO.Vehicles;
+using Models.Models;
 using Service.Services.Interfaces;
 
 namespace API.Controllers;
@@ -133,5 +136,96 @@ public sealed class VehicleAssetsController : BaseController
 
         return HandleResult(result.Data);
     }
+
+    // ===== DROPDOWN DATA ENDPOINTS =====
+
+    [HttpGet("models")]
+    [ProducesResponseType(typeof(List<VehicleModelDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<VehicleModelDto>>> GetVehicleModels()
+    {
+        using var context = new CarManagerContext();
+        var models = await context.VehicleModels
+            .Where(m => m.DeletedAt == null)
+            .OrderBy(m => m.Manufacturer)
+            .ThenBy(m => m.ModelName)
+            .Select(m => new VehicleModelDto
+            {
+                Id = m.Id,
+                Manufacturer = m.Manufacturer,
+                ModelName = m.ModelName,
+                Seats = m.Seats,
+                EngineType = m.EngineType,
+                DefaultPrice = m.DefaultPrice
+            })
+            .ToListAsync();
+
+        return Ok(models);
+    }
+
+    [HttpGet("branches")]
+    [ProducesResponseType(typeof(List<BranchDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<BranchDto>>> GetBranches()
+    {
+        using var context = new CarManagerContext();
+        var branches = await context.Branches
+            .Where(b => b.DeletedAt == null)
+            .OrderBy(b => b.Name)
+            .Select(b => new BranchDto
+            {
+                Id = b.Id,
+                Name = b.Name,
+                Address = b.Address
+            })
+            .ToListAsync();
+
+        return Ok(branches);
+    }
+
+    [HttpGet("drivers")]
+    [ProducesResponseType(typeof(List<DriverDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<DriverDto>>> GetDrivers()
+    {
+        using var context = new CarManagerContext();
+        var drivers = await context.Drivers
+            .Where(d => d.DeletedAt == null && d.Status == "Active")
+            .OrderBy(d => d.Name)
+            .Select(d => new DriverDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                LicenseNumber = d.LicenseNumber,
+                Phone = d.Phone
+            })
+            .ToListAsync();
+
+        return Ok(drivers);
+    }
+}
+
+// ===== DTOs for dropdown data =====
+
+public class VehicleModelDto
+{
+    public int Id { get; set; }
+    public string Manufacturer { get; set; }
+    public string ModelName { get; set; }
+    public int? Seats { get; set; }
+    public string EngineType { get; set; }
+    public decimal? DefaultPrice { get; set; }
+}
+
+public class BranchDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Address { get; set; }
+}
+
+public class DriverDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string LicenseNumber { get; set; }
+    public string Phone { get; set; }
 }
 
