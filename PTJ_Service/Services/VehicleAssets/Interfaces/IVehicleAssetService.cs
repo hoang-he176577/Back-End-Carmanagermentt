@@ -11,4 +11,9 @@ public interface IVehicleAssetService
     Task<ServiceResult<VehicleAssetDto>> GetVehicleByIdAsync(int actorUserId, IReadOnlyCollection<string> roles, int id);
     Task<ServiceResult<VehicleAssetDto>> CreateVehicleAsync(int actorUserId, IReadOnlyCollection<string> roles, VehicleCreateRequestDto request);
     Task<ServiceResult<VehicleAssetDto>> UpdateVehicleAsync(int actorUserId, IReadOnlyCollection<string> roles, int id, VehicleUpdateRequestDto request);
+
+    // Dropdown data methods
+    Task<List<VehicleModelDto>> GetVehicleModelsAsync();
+    Task<List<BranchDto>> GetBranchesAsync();
+    Task<List<DriverDto>> GetDriversAsync();
 }

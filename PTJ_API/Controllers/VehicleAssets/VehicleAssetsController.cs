@@ -123,6 +123,32 @@ public sealed class VehicleAssetsController : ControllerBase
         return Ok(result.Data);
     }
 
+    // ===== DROPDOWN DATA ENDPOINTS =====
+
+    [HttpGet("models")]
+    [ProducesResponseType(typeof(List<VehicleModelDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<VehicleModelDto>>> GetVehicleModels()
+    {
+        var models = await _service.GetVehicleModelsAsync();
+        return Ok(models);
+    }
+
+    [HttpGet("branches")]
+    [ProducesResponseType(typeof(List<BranchDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<BranchDto>>> GetBranches()
+    {
+        var branches = await _service.GetBranchesAsync();
+        return Ok(branches);
+    }
+
+    [HttpGet("drivers")]
+    [ProducesResponseType(typeof(List<DriverDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<DriverDto>>> GetDrivers()
+    {
+        var drivers = await _service.GetDriversAsync();
+        return Ok(drivers);
+    }
+
     private bool TryGetActor(out int actorUserId, out IReadOnlyCollection<string> roles, out ActionResult? errorResult)
     {
         roles = User.FindAll(ClaimTypes.Role)

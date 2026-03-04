@@ -1,181 +1,179 @@
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\appsettings.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\API.staticwebassets.endpoints.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\API.exe
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\API.deps.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\API.runtimeconfig.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\API.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\API.pdb
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Antlr3.Runtime.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\AutoMapper.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Azure.Core.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Azure.Identity.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\BCrypt.Net-Next.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\CloudinaryDotNet.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\CommandLine.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\dotenv.net.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Google.Apis.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Google.Apis.Auth.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Google.Apis.Core.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Humanizer.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Iesi.Collections.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.WebUtilities.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Configuration.FileExtensions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Json.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Http.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Core.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Stores.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Identity.Client.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Net.Http.Headers.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.OpenApi.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Mono.TextTemplating.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Newtonsoft.Json.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\NHibernate.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\QRCoder.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Remotion.Linq.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Remotion.Linq.EagerFetching.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.CodeDom.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Composition.AttributedModel.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Composition.Convention.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Composition.Hosting.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Composition.Runtime.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Composition.TypedParts.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Drawing.Common.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Management.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Memory.Data.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Runtime.Caching.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Data.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Models.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Service.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Data.pdb
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Models.pdb
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\bin\Debug\net8.0\Service.pdb
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.csproj.AssemblyReference.cache
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.GeneratedMSBuildEditorConfig.editorconfig
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.AssemblyInfoInputs.cache
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.AssemblyInfo.cs
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.csproj.CoreCompileInputs.cache
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cs
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cache
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.sourcelink.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\scopedcss\bundle\API.styles.css
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.build.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.development.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.API.Microsoft.AspNetCore.StaticWebAssets.props
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.build.API.props
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.API.props
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.API.props
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.pack.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.csproj.Up2Date
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\refint\API.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.pdb
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.genruntimeconfig.cache
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\ref\API.dll
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\appsettings.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\API.staticwebassets.endpoints.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\API.exe
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\API.deps.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\API.runtimeconfig.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\API.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\API.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Antlr3.Runtime.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\AutoMapper.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Azure.Core.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Azure.Identity.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\BCrypt.Net-Next.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\CloudinaryDotNet.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\CommandLine.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\dotenv.net.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Google.Apis.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Google.Apis.Auth.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Google.Apis.Core.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Humanizer.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Iesi.Collections.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.AspNetCore.WebUtilities.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.CodeAnalysis.Workspaces.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Design.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Configuration.FileExtensions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Json.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Http.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Core.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Stores.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Identity.Client.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Identity.Client.Extensions.Msal.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Net.Http.Headers.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.OpenApi.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Mono.TextTemplating.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Newtonsoft.Json.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\NHibernate.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\QRCoder.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Remotion.Linq.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Remotion.Linq.EagerFetching.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.CodeDom.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Composition.AttributedModel.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Composition.Convention.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Composition.Hosting.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Composition.Runtime.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Composition.TypedParts.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Drawing.Common.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Management.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Memory.Data.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Runtime.Caching.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Data.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Models.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Service.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Data.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Models.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\bin\Debug\net8.0\Service.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.csproj.AssemblyReference.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\rpswa.dswa.cache.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.GeneratedMSBuildEditorConfig.editorconfig
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.AssemblyInfoInputs.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.AssemblyInfo.cs
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.csproj.CoreCompileInputs.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cs
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\rjimswa.dswa.cache.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\scopedcss\bundle\API.styles.css
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\staticwebassets.build.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\staticwebassets.build.json.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\staticwebassets.development.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.csproj.Up2Date
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\refint\API.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\API.genruntimeconfig.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_API\obj\Debug\net8.0\ref\API.dll
