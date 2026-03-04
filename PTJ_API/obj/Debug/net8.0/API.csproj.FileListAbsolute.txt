@@ -172,10 +172,10 @@ D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\static
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.API.props
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.API.props
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.pack.json
-D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.csproj.Up2Date
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.dll
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\refint\API.dll
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.pdb
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\API.genruntimeconfig.cache
 D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\ref\API.dll
+D:\Study\Ki cuoi\SWP391\Newfolder\CarManagements\PTJ_API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
