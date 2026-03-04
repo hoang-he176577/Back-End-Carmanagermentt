@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -26,6 +26,20 @@ public partial class Vehicle
     public int? CurrentBranchId { get; set; }
 
     public int? CurrentDriverId { get; set; }
+
+    public string? Vin { get; set; }
+
+    public string? EngineNumber { get; set; }
+
+    public string? ChassisNumber { get; set; }
+
+    public string? Color { get; set; }
+
+    public int? SeatCount { get; set; }
+
+    public string? FuelType { get; set; }
+
+    public DateOnly? WarrantyExpiryDate { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
