@@ -1,0 +1,14 @@
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\bin\Debug\net8.0\Models.deps.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\bin\Debug\net8.0\Models.runtimeconfig.json
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\bin\Debug\net8.0\Models.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\bin\Debug\net8.0\Models.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.csproj.AssemblyReference.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.GeneratedMSBuildEditorConfig.editorconfig
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.AssemblyInfoInputs.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.AssemblyInfo.cs
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.csproj.CoreCompileInputs.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\refint\Models.dll
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.pdb
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\Models.genruntimeconfig.cache
+D:\Carmanagerment\Back-End-Carmanagermentt\PTJ_Models\obj\Debug\net8.0\ref\Models.dll
