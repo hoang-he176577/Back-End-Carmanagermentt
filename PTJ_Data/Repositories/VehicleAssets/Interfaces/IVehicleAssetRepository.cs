@@ -18,4 +18,12 @@ public interface IVehicleAssetRepository
     Task<int?> GetUserBranchIdAsync(int userId);
     Task<Vehicle> AddVehicleAsync(Vehicle vehicle);
     Task SaveChangesAsync();
+
+    // Dropdown data
+    Task<List<VehicleModel>> GetAllModelsAsync();
+    Task<List<Driver>> GetAllDriversAsync();
+    Task<List<Branch>> GetAllBranchesAsync();
+
+    // Assign operations
+    Task<Driver?> GetDriverByIdAsync(int driverId);
 }

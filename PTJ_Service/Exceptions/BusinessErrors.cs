@@ -41,5 +41,8 @@ namespace Service.Exceptions
 
         public static BusinessException BadRequest(string message) =>
             new BusinessException(ErrorCode.BadRequest, message, HttpStatusCode.BadRequest);
+
+        public static BusinessException Conflict(string message) =>
+            new BusinessException(ErrorCode.Conflict, message, HttpStatusCode.Conflict);
     }
 }

@@ -125,4 +125,39 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
     {
         return _context.SaveChangesAsync();
     }
+
+    // ───────── Dropdown Data ─────────
+
+    public Task<List<VehicleModel>> GetAllModelsAsync()
+    {
+        return _context.VehicleModels.AsNoTracking()
+            .Where(m => m.DeletedAt == null)
+            .OrderBy(m => m.Manufacturer)
+            .ThenBy(m => m.ModelName)
+            .ToListAsync();
+    }
+
+    public Task<List<Driver>> GetAllDriversAsync()
+    {
+        return _context.Drivers.AsNoTracking()
+            .Where(d => d.DeletedAt == null)
+            .OrderBy(d => d.Name)
+            .ToListAsync();
+    }
+
+    public Task<List<Branch>> GetAllBranchesAsync()
+    {
+        return _context.Branches.AsNoTracking()
+            .Where(b => b.DeletedAt == null)
+            .OrderBy(b => b.Name)
+            .ToListAsync();
+    }
+
+    // ───────── Assign Operations ─────────
+
+    public Task<Driver?> GetDriverByIdAsync(int driverId)
+    {
+        return _context.Drivers
+            .FirstOrDefaultAsync(d => d.Id == driverId && d.DeletedAt == null);
+    }
 }

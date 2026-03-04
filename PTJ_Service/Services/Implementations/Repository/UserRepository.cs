@@ -19,5 +19,25 @@ namespace Service.Services.Implementations.Repository
                 .Include(u => u.Branch)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
+
+        public async Task<List<User>> GetAllUsersWithBranchAsync(bool includeDeactivated)
+        {
+            var query = _context.Users
+                .Include(u => u.Branch)
+                .AsNoTracking();
+
+            if (!includeDeactivated)
+            {
+                query = query.Where(u => u.DeletedAt == null);
+            }
+
+            return await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
+        }
+
+        public Task SaveChangesAsync()
+        {
+            return _context.SaveChangesAsync();
+        }
     }
 }
+

@@ -380,4 +380,101 @@ public sealed class VehicleAssetService : IVehicleAssetService
     }
 
     private sealed record AccessScope(int? RestrictedBranchId, bool CanManage);
+
+    // ───────────────── Dropdown Data ─────────────────
+
+    public async Task<ServiceResult<List<VehicleModel>>> GetModelsAsync()
+    {
+        var models = await _repository.GetAllModelsAsync();
+        return ServiceResult<List<VehicleModel>>.SuccessResult(models);
+    }
+
+    public async Task<ServiceResult<List<Driver>>> GetDriversAsync()
+    {
+        var drivers = await _repository.GetAllDriversAsync();
+        return ServiceResult<List<Driver>>.SuccessResult(drivers);
+    }
+
+    public async Task<ServiceResult<List<Branch>>> GetBranchesAsync()
+    {
+        var branches = await _repository.GetAllBranchesAsync();
+        return ServiceResult<List<Branch>>.SuccessResult(branches);
+    }
+
+    // ───────────────── Assign / Unassign ─────────────────
+
+    public async Task<ServiceResult<VehicleAssetDto>> AssignVehicleAsync(
+        int actorUserId, IReadOnlyCollection<string> roles, int vehicleId, VehicleAssignRequestDto request)
+    {
+        var access = await ResolveAccessScopeAsync(actorUserId, roles, requireManagePermission: true);
+        if (!access.Success)
+            return ServiceResult<VehicleAssetDto>.Fail(access.StatusCode, access.Message!);
+
+        var vehicle = await _repository.GetVehicleEntityByIdAsync(vehicleId);
+        if (vehicle == null)
+            return ServiceResult<VehicleAssetDto>.Fail(404, "Vehicle not found.");
+
+        var scope = access.Data!;
+        if (scope.RestrictedBranchId.HasValue && vehicle.CurrentBranchId != scope.RestrictedBranchId.Value)
+            return ServiceResult<VehicleAssetDto>.Fail(403, "You can only manage assets in your branch.");
+
+        if (request.DriverId <= 0 || !await _repository.DriverExistsAsync(request.DriverId))
+            return ServiceResult<VehicleAssetDto>.Fail(400, "Driver not found.");
+
+        vehicle.CurrentDriverId = request.DriverId;
+        vehicle.Status = "Assigned";
+        vehicle.UpdatedAt = DateTime.Now;
+        await _repository.SaveChangesAsync();
+
+        var dto = await _repository.GetVehicleByIdAsync(vehicle.Id);
+        return ServiceResult<VehicleAssetDto>.SuccessResult(dto!);
+    }
+
+    public async Task<ServiceResult<VehicleAssetDto>> UnassignVehicleAsync(
+        int actorUserId, IReadOnlyCollection<string> roles, int vehicleId, VehicleUnassignRequestDto request)
+    {
+        var access = await ResolveAccessScopeAsync(actorUserId, roles, requireManagePermission: true);
+        if (!access.Success)
+            return ServiceResult<VehicleAssetDto>.Fail(access.StatusCode, access.Message!);
+
+        var vehicle = await _repository.GetVehicleEntityByIdAsync(vehicleId);
+        if (vehicle == null)
+            return ServiceResult<VehicleAssetDto>.Fail(404, "Vehicle not found.");
+
+        var scope = access.Data!;
+        if (scope.RestrictedBranchId.HasValue && vehicle.CurrentBranchId != scope.RestrictedBranchId.Value)
+            return ServiceResult<VehicleAssetDto>.Fail(403, "You can only manage assets in your branch.");
+
+        vehicle.CurrentDriverId = null;
+        vehicle.Status = "Available";
+        vehicle.UpdatedAt = DateTime.Now;
+        await _repository.SaveChangesAsync();
+
+        var dto = await _repository.GetVehicleByIdAsync(vehicle.Id);
+        return ServiceResult<VehicleAssetDto>.SuccessResult(dto!);
+    }
+
+    // ───────────────── Asset Create (extended) ─────────────────
+
+    public async Task<ServiceResult<VehicleAssetDto>> CreateAssetAsync(
+        int actorUserId, IReadOnlyCollection<string> roles, AssetCreateRequestDto request)
+    {
+        // Delegate to existing CreateVehicleAsync after mapping the fields
+        var createRequest = new VehicleCreateRequestDto
+        {
+            LicensePlate = request.LicensePlate,
+            ModelId = request.ModelId,
+            YearManufacture = request.YearManufacture,
+            PurchaseDate = !string.IsNullOrWhiteSpace(request.PurchaseDate)
+                ? DateOnly.TryParse(request.PurchaseDate, out var pd) ? pd : null
+                : null,
+            OriginalCost = request.OriginalCost,
+            CurrentValue = request.CurrentValue,
+            Mileage = request.Mileage,
+            Status = request.Status,
+            CurrentDriverId = request.CurrentDriverId
+        };
+
+        return await CreateVehicleAsync(actorUserId, roles, createRequest);
+    }
 }

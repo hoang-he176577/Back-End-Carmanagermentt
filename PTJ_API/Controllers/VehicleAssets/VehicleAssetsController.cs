@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTO.Vehicles;
+using Models.Models;
 using Service.Services.VehicleAssets.Interfaces;
 
 namespace API.Controllers.VehicleAssets;
@@ -20,6 +21,97 @@ public sealed class VehicleAssetsController : ControllerBase
     {
         _service = service;
     }
+
+    // ───────────────── Dropdown Data ─────────────────
+
+    [HttpGet("models")]
+    [ProducesResponseType(typeof(List<VehicleModel>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetModels()
+    {
+        var result = await _service.GetModelsAsync();
+        return Ok(result.Data);
+    }
+
+    [HttpGet("drivers")]
+    [ProducesResponseType(typeof(List<Driver>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDrivers()
+    {
+        var result = await _service.GetDriversAsync();
+        return Ok(result.Data);
+    }
+
+    [HttpGet("branches")]
+    [ProducesResponseType(typeof(List<Branch>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBranches()
+    {
+        var result = await _service.GetBranchesAsync();
+        return Ok(result.Data);
+    }
+
+    // ───────────────── Asset Create ─────────────────
+
+    [HttpPost("asset-create")]
+    [ProducesResponseType(typeof(VehicleAssetDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateAsset([FromBody] AssetCreateRequestDto request)
+    {
+        if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        var result = await _service.CreateAssetAsync(actorUserId, roles, request);
+        if (!result.Success)
+        {
+            return StatusCode(result.StatusCode, new { message = result.Message });
+        }
+
+        return StatusCode(201, result.Data);
+    }
+
+    // ───────────────── Assign / Unassign ─────────────────
+
+    [HttpPost("{id:int}/assign")]
+    [ProducesResponseType(typeof(VehicleAssetDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignVehicle([FromRoute] int id, [FromBody] VehicleAssignRequestDto request)
+    {
+        if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        var result = await _service.AssignVehicleAsync(actorUserId, roles, id, request);
+        if (!result.Success)
+        {
+            return StatusCode(result.StatusCode, new { message = result.Message });
+        }
+
+        return Ok(result.Data);
+    }
+
+    [HttpPost("{id:int}/unassign")]
+    [ProducesResponseType(typeof(VehicleAssetDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UnassignVehicle([FromRoute] int id, [FromBody] VehicleUnassignRequestDto request)
+    {
+        if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        var result = await _service.UnassignVehicleAsync(actorUserId, roles, id, request);
+        if (!result.Success)
+        {
+            return StatusCode(result.StatusCode, new { message = result.Message });
+        }
+
+        return Ok(result.Data);
+    }
+
+    // ───────────────── Original Endpoints ─────────────────
 
     [HttpGet]
     [ProducesResponseType(typeof(List<VehicleAssetDto>), StatusCodes.Status200OK)]
