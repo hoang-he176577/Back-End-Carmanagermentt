@@ -1,0 +1,21 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+[Bb]in/
+[Oo]bj/
+
+# Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
