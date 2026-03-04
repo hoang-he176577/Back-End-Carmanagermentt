@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Models.DTO.Vehicles;
 using Service.Services;
+using Service.Services.Common;
 
 namespace Service.Services.Interfaces;
 
@@ -10,8 +11,6 @@ public interface IVehicleAssetService
     Task<List<VehicleAssetDto>> GetVehiclesAsync(int? branchId, string? status, bool includeDeleted);
     Task<VehicleAssetDto?> GetVehicleByIdAsync(int id);
 
-    // Simple create vehicle (demo API hiện có)
-    Task<ServiceResult<VehicleAssetDto>> CreateVehicleAsync(VehicleCreateRequestDto request);
 
     // Tạo mới asset đầy đủ (>= 15 field) chỉ cho Accountant
     Task<ServiceResult<VehicleAssetDto>> CreateAssetAsync(VehicleAssetCreateRequestDto request, int accountantUserId);
