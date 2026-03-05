@@ -125,6 +125,10 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
     public Task<bool> VehicleExistsAsync(int vehicleId)
         => _context.Vehicles.AnyAsync(v => v.Id == vehicleId && v.DeletedAt == null);
 
+    public Task<string?> GetVehicleStatusAsync(int vehicleId)
+        => _context.Vehicles.Where(v => v.Id == vehicleId && v.DeletedAt == null)
+            .Select(v => v.Status).FirstOrDefaultAsync();
+
     public Task<bool> UserExistsAsync(int userId)
         => _context.Users.AnyAsync(u => u.Id == userId && u.DeletedAt == null);
 

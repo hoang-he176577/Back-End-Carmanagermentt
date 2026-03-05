@@ -31,4 +31,12 @@ public interface IVehicleAssetRepository
     Task<VehicleDriverHistory?> GetLatestActiveDriverHistoryAsync(int vehicleId);
     Task AddDriverHistoryAsync(VehicleDriverHistory history);
     Task SaveChangesAsync();
+
+    // Dropdown data
+    Task<List<VehicleModel>> GetAllModelsAsync();
+    Task<List<Driver>> GetAllDriversAsync();
+    Task<List<Branch>> GetAllBranchesAsync();
+
+    // Assign operations
+    Task<Driver?> GetDriverByIdAsync(int driverId);
 }

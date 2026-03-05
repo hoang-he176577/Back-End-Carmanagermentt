@@ -14,3 +14,4 @@ namespace Service.Services.Interfaces.Repository
         Task SaveChangesAsync();
     }
 }
+

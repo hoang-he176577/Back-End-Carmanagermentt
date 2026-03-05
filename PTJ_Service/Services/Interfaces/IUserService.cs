@@ -10,3 +10,4 @@ namespace Service.Services.Interfaces
         Task<AdminUserAccountDto> UpdateAccountStatusAsync(int userId, bool isActive);
     }
 }
+

@@ -142,6 +142,12 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
                 return ServiceResult<MaintenanceRequestDto>.Fail(400, "Vehicle not found.");
             }
 
+            var vehicleStatus = await _repository.GetVehicleStatusAsync(request.VehicleId.Value);
+            if (string.Equals(vehicleStatus, "Disposed", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<MaintenanceRequestDto>.Fail(400, "Xe đã được thanh lý, không thể tạo yêu cầu bảo trì.");
+            }
+
             entity.VehicleId = request.VehicleId.Value;
         }
 
