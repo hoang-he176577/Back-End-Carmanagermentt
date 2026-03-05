@@ -12,7 +12,6 @@ namespace API.Controllers.VehicleAssets;
 
 [ApiController]
 [Authorize]
-[NonController]
 [Route("api/assets/vehicles")]
 public sealed class VehicleAssetsController : ControllerBase
 {

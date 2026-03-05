@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -82,24 +82,6 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
             .AnyAsync(v => v.LicensePlate == licensePlate);
     }
 
-    public Task<bool> VinExistsAsync(string vin)
-    {
-        return _context.Vehicles.AsNoTracking()
-            .AnyAsync(v => v.Vin == vin);
-    }
-
-    public Task<bool> EngineNumberExistsAsync(string engineNumber)
-    {
-        return _context.Vehicles.AsNoTracking()
-            .AnyAsync(v => v.EngineNumber == engineNumber);
-    }
-
-    public Task<bool> ChassisNumberExistsAsync(string chassisNumber)
-    {
-        return _context.Vehicles.AsNoTracking()
-            .AnyAsync(v => v.ChassisNumber == chassisNumber);
-    }
-
     public Task<bool> LicensePlateExistsForOtherVehicleAsync(string licensePlate, int vehicleId)
     {
         return _context.Vehicles.AsNoTracking()
@@ -137,44 +119,6 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
         _context.Vehicles.Add(vehicle);
         await _context.SaveChangesAsync();
         return vehicle;
-    }
-
-    public async Task AddRegistrationRecordAsync(RegistrationRecord record)
-    {
-        _context.RegistrationRecords.Add(record);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task AddInsuranceRecordAsync(InsuranceRecord record)
-    {
-        _context.InsuranceRecords.Add(record);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task AddAssetChangeLogAsync(AssetChangeLog log)
-    {
-        _context.AssetChangeLogs.Add(log);
-        await _context.SaveChangesAsync();
-    }
-
-    public Task<Driver?> GetDriverByIdAsync(int id)
-    {
-        return _context.Drivers
-            .FirstOrDefaultAsync(d => d.Id == id && d.DeletedAt == null);
-    }
-
-    public Task<VehicleDriverHistory?> GetLatestActiveDriverHistoryAsync(int vehicleId)
-    {
-        return _context.VehicleDriverHistories
-            .Where(h => h.VehicleId == vehicleId && h.UnassignDate == null)
-            .OrderByDescending(h => h.AssignDate)
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task AddDriverHistoryAsync(VehicleDriverHistory history)
-    {
-        _context.VehicleDriverHistories.Add(history);
-        await _context.SaveChangesAsync();
     }
 
     public Task SaveChangesAsync()
@@ -217,4 +161,3 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
             .FirstOrDefaultAsync(d => d.Id == driverId && d.DeletedAt == null);
     }
 }
-

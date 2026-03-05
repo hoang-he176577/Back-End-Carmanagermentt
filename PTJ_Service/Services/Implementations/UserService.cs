@@ -41,106 +41,105 @@ namespace Service.Services.Implementations
             };
         }
 
-        public async Task<List<AdminUserAccountDto>> GetManagedAccountsAsync(bool includeDeactivated)
+        // ───────────────── Admin Account Management ─────────────────
+
+        public async Task<List<AdminAccountDto>> GetAdminAccountsAsync(bool includeDeactivated)
         {
-            var users = await _userRepo.GetUsersWithDetailsAsync(includeDeactivated);
-            return users.Select(MapToAdminUserAccount).ToList();
+            var users = await _userRepo.GetAllUsersWithBranchAsync(includeDeactivated);
+
+            var result = new List<AdminAccountDto>();
+            foreach (var user in users)
+            {
+                var roles = await _authRepo.GetUserRolesAsync(user.Id);
+                result.Add(new AdminAccountDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    BranchId = user.BranchId,
+                    BranchName = user.Branch?.Name,
+                    Roles = roles,
+                    EmailVerified = user.EmailVerified,
+                    IsActive = user.DeletedAt == null,
+                    CreatedAt = user.CreatedAt,
+                    LastLogin = user.LastLogin
+                });
+            }
+
+            return result;
         }
 
-        public async Task<AdminUserAccountDto> CreateAccountAsync(AdminCreateUserRequestDto request)
+        public async Task<AdminAccountDto> CreateAdminAccountAsync(CreateAdminAccountDto request)
         {
-            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-            var emailExists = await _userRepo.GetByEmailAsync(normalizedEmail);
-            if (emailExists != null)
-            {
-                throw BusinessErrors.BadRequest("Email already exists.");
-            }
+            if (string.IsNullOrWhiteSpace(request.Email))
+                throw BusinessErrors.BadRequest("Email is required.");
 
-            int? normalizedBranchId = request.BranchId;
-            if (normalizedBranchId.HasValue && normalizedBranchId.Value <= 0)
-            {
-                normalizedBranchId = null;
-            }
+            if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
+                throw BusinessErrors.BadRequest("Password must be at least 6 characters.");
 
-            if (normalizedBranchId.HasValue)
-            {
-                var branchExists = await _userRepo.BranchExistsAsync(normalizedBranchId.Value);
-                if (!branchExists)
-                {
-                    throw BusinessErrors.BadRequest("Branch does not exist.");
-                }
-            }
+            if (await _authRepo.EmailExistsAsync(request.Email.Trim()))
+                throw BusinessErrors.Conflict("Email already exists.");
 
-            var roleName = request.Role?.Trim();
-            if (string.IsNullOrWhiteSpace(roleName))
-            {
-                throw BusinessErrors.BadRequest("Role is required.");
-            }
+            if (request.BranchId.HasValue && !await _authRepo.BranchExistsAsync(request.BranchId.Value))
+                throw BusinessErrors.BadRequest("Branch not found.");
 
-            var role = await _userRepo.GetRoleByNameAsync(roleName);
-            if (role == null)
-            {
-                throw BusinessErrors.BadRequest($"Invalid role '{roleName}'.");
-            }
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-            var now = DateTime.UtcNow;
             var user = new User
             {
-                Name = request.Name.Trim(),
-                Email = normalizedEmail,
-                Phone = string.IsNullOrWhiteSpace(request.Phone) ? null : request.Phone.Trim(),
-                BranchId = normalizedBranchId,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Name = request.Name?.Trim(),
+                Email = request.Email.Trim(),
+                PasswordHash = passwordHash,
+                Phone = request.Phone?.Trim(),
+                BranchId = request.BranchId,
                 EmailVerified = false,
-                CreatedAt = now,
-                UpdatedAt = now,
-                DeletedAt = null
+                CreatedAt = DateTime.UtcNow
             };
 
-            user.Roles.Add(role);
-            await _userRepo.AddAsync(user);
+            var created = await _authRepo.CreateUserAsync(user);
 
-            var created = await _userRepo.GetByIdWithDetailsAsync(user.Id)
-                ?? throw BusinessErrors.NotFound("Created account was not found.");
-
-            return MapToAdminUserAccount(created);
-        }
-
-        public async Task<AdminUserAccountDto> UpdateAccountStatusAsync(int userId, bool isActive)
-        {
-            var user = await _userRepo.GetByIdWithDetailsAsync(userId);
-            if (user == null)
+            if (!string.IsNullOrWhiteSpace(request.Role))
             {
-                throw BusinessErrors.NotFound("User not found.");
+                await _authRepo.AddRoleToUserAsync(created.Id, request.Role.Trim());
             }
 
-            var now = DateTime.UtcNow;
-            user.DeletedAt = isActive ? null : now;
-            user.UpdatedAt = now;
-            await _userRepo.SaveChangesAsync();
+            var roles = await _authRepo.GetUserRolesAsync(created.Id);
+            var createdUser = await _userRepo.GetByIdWithBranchAsync(created.Id);
 
-            return MapToAdminUserAccount(user);
+            return new AdminAccountDto
+            {
+                Id = created.Id,
+                Name = createdUser?.Name,
+                Email = createdUser?.Email,
+                Phone = createdUser?.Phone,
+                BranchId = createdUser?.BranchId,
+                BranchName = createdUser?.Branch?.Name,
+                Roles = roles,
+                EmailVerified = createdUser?.EmailVerified,
+                IsActive = createdUser?.DeletedAt == null,
+                CreatedAt = createdUser?.CreatedAt,
+                LastLogin = createdUser?.LastLogin
+            };
         }
 
-        private static AdminUserAccountDto MapToAdminUserAccount(User user)
+        public async Task UpdateAccountStatusAsync(int id, bool isActive)
         {
-            return new AdminUserAccountDto
+            var user = await _userRepo.GetByIdWithBranchAsync(id);
+            if (user == null)
+                throw BusinessErrors.NotFound("User not found.");
+
+            if (isActive)
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Phone = user.Phone,
-                BranchId = user.BranchId,
-                BranchName = user.Branch?.Name,
-                EmailVerified = user.EmailVerified ?? false,
-                IsActive = user.DeletedAt == null,
-                Roles = user.Roles
-                    .Where(r => !string.IsNullOrWhiteSpace(r.Name))
-                    .Select(r => r.Name!)
-                    .ToList(),
-                CreatedAt = user.CreatedAt,
-                LastLogin = user.LastLogin
-            };
+                user.DeletedAt = null;
+            }
+            else
+            {
+                user.DeletedAt = DateTime.UtcNow;
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
+            await _userRepo.SaveChangesAsync();
         }
     }
 }

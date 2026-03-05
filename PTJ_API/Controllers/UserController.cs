@@ -28,31 +28,30 @@ namespace API.Controllers
             return HandleResult(profile, "Profile retrieved successfully");
         }
 
+        // ───────────────── Admin Account Management ─────────────────
+
         [HttpGet("admin/accounts")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAccounts([FromQuery] bool includeDeactivated = false)
+        public async Task<IActionResult> GetAdminAccounts([FromQuery] bool includeDeactivated = false)
         {
-            var accounts = await _userService.GetManagedAccountsAsync(includeDeactivated);
+            var accounts = await _userService.GetAdminAccountsAsync(includeDeactivated);
             return HandleResult(accounts, "Accounts retrieved successfully");
         }
 
         [HttpPost("admin/accounts")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateAccount([FromBody] AdminCreateUserRequestDto request)
+        public async Task<IActionResult> CreateAdminAccount([FromBody] CreateAdminAccountDto request)
         {
-            var account = await _userService.CreateAccountAsync(request);
+            var account = await _userService.CreateAdminAccountAsync(request);
             return HandleCreated(account, "Account created successfully");
         }
 
         [HttpPatch("admin/accounts/{id:int}/status")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateAccountStatus(int id, [FromBody] AdminUpdateUserStatusRequestDto request)
+        public async Task<IActionResult> UpdateAccountStatus([FromRoute] int id, [FromBody] UpdateAccountStatusDto request)
         {
-            var account = await _userService.UpdateAccountStatusAsync(id, request.IsActive);
-            var message = request.IsActive
-                ? "Account activated successfully"
-                : "Account deactivated successfully";
-            return HandleResult(account, message);
+            await _userService.UpdateAccountStatusAsync(id, request.IsActive);
+            return HandleSuccess(request.IsActive ? "Account activated" : "Account deactivated");
         }
     }
 }

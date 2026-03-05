@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -27,20 +27,6 @@ public partial class Vehicle
 
     public int? CurrentDriverId { get; set; }
 
-    public string? Vin { get; set; }
-
-    public string? EngineNumber { get; set; }
-
-    public string? ChassisNumber { get; set; }
-
-    public string? Color { get; set; }
-
-    public int? SeatCount { get; set; }
-
-    public string? FuelType { get; set; }
-
-    public DateOnly? WarrantyExpiryDate { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
@@ -68,8 +54,6 @@ public partial class Vehicle
     public virtual ICollection<RegistrationRecord> RegistrationRecords { get; set; } = new List<RegistrationRecord>();
 
     public virtual ICollection<TransferPlan> TransferPlans { get; set; } = new List<TransferPlan>();
-
-    public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
 
     public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
 

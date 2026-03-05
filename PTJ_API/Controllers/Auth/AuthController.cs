@@ -18,6 +18,18 @@ namespace API.Controllers.Auth
             _config = config;
         }
 
+        [HttpPost("register")]
+        [Authorize(Roles = "Admin,Executive Management")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var result = await _authService.RegisterAsync(request, ip);
+            var message = string.IsNullOrWhiteSpace(result.Warning)
+                ? "Register successful. Please check your email to verify your account."
+                : "Register successful. Verification email was not sent, please check SMTP settings and resend.";
+            return HandleCreated(result, message);
+        }
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)

@@ -1,5 +1,4 @@
 using Data.Repositories.MaintenanceRequests.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Models.DTO.Maintenance;
 using Models.Models;
 using Service.Services.Common;
@@ -9,6 +8,12 @@ namespace Service.Services.MaintenanceRequests.Implementations;
 
 public sealed class MaintenanceRequestService : IMaintenanceRequestService
 {
+    private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Periodic",
+        "Breakdown"
+    };
+
     private static readonly HashSet<string> AllowedStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
         "Pending",
@@ -19,33 +24,22 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
     };
 
     private readonly IMaintenanceRequestRepository _repository;
-    private readonly IConfiguration _configuration;
 
-    public MaintenanceRequestService(IMaintenanceRequestRepository repository, IConfiguration configuration)
+    public MaintenanceRequestService(IMaintenanceRequestRepository repository)
     {
         _repository = repository;
-        _configuration = configuration;
     }
 
     public async Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int userId, string userRole)
     {
-        var allowedTypes = await GetAllowedTypesAsync();
-
         if (!string.IsNullOrWhiteSpace(status) && !AllowedStatuses.Contains(status.Trim()))
         {
             return ServiceResult<List<MaintenanceRequestDto>>.Fail(400, "Invalid status.");
         }
 
-        string? normalizedMaintenanceType = null;
-        if (!string.IsNullOrWhiteSpace(maintenanceType))
+        if (!string.IsNullOrWhiteSpace(maintenanceType) && !AllowedTypes.Contains(maintenanceType.Trim()))
         {
-            var candidate = maintenanceType.Trim();
-            if (!allowedTypes.Contains(candidate))
-            {
-                return ServiceResult<List<MaintenanceRequestDto>>.Fail(400, "Invalid maintenanceType.");
-            }
-
-            normalizedMaintenanceType = NormalizeType(candidate, allowedTypes);
+            return ServiceResult<List<MaintenanceRequestDto>>.Fail(400, "Invalid maintenanceType.");
         }
 
         // Executive Management can see all branches; others see only their branch
@@ -56,7 +50,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             branchId = await _repository.GetUserBranchIdAsync(userId);
         }
 
-        var items = await _repository.GetListAsync(status, normalizedMaintenanceType, includeDeleted, branchId);
+        var items = await _repository.GetListAsync(status, maintenanceType, includeDeleted, branchId);
         return ServiceResult<List<MaintenanceRequestDto>>.SuccessResult(items);
     }
 
@@ -85,11 +79,16 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "Vehicle not found.");
         }
 
-        var allowedTypes = await GetAllowedTypesAsync();
-        var type = request.MaintenanceType?.Trim();
-        if (string.IsNullOrWhiteSpace(type) || !allowedTypes.Contains(type))
+        var vehicleStatus = await _repository.GetVehicleStatusAsync(request.VehicleId.Value);
+        if (string.Equals(vehicleStatus, "Disposed", StringComparison.OrdinalIgnoreCase))
         {
-            return ServiceResult<MaintenanceRequestDto>.Fail(400, $"MaintenanceType is invalid. Allowed values: {string.Join(", ", allowedTypes)}.");
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "Xe đã được thanh lý, không thể tạo yêu cầu bảo trì.");
+        }
+
+        var type = request.MaintenanceType?.Trim();
+        if (string.IsNullOrWhiteSpace(type) || !AllowedTypes.Contains(type))
+        {
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "MaintenanceType must be 'Periodic' or 'Breakdown'.");
         }
 
         if (request.EstimatedCost.HasValue && request.EstimatedCost.Value < 0)
@@ -105,7 +104,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             RequestDate = request.RequestDate ?? DateOnly.FromDateTime(now),
             Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
             EstimatedCost = request.EstimatedCost,
-            MaintenanceType = NormalizeType(type, allowedTypes),
+            MaintenanceType = NormalizeType(type),
             Status = "Pending",
             CreatedAt = now,
             UpdatedAt = now
@@ -128,7 +127,6 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "Request body is required.");
         }
 
-        var allowedTypes = await GetAllowedTypesAsync();
         var entity = await _repository.GetEntityByIdAsync(id);
         if (entity == null)
         {
@@ -174,12 +172,12 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         if (!string.IsNullOrWhiteSpace(request.MaintenanceType))
         {
             var type = request.MaintenanceType.Trim();
-            if (!allowedTypes.Contains(type))
+            if (!AllowedTypes.Contains(type))
             {
                 return ServiceResult<MaintenanceRequestDto>.Fail(400, "Invalid maintenanceType.");
             }
 
-            entity.MaintenanceType = NormalizeType(type, allowedTypes);
+            entity.MaintenanceType = NormalizeType(type);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Status))
@@ -193,7 +191,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             if (status.Equals("Approved", StringComparison.OrdinalIgnoreCase) ||
                 status.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
             {
-                return ServiceResult<MaintenanceRequestDto>.Fail(403, "Only Branch Asset Accountant can approve or reject.");
+                return ServiceResult<MaintenanceRequestDto>.Fail(403, "Only BranchAssetAccountant can approve or reject.");
             }
 
             entity.Status = NormalizeStatus(status);
@@ -267,18 +265,9 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<MaintenanceRequestDto>.Fail(409, "Only Pending requests can be approved or rejected.");
         }
 
-        var approvalNote = string.IsNullOrWhiteSpace(request.ApprovalNote) ? null : request.ApprovalNote.Trim();
-        var rejectionReason = string.IsNullOrWhiteSpace(request.RejectionReason) ? null : request.RejectionReason.Trim();
-        if (targetStatus.Equals("Rejected", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(rejectionReason))
-        {
-            return ServiceResult<MaintenanceRequestDto>.Fail(400, "RejectionReason is required when status is Rejected.");
-        }
-
         entity.Status = NormalizeStatus(targetStatus);
         entity.AccountantId = accountantUserId;
         entity.ApprovedDate = request.ApprovedDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
-        entity.ApprovalNote = approvalNote;
-        entity.RejectionReason = targetStatus.Equals("Rejected", StringComparison.OrdinalIgnoreCase) ? rejectionReason : null;
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _repository.SaveChangesAsync();
@@ -306,27 +295,8 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         return ServiceResult<bool>.SuccessResult(true);
     }
 
-    private async Task<HashSet<string>> GetAllowedTypesAsync()
-    {
-        var fromDb = await _repository.GetDistinctMaintenanceTypesAsync(includeDeleted: true);
-        var fromConfig = _configuration
-            .GetSection("MaintenanceCatalog:Types")
-            .Get<string[]>()?
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim())
-            .ToList() ?? new List<string>();
-
-        var allowed = new HashSet<string>(fromDb, StringComparer.OrdinalIgnoreCase);
-        foreach (var item in fromConfig)
-        {
-            allowed.Add(item);
-        }
-
-        return allowed;
-    }
-
-    private static string NormalizeType(string type, HashSet<string> allowedTypes)
-        => allowedTypes.First(x => x.Equals(type, StringComparison.OrdinalIgnoreCase));
+    private static string NormalizeType(string type)
+        => AllowedTypes.First(x => x.Equals(type, StringComparison.OrdinalIgnoreCase));
 
     private static string NormalizeStatus(string status)
         => AllowedStatuses.First(x => x.Equals(status, StringComparison.OrdinalIgnoreCase));
