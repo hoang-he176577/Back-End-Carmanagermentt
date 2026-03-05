@@ -1,4 +1,4 @@
-﻿using API.Middlewares;
+using API.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using Models.Common;
 using Models.Models;

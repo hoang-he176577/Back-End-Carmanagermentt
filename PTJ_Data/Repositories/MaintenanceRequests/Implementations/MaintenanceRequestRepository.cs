@@ -55,12 +55,29 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
                 MaintenanceType = x.MaintenanceType,
                 AccountantId = x.AccountantId,
                 ApprovedDate = x.ApprovedDate,
+                ApprovalNote = x.ApprovalNote,
+                RejectionReason = x.RejectionReason,
                 ActualCost = x.ActualCost,
                 CompletionDate = x.CompletionDate,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
                 DeletedAt = x.DeletedAt
             })
+            .ToListAsync();
+    }
+
+    public async Task<List<string>> GetDistinctMaintenanceTypesAsync(bool includeDeleted = true)
+    {
+        var query = _context.MaintenanceRequests.AsQueryable();
+        if (!includeDeleted)
+        {
+            query = query.Where(x => x.DeletedAt == null);
+        }
+
+        return await query
+            .Where(x => !string.IsNullOrWhiteSpace(x.MaintenanceType))
+            .Select(x => x.MaintenanceType.Trim())
+            .Distinct()
             .ToListAsync();
     }
 
@@ -84,6 +101,8 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
             MaintenanceType = x.MaintenanceType,
             AccountantId = x.AccountantId,
             ApprovedDate = x.ApprovedDate,
+            ApprovalNote = x.ApprovalNote,
+            RejectionReason = x.RejectionReason,
             ActualCost = x.ActualCost,
             CompletionDate = x.CompletionDate,
             CreatedAt = x.CreatedAt,

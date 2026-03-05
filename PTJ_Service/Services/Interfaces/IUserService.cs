@@ -5,9 +5,9 @@ namespace Service.Services.Interfaces
     public interface IUserService
     {
         Task<UserProfileDto> GetProfileAsync(int userId);
-        Task<List<AdminAccountDto>> GetAdminAccountsAsync(bool includeDeactivated);
-        Task<AdminAccountDto> CreateAdminAccountAsync(CreateAdminAccountDto request);
-        Task UpdateAccountStatusAsync(int id, bool isActive);
+        Task<List<AdminUserAccountDto>> GetManagedAccountsAsync(bool includeDeactivated);
+        Task<AdminUserAccountDto> CreateAccountAsync(AdminCreateUserRequestDto request);
+        Task<AdminUserAccountDto> UpdateAccountStatusAsync(int userId, bool isActive);
     }
 }
 

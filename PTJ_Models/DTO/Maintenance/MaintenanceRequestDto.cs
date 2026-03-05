@@ -12,6 +12,8 @@ public sealed class MaintenanceRequestDto
     public string MaintenanceType { get; set; } = string.Empty;
     public int? AccountantId { get; set; }
     public DateOnly? ApprovedDate { get; set; }
+    public string? ApprovalNote { get; set; }
+    public string? RejectionReason { get; set; }
     public decimal? ActualCost { get; set; }
     public DateOnly? CompletionDate { get; set; }
     public DateTime? CreatedAt { get; set; }
