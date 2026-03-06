@@ -161,6 +161,17 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
             .FirstOrDefaultAsync(d => d.Id == driverId && d.DeletedAt == null);
     }
 
+    public Task<VehicleDriverHistory?> GetLatestActiveDriverHistoryAsync(int vehicleId)
+    {
+        return _context.VehicleDriverHistories
+            .FirstOrDefaultAsync(h => h.VehicleId == vehicleId && h.UnassignDate == null);
+    }
+
+    public async Task AddDriverHistoryAsync(VehicleDriverHistory history)
+    {
+        await _context.VehicleDriverHistories.AddAsync(history);
+    }
+
     // ===== DROPDOWN DATA METHODS =====
 
     public async Task<List<VehicleModelDto>> GetVehicleModelsAsync()
