@@ -2,7 +2,6 @@ using Data.Repositories.Auth.Interfaces;
 using Models.DTO.User;
 using Models.Models;
 using Service.Exceptions;
-using Service.Services.Auth.Interfaces;
 using Service.Services.Interfaces;
 using Service.Services.Interfaces.Repository;
 
@@ -12,13 +11,11 @@ namespace Service.Services.Implementations
     {
         private readonly IUserRepository _userRepo;
         private readonly IAuthRepository _authRepo;
-        private readonly IAuthService _authService;
 
-        public UserService(IUserRepository userRepo, IAuthRepository authRepo, IAuthService authService)
+        public UserService(IUserRepository userRepo, IAuthRepository authRepo)
         {
             _userRepo = userRepo;
             _authRepo = authRepo;
-            _authService = authService;
         }
 
         public async Task<UserProfileDto> GetProfileAsync(int userId)
@@ -81,9 +78,7 @@ namespace Service.Services.Implementations
             if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 6)
                 throw BusinessErrors.BadRequest("Password must be at least 6 characters.");
 
-            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-
-            if (await _authRepo.EmailExistsAsync(normalizedEmail))
+            if (await _authRepo.EmailExistsAsync(request.Email.Trim()))
                 throw BusinessErrors.Conflict("Email already exists.");
 
             if (request.BranchId.HasValue && !await _authRepo.BranchExistsAsync(request.BranchId.Value))
@@ -94,7 +89,7 @@ namespace Service.Services.Implementations
             var user = new User
             {
                 Name = request.Name?.Trim(),
-                Email = normalizedEmail,
+                Email = request.Email.Trim(),
                 PasswordHash = passwordHash,
                 Phone = request.Phone?.Trim(),
                 BranchId = request.BranchId,
@@ -107,16 +102,6 @@ namespace Service.Services.Implementations
             if (!string.IsNullOrWhiteSpace(request.Role))
             {
                 await _authRepo.AddRoleToUserAsync(created.Id, request.Role.Trim());
-            }
-
-            string? warning = null;
-            try
-            {
-                await _authService.ResendVerificationAsync(normalizedEmail);
-            }
-            catch (BusinessException ex)
-            {
-                warning = ex.Message;
             }
 
             var roles = await _authRepo.GetUserRolesAsync(created.Id);
@@ -134,8 +119,7 @@ namespace Service.Services.Implementations
                 EmailVerified = createdUser?.EmailVerified,
                 IsActive = createdUser?.DeletedAt == null,
                 CreatedAt = createdUser?.CreatedAt,
-                LastLogin = createdUser?.LastLogin,
-                Warning = warning
+                LastLogin = createdUser?.LastLogin
             };
         }
 

@@ -111,7 +111,6 @@ namespace API.Controllers.Auth
                 {
                     branchId = userInfo.Value.branchId;
                     branchName = userInfo.Value.branchName;
-                    verified = userInfo.Value.emailVerified.ToString().ToLowerInvariant();
                 }
             }
 

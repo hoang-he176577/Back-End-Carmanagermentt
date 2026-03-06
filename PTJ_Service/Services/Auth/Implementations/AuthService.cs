@@ -105,9 +105,6 @@ namespace Service.Services.Auth.Implementations
             if (!valid)
                 throw BusinessErrors.BadRequest("Invalid email or password");
 
-            if (user.EmailVerified != true)
-                throw BusinessErrors.BadRequest("Email is not verified. Please verify your email before logging in.");
-
             var roles = await _repo.GetUserRolesAsync(user.Id);
             await _repo.UpdateLastLoginAsync(user.Id, DateTime.UtcNow);
 
@@ -150,8 +147,6 @@ namespace Service.Services.Auth.Implementations
 
         private async Task CreateAndSendVerificationTokenAsync(User user)
         {
-            await _repo.InvalidateActiveEmailVerificationTokensAsync(user.Id);
-
             var token = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(48));
             await _repo.AddEmailVerificationTokenAsync(new EmailVerificationToken
             {
@@ -168,69 +163,20 @@ namespace Service.Services.Auth.Implementations
             }
 
             var verifyLink = $"{apiBaseUrl}/api/Auth/verify-email?token={WebUtility.UrlEncode(token)}";
-            var roles = await _repo.GetUserRolesAsync(user.Id);
-            var roleText = roles.Count > 0 ? string.Join(", ", roles) : "Not assigned";
-            var createdAtText = (user.CreatedAt ?? DateTime.UtcNow).ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
-            var safeName = WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(user.Name) ? "User" : user.Name.Trim());
-            var safeEmail = WebUtility.HtmlEncode(user.Email ?? string.Empty);
-            var safeRoles = WebUtility.HtmlEncode(roleText);
-            var safeCreatedAt = WebUtility.HtmlEncode(createdAtText);
-            var safeLink = WebUtility.HtmlEncode(verifyLink);
-
             var html = $"""
-                        <div style="background:#f4f7fb;padding:24px 0;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
-                          <div style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
-                            <div style="padding:20px 24px;background:linear-gradient(135deg,#0f6fff,#0b59cc);color:#ffffff;">
-                              <h2 style="margin:0;font-size:22px;">CarManagement</h2>
-                              <p style="margin:8px 0 0;font-size:14px;opacity:.95;">Account verification required</p>
-                            </div>
-                            <div style="padding:24px;">
-                              <p style="margin:0 0 12px;">Hello <strong>{safeName}</strong>,</p>
-                              <p style="margin:0 0 16px;line-height:1.6;">
-                                Your account has been created successfully. Please verify your email to activate access.
-                              </p>
-
-                              <table style="width:100%;border-collapse:collapse;margin:0 0 18px;">
-                                <tr>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;background:#f9fafb;width:180px;"><strong>Full name</strong></td>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;">{safeName}</td>
-                                </tr>
-                                <tr>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;background:#f9fafb;"><strong>Email</strong></td>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;">{safeEmail}</td>
-                                </tr>
-                                <tr>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;background:#f9fafb;"><strong>Role</strong></td>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;">{safeRoles}</td>
-                                </tr>
-                                <tr>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;background:#f9fafb;"><strong>Created at</strong></td>
-                                  <td style="padding:10px;border:1px solid #e5e7eb;">{safeCreatedAt}</td>
-                                </tr>
-                              </table>
-
-                              <p style="margin:0 0 14px;">Verification link (expires in 30 minutes):</p>
-                              <div style="margin:0 0 18px;">
-                                <a href="{safeLink}" style="display:inline-block;background:#0f6fff;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600;">
-                                  Verify Email
-                                </a>
-                              </div>
-                              <p style="margin:0;word-break:break-all;font-size:12px;color:#4b5563;">{safeLink}</p>
-                            </div>
-                            <div style="padding:14px 24px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;">
-                              If you did not expect this account, contact your administrator.
-                            </div>
-                          </div>
-                        </div>
+                        <h3>Verify your email</h3>
+                        <p>Please click the link below to verify your account:</p>
+                        <p><a href="{verifyLink}">{verifyLink}</a></p>
+                        <p>This link will expire in 30 minutes.</p>
                         """;
 
             await _emailSender.SendEmailAsync(
                 user.Email ?? string.Empty,
-                "CarManagement - Verify your account",
+                "CarManagement - Verify your email",
                 html);
         }
 
-        public async Task<(int? branchId, string? branchName, bool emailVerified)?> GetUserBranchInfoAsync(int userId)
+        public async Task<(int? branchId, string? branchName)?> GetUserBranchInfoAsync(int userId)
         {
             var user = await _repo.GetByIdAsync(userId);
             if (user == null) return null;
@@ -241,7 +187,7 @@ namespace Service.Services.Auth.Implementations
                 branchName = (await _repo.GetBranchNameAsync(user.BranchId.Value));
             }
 
-            return (user.BranchId, branchName, user.EmailVerified == true);
+            return (user.BranchId, branchName);
         }
     }
 }

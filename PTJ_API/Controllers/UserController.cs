@@ -43,10 +43,7 @@ namespace API.Controllers
         public async Task<IActionResult> CreateAdminAccount([FromBody] CreateAdminAccountDto request)
         {
             var account = await _userService.CreateAdminAccountAsync(request);
-            var message = string.IsNullOrWhiteSpace(account.Warning)
-                ? "Account created successfully"
-                : "Account created, but verification email was not sent.";
-            return HandleCreated(account, message);
+            return HandleCreated(account, "Account created successfully");
         }
 
         [HttpPatch("admin/accounts/{id:int}/status")]

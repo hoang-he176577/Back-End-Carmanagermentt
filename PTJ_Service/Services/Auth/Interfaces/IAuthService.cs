@@ -10,6 +10,6 @@ namespace Service.Services.Auth.Interfaces
         Task LogoutAsync(string refreshToken);
         Task VerifyEmailAsync(string token);
         Task ResendVerificationAsync(string email);
-        Task<(int? branchId, string? branchName, bool emailVerified)?> GetUserBranchInfoAsync(int userId);
+        Task<(int? branchId, string? branchName)?> GetUserBranchInfoAsync(int userId);
     }
 }
