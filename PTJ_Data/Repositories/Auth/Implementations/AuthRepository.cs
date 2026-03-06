@@ -99,6 +99,26 @@ public class AuthRepository : IAuthRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task InvalidateActiveEmailVerificationTokensAsync(int userId)
+    {
+        var activeTokens = await _context.EmailVerificationTokens
+            .Where(t => t.UserId == userId && t.UsedAt == null)
+            .ToListAsync();
+
+        if (activeTokens.Count == 0)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        foreach (var activeToken in activeTokens)
+        {
+            activeToken.UsedAt = now;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<EmailVerificationToken?> GetActiveEmailVerificationTokenAsync(string token)
     {
         return await _context.EmailVerificationTokens
