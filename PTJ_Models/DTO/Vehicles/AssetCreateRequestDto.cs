@@ -1,96 +1,56 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Models.DTO.Vehicles;
 
-public sealed class VehicleAssetCreateRequestDto
+/// <summary>
+/// Extended vehicle creation DTO used by the Accountant "Asset Create" form.
+/// Contains core Vehicle fields plus optional registration/insurance/identification data.
+/// Extra fields (vin, engineNumber, etc.) are accepted by the API but currently 
+/// stored only if the schema supports them; otherwise they are silently ignored.
+/// </summary>
+public sealed class AssetCreateRequestDto
 {
-    // ===== THÔNG TIN XE CHÍNH =====
-
+    // ── Core vehicle fields ──
     [Required]
-    [StringLength(20)]
     public string? LicensePlate { get; set; }
 
     [Required]
     public int? ModelId { get; set; }
 
     public int? YearManufacture { get; set; }
-
-    public DateOnly? PurchaseDate { get; set; }
-
-    [Range(0, double.MaxValue)]
+    public string? PurchaseDate { get; set; }
     public decimal? OriginalCost { get; set; }
-
-    [Range(0, double.MaxValue)]
     public decimal? CurrentValue { get; set; }
-
-    [Range(0, double.MaxValue)]
     public decimal? Mileage { get; set; }
-
     public string? Status { get; set; }
-
     public int? CurrentBranchId { get; set; }
-
     public int? CurrentDriverId { get; set; }
 
-    // ===== ĐỊNH DANH XE =====
-
-    [Required]
-    [StringLength(50)]
+    // ── Identification ──
     public string? Vin { get; set; }
-
-    [Required]
-    [StringLength(50)]
     public string? EngineNumber { get; set; }
-
-    [Required]
-    [StringLength(50)]
     public string? ChassisNumber { get; set; }
-
-    [StringLength(50)]
     public string? Color { get; set; }
-
     public int? SeatCount { get; set; }
-
-    [StringLength(30)]
     public string? FuelType { get; set; }
 
-    // ===== ĐĂNG KÝ XE =====
-
-    [StringLength(100)]
+    // ── Registration ──
     public string? RegistrationNumber { get; set; }
-
-    [StringLength(200)]
     public string? RegistrationAuthority { get; set; }
-
-    public DateOnly? RegistrationIssueDate { get; set; }
-
-    public DateOnly? RegistrationExpiryDate { get; set; }
-
-    [Range(0, double.MaxValue)]
+    public string? RegistrationIssueDate { get; set; }
+    public string? RegistrationExpiryDate { get; set; }
     public decimal? RegistrationCost { get; set; }
-
     public string? RegistrationNotes { get; set; }
 
-    // ===== BẢO HIỂM / BẢO HÀNH =====
-
-    [StringLength(100)]
+    // ── Insurance / Warranty ──
     public string? InsurancePolicyNumber { get; set; }
-
-    [StringLength(200)]
     public string? InsuranceProvider { get; set; }
-
-    public DateOnly? InsuranceStartDate { get; set; }
-
-    public DateOnly? InsuranceExpiryDate { get; set; }
-
-    [Range(0, double.MaxValue)]
+    public string? InsuranceStartDate { get; set; }
+    public string? InsuranceExpiryDate { get; set; }
     public decimal? InsuranceCost { get; set; }
-
     public string? InsuranceCoverageDetails { get; set; }
+    public string? WarrantyExpiryDate { get; set; }
 
-    public DateOnly? WarrantyExpiryDate { get; set; }
-
+    // ── Notes ──
     public string? Notes { get; set; }
 }
-

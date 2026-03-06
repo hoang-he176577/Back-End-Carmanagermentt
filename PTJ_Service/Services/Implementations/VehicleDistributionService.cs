@@ -133,15 +133,33 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
         plan.Status = newStatus;
 
-        if (string.Equals(newStatus, "Executed", StringComparison.OrdinalIgnoreCase))
+        if (plan.VehicleId.HasValue)
         {
-            plan.ExecutedDate = DateOnly.FromDateTime(DateTime.Now);
-
-            // Move the vehicle to the destination branch
-            if (plan.VehicleId.HasValue && plan.ToBranchId.HasValue)
+            if (string.Equals(newStatus, "Approved", StringComparison.OrdinalIgnoreCase))
             {
-                await _repository.UpdateVehicleBranchAsync(
-                    plan.VehicleId.Value, plan.ToBranchId.Value);
+                // Xe bắt đầu trong trạng thái điều chuyển
+                await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "InTransfer");
+            }
+            else if (string.Equals(newStatus, "Executed", StringComparison.OrdinalIgnoreCase))
+            {
+                plan.ExecutedDate = DateOnly.FromDateTime(DateTime.Now);
+
+                // Chuyển xe sang chi nhánh mới và đặt lại Active
+                if (plan.ToBranchId.HasValue)
+                {
+                    await _repository.UpdateVehicleBranchAsync(
+                        plan.VehicleId.Value, plan.ToBranchId.Value);
+                }
+                await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "Active");
+            }
+            else if (string.Equals(newStatus, "Rejected", StringComparison.OrdinalIgnoreCase)
+                  || string.Equals(newStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                // Nếu xe đang ở trạng thái InTransfer thì reset lại Active
+                if (string.Equals(current, "Approved", StringComparison.OrdinalIgnoreCase))
+                {
+                    await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "Active");
+                }
             }
         }
 

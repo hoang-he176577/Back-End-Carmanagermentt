@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTO.Vehicles;
+using Models.Models;
 using Service.Services.VehicleAssets.Interfaces;
 
 namespace API.Controllers.VehicleAssets;
 
 [ApiController]
 [Authorize]
+
 [Route("api/assets/vehicles")]
 public sealed class VehicleAssetsController : ControllerBase
 {
@@ -20,6 +22,34 @@ public sealed class VehicleAssetsController : ControllerBase
     {
         _service = service;
     }
+
+    // ───────────────── Dropdown Data ─────────────────
+
+    [HttpGet("models")]
+    [ProducesResponseType(typeof(List<VehicleModelDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetModels()
+    {
+        var result = await _service.GetVehicleModelsAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("drivers")]
+    [ProducesResponseType(typeof(List<DriverDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDrivers()
+    {
+        var result = await _service.GetDriversAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("branches")]
+    [ProducesResponseType(typeof(List<BranchDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBranches()
+    {
+        var result = await _service.GetBranchesAsync();
+        return Ok(result);
+    }
+
+    // ───────────────── Original Endpoints ─────────────────
 
     [HttpGet]
     [ProducesResponseType(typeof(List<VehicleAssetDto>), StatusCodes.Status200OK)]

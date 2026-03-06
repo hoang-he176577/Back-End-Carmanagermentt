@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -82,24 +82,6 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
             .AnyAsync(v => v.LicensePlate == licensePlate);
     }
 
-    public Task<bool> VinExistsAsync(string vin)
-    {
-        return _context.Vehicles.AsNoTracking()
-            .AnyAsync(v => v.Vin == vin);
-    }
-
-    public Task<bool> EngineNumberExistsAsync(string engineNumber)
-    {
-        return _context.Vehicles.AsNoTracking()
-            .AnyAsync(v => v.EngineNumber == engineNumber);
-    }
-
-    public Task<bool> ChassisNumberExistsAsync(string chassisNumber)
-    {
-        return _context.Vehicles.AsNoTracking()
-            .AnyAsync(v => v.ChassisNumber == chassisNumber);
-    }
-
     public Task<bool> LicensePlateExistsForOtherVehicleAsync(string licensePlate, int vehicleId)
     {
         return _context.Vehicles.AsNoTracking()
@@ -139,47 +121,106 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
         return vehicle;
     }
 
-    public async Task AddRegistrationRecordAsync(RegistrationRecord record)
+    public Task SaveChangesAsync()
     {
-        _context.RegistrationRecords.Add(record);
-        await _context.SaveChangesAsync();
+        return _context.SaveChangesAsync();
     }
 
-    public async Task AddInsuranceRecordAsync(InsuranceRecord record)
+    // ───────── Dropdown Data ─────────
+
+    public Task<List<VehicleModel>> GetAllModelsAsync()
     {
-        _context.InsuranceRecords.Add(record);
-        await _context.SaveChangesAsync();
+        return _context.VehicleModels.AsNoTracking()
+            .Where(m => m.DeletedAt == null)
+            .OrderBy(m => m.Manufacturer)
+            .ThenBy(m => m.ModelName)
+            .ToListAsync();
     }
 
-    public async Task AddAssetChangeLogAsync(AssetChangeLog log)
+    public Task<List<Driver>> GetAllDriversAsync()
     {
-        _context.AssetChangeLogs.Add(log);
-        await _context.SaveChangesAsync();
+        return _context.Drivers.AsNoTracking()
+            .Where(d => d.DeletedAt == null)
+            .OrderBy(d => d.Name)
+            .ToListAsync();
     }
 
-    public Task<Driver?> GetDriverByIdAsync(int id)
+    public Task<List<Branch>> GetAllBranchesAsync()
+    {
+        return _context.Branches.AsNoTracking()
+            .Where(b => b.DeletedAt == null)
+            .OrderBy(b => b.Name)
+            .ToListAsync();
+    }
+
+    // ───────── Assign Operations ─────────
+
+    public Task<Driver?> GetDriverByIdAsync(int driverId)
     {
         return _context.Drivers
-            .FirstOrDefaultAsync(d => d.Id == id && d.DeletedAt == null);
+            .FirstOrDefaultAsync(d => d.Id == driverId && d.DeletedAt == null);
     }
 
     public Task<VehicleDriverHistory?> GetLatestActiveDriverHistoryAsync(int vehicleId)
     {
         return _context.VehicleDriverHistories
-            .Where(h => h.VehicleId == vehicleId && h.UnassignDate == null)
-            .OrderByDescending(h => h.AssignDate)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(h => h.VehicleId == vehicleId && h.UnassignDate == null);
     }
 
     public async Task AddDriverHistoryAsync(VehicleDriverHistory history)
     {
-        _context.VehicleDriverHistories.Add(history);
-        await _context.SaveChangesAsync();
+        await _context.VehicleDriverHistories.AddAsync(history);
     }
 
-    public Task SaveChangesAsync()
+    // ===== DROPDOWN DATA METHODS =====
+
+    public async Task<List<VehicleModelDto>> GetVehicleModelsAsync()
     {
-        return _context.SaveChangesAsync();
+        return await _context.VehicleModels
+            .AsNoTracking()
+            .Where(m => m.DeletedAt == null)
+            .OrderBy(m => m.Manufacturer)
+            .ThenBy(m => m.ModelName)
+            .Select(m => new VehicleModelDto
+            {
+                Id = m.Id,
+                Manufacturer = m.Manufacturer ?? "Unknown",
+                ModelName = m.ModelName ?? "Unknown",
+                Seats = m.Seats,
+                EngineType = m.EngineType,
+                DefaultPrice = m.DefaultPrice
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<BranchDto>> GetBranchesAsync()
+    {
+        return await _context.Branches
+            .AsNoTracking()
+            .Where(b => b.DeletedAt == null)
+            .OrderBy(b => b.Name)
+            .Select(b => new BranchDto
+            {
+                Id = b.Id,
+                Name = b.Name ?? "Unknown",
+                Address = b.Address
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<DriverDto>> GetDriversAsync()
+    {
+        return await _context.Drivers
+            .AsNoTracking()
+            .Where(d => d.DeletedAt == null && d.Status == "Active")
+            .OrderBy(d => d.Name)
+            .Select(d => new DriverDto
+            {
+                Id = d.Id,
+                Name = d.Name ?? "Unknown",
+                LicenseNumber = d.LicenseNumber,
+                Phone = d.Phone
+            })
+            .ToListAsync();
     }
 }
-

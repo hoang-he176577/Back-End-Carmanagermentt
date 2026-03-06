@@ -17,5 +17,6 @@ public interface IVehicleDistributionRepository
     Task<bool> BranchExistsAsync(int branchId);
     Task<bool> HasActiveTransferAsync(int vehicleId);
     Task UpdateVehicleBranchAsync(int vehicleId, int newBranchId);
+    Task UpdateVehicleStatusAsync(int vehicleId, string status);
     Task<int?> GetUserBranchIdAsync(int userId);
 }

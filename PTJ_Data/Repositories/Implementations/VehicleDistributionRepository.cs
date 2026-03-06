@@ -148,6 +148,17 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         }
     }
 
+    public async Task UpdateVehicleStatusAsync(int vehicleId, string status)
+    {
+        var vehicle = await _context.Vehicles.FindAsync(vehicleId);
+        if (vehicle != null)
+        {
+            vehicle.Status = status;
+            vehicle.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+        }
+    }
+
     public async Task<int?> GetUserBranchIdAsync(int userId)
     {
         return await _context.Users.AsNoTracking()

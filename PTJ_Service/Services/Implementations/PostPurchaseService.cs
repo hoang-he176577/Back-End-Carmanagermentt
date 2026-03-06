@@ -36,7 +36,7 @@ namespace Service.Services.Implementations
             proposal.MarkAsCompleted();
             proposal.ApproveByChiefAccountant(accountantId);
 
-            // Create and activate a new vehicle after payment is confirmed.
+            // 2. Automatically create and activate the new Vehicle asset
             var detail = proposal.BulkPurchaseDetails.FirstOrDefault();
             var newVehicle = new Vehicle
             {
@@ -49,7 +49,8 @@ namespace Service.Services.Implementations
             };
 
             await _context.Vehicles.AddAsync(newVehicle);
-            await _context.SaveChangesAsync();
+            _proposalRepository.Update(proposal);
+            await _proposalRepository.SaveChangesAsync();
         }
     }
 }
