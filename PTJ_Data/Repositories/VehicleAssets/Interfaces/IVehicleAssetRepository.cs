@@ -24,6 +24,12 @@ public interface IVehicleAssetRepository
     Task<List<Driver>> GetAllDriversAsync();
     Task<List<Branch>> GetAllBranchesAsync();
 
-    // Assign operations
-    Task<Driver?> GetDriverByIdAsync(int driverId);
+    Task<Driver?> GetDriverByIdAsync(int id);
+    Task<VehicleDriverHistory?> GetLatestActiveDriverHistoryAsync(int vehicleId);
+    Task AddDriverHistoryAsync(VehicleDriverHistory history);
+
+    // Dropdown data methods
+    Task<List<VehicleModelDto>> GetVehicleModelsAsync();
+    Task<List<BranchDto>> GetBranchesAsync();
+    Task<List<DriverDto>> GetDriversAsync();
 }
