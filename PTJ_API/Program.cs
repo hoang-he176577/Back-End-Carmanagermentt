@@ -80,7 +80,7 @@ builder.Services.AddDbContext<CarManagerContext>(options =>
 builder.Services.AddScoped<IVehicleAssetRepository, VehicleAssetRepository>();
 builder.Services.AddScoped<IVehicleAssetService, VehicleAssetService>();
 builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalRepository>();
-
+builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
 
@@ -89,7 +89,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
-
+builder.Services.AddScoped<ITripLogsService, TripLogService>();
 
 // 🔥 ADD USER REPO & SERVICE
 builder.Services.AddScoped<IUserRepository, UserRepository>();

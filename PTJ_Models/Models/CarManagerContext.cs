@@ -56,7 +56,8 @@ public partial class CarManagerContext : DbContext
     public virtual DbSet<VehicleDriverHistory> VehicleDriverHistories { get; set; }
 
     public virtual DbSet<VehicleModel> VehicleModels { get; set; }
-
+    
+    public virtual DbSet<TripLog> TripLog { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
 
@@ -812,6 +813,41 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.YearFrom).HasColumnName("year_from");
             entity.Property(e => e.YearTo).HasColumnName("year_to");
         });
+
+        modelBuilder.Entity<TripLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__trip_log__3213E83F3639C1E1");
+
+            entity.ToTable("trip_log", tb => tb.HasTrigger("TRG_UpdateVehicleMileage"));
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Destination)
+                .HasMaxLength(255)
+                .HasColumnName("destination");
+            entity.Property(e => e.DriverId).HasColumnName("driver_id");
+            entity.Property(e => e.EndMileage)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("end_mileage");
+            entity.Property(e => e.EndTime)
+                .HasColumnType("datetime")
+                .HasColumnName("end_time");
+            entity.Property(e => e.Origin)
+                .HasMaxLength(255)
+                .HasColumnName("origin");
+            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.StartMileage)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("start_mileage");
+            entity.Property(e => e.StartTime)
+                .HasColumnType("datetime")
+                .HasColumnName("start_time");
+            entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
