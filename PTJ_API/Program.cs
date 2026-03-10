@@ -2,6 +2,8 @@
 using API.Middlewares;
 using Data.Repositories.Auth.Implementations;
 using Data.Repositories.Auth.Interfaces;
+using Data.Repositories.Accessories.Implementations;
+using Data.Repositories.Accessories.Interfaces;
 using Data.Repositories.MaintenanceRequests.Implementations;
 using Data.Repositories.MaintenanceRequests.Interfaces;
 using Data.Repositories.VehicleAssets.Implementations;
@@ -13,6 +15,8 @@ using Microsoft.OpenApi.Models;
 using Models.Models;
 using Service.Services.Auth.Implementations;
 using Service.Services.Auth.Interfaces;
+using Service.Services.Accessories.Implementations;
+using Service.Services.Accessories.Interfaces;
 using Service.Services.MaintenanceRequests.Implementations;
 using Service.Services.MaintenanceRequests.Interfaces;
 using Service.Services.VehicleAssets.Implementations;
@@ -83,6 +87,8 @@ builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalReposito
 builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
+builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
+builder.Services.AddScoped<IAccessoryService, AccessoryService>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
