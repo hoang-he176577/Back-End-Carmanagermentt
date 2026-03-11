@@ -19,4 +19,6 @@ public sealed class VehicleAssetDto
     public string? CurrentBranchName { get; set; }
     public int? CurrentDriverId { get; set; }
     public string? CurrentDriverName { get; set; }
+
+
 }
