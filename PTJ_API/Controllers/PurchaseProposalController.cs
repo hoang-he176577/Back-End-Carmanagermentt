@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Models.DTO.PurchaseProposal;
 using Service.Services.Interfaces;
 
@@ -7,6 +8,7 @@ namespace API.Controllers
 {
 
     [Route("api/purchase-proposals")]
+    [Authorize] // require authentication for all endpoints
     public class PurchaseProposalController : BaseController
     {
         private readonly IPurchaseProposalService _service;
@@ -112,14 +114,24 @@ namespace API.Controllers
         [HttpGet("purchase-plans")]
         public async Task<IActionResult> GetPurchasePlans([FromQuery] int? branchId = null)
         {
-            // Nếu không có branchId, lấy branchId của user hiện tại
+            // Kiểm tra vai trò để xác định phạm vi hiển thị
+            var userRoles = GetUserRoles();
+            bool isManager = userRoles?.Any(r => r == "Manager" || r == "Executive Management") ?? false;
+
+            // Nếu không truyền branchId thì dùng branchId trong token
             if (!branchId.HasValue || branchId.Value <= 0)
             {
-                branchId = GetBranchId();
+                if (!isManager)
+                {
+                    branchId = GetBranchId();
+                }
+                else
+                {
+                    // manager có thể xem toàn bộ nên để null
+                    branchId = null;
+                }
             }
 
-            // Lấy danh sách kế hoạch mua
-            // Nếu query có branchId = 0 hoặc -1, tức là xem tất cả (cho Manager)
             var plans = await _service.GetPurchasePlanAsync(branchId);
             return HandleResult(plans);
         }

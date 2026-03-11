@@ -24,7 +24,7 @@ namespace API.Controllers
             if (data == null)
                 return NotFound();
 
-            return HandleSuccess(data);
+            return HandleResult(data);
         }
 
         // ==============================
@@ -34,7 +34,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetByProposalId(int proposalId)
         {
             var data = await _service.GetByProposalIdAsync(proposalId);
-            return HandleSuccess(data);
+            return HandleResult(data);
         }
 
         // ==============================
@@ -44,7 +44,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetByBranchId(int branchId)
         {
             var data = await _service.GetByBranchIdAsync(branchId);
-            return HandleSuccess(data);
+            return HandleResult(data);
         }
 
         // ==============================
@@ -54,7 +54,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetPendingByBranch(int branchId)
         {
             var data = await _service.GetPendingByBranchAsync(branchId);
-            return HandleSuccess(data);
+            return HandleResult(data);
         }
 
         // ==============================
@@ -64,7 +64,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var data = await _service.GetAllAsync();
-            return HandleSuccess(data);
+            return HandleResult(data);
         }
 
         // ==============================
@@ -90,7 +90,7 @@ namespace API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] CreateVehicleReceptionDto dto)
         {
             var result = await _service.UpdateAsync(id, dto);
-            return HandleSuccess(result, "Reception record updated successfully");
+            return HandleResult(result, "Reception record updated successfully");
         }
 
         // ==============================
@@ -100,7 +100,7 @@ namespace API.Controllers
         public async Task<IActionResult> Complete(int id)
         {
             var result = await _service.CompleteAsync(id);
-            return HandleSuccess(result, "Reception record completed");
+            return HandleResult(result, "Reception record completed");
         }
 
         // ==============================
@@ -110,7 +110,7 @@ namespace API.Controllers
         public async Task<IActionResult> Reject(int id, [FromBody] UpdateVehicleReceptionStatusDto dto)
         {
             var result = await _service.RejectAsync(id, dto.Reason);
-            return HandleSuccess(result, "Reception record rejected");
+            return HandleResult(result, "Reception record rejected");
         }
 
         // ==============================
