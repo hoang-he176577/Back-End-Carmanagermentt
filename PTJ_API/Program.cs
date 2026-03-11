@@ -91,7 +91,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
+<<<<<<< Updated upstream
+
+=======
 builder.Services.AddScoped<ITripLogsService, TripLogService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+>>>>>>> Stashed changes
 
 // 🔥 ADD USER REPO & SERVICE
 builder.Services.AddScoped<IUserRepository, UserRepository>();
