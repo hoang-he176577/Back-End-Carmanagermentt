@@ -18,5 +18,11 @@ namespace Service.Services.Interfaces
 
         Task<List<PurchaseProposalDto>> GetApprovedByBranchAsync(int branchId);
 
+        /// <summary>
+        /// Lấy danh sách kế hoạch mua (chỉ những đề xuất đã duyệt)
+        /// Dùng cho hiển thị tab "Kế hoạch mua"
+        /// </summary>
+        Task<List<PurchasePlanDto>> GetPurchasePlanAsync(int? branchId = null);
+
     }
 }

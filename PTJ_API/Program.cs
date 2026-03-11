@@ -99,6 +99,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPendingRequestRepository, PendingRequestRepository>();
 builder.Services.AddScoped<IPendingRequestService, PendingRequestService>();
 
+// 🔥 ADD VEHICLE RECEPTION REPO & SERVICE
+builder.Services.AddScoped<IVehicleReceptionRepository, VehicleReceptionRepository>();
+builder.Services.AddScoped<IVehicleReceptionService, VehicleReceptionService>();
+
 // 🔥 ADD VEHICLE DISTRIBUTION REPO & SERVICE
 builder.Services.AddScoped<IVehicleDistributionRepository, VehicleDistributionRepository>();
 builder.Services.AddScoped<IVehicleDistributionService, VehicleDistributionService>();

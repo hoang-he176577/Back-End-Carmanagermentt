@@ -101,5 +101,28 @@ namespace API.Controllers
             return HandleResult(data);
         }
 
+        // ==============================
+        // GET PURCHASE PLANS
+        // ==============================
+        /// <summary>
+        /// Lấy danh sách kế hoạch mua (approved proposals)
+        /// - Manager: xem tất cả kế hoạch của tất cả chi nhánh
+        /// - Operator: xem chỉ kế hoạch của chi nhánh mình
+        /// </summary>
+        [HttpGet("purchase-plans")]
+        public async Task<IActionResult> GetPurchasePlans([FromQuery] int? branchId = null)
+        {
+            // Nếu không có branchId, lấy branchId của user hiện tại
+            if (!branchId.HasValue || branchId.Value <= 0)
+            {
+                branchId = GetBranchId();
+            }
+
+            // Lấy danh sách kế hoạch mua
+            // Nếu query có branchId = 0 hoặc -1, tức là xem tất cả (cho Manager)
+            var plans = await _service.GetPurchasePlanAsync(branchId);
+            return HandleResult(plans);
+        }
+
     }
 }
