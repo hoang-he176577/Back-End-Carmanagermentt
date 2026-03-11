@@ -28,12 +28,10 @@ namespace Data.Repositories.Implementations
 
         public async Task<List<PurchaseProposal>> GetAllAsync()
         {
-            return await _context.PurchaseProposals
-                .Where(x => x.Status != "Deleted")
-                .Include(x => x.BulkPurchaseDetails)
-                .OrderByDescending(x => x.CreatedDate) // record mới nhất lên đầu
-                .AsNoTracking()
-                .ToListAsync();
+            return await _context.PurchaseProposals.Where(x => x.Status != "Deleted")
+            .Include(x => x.BulkPurchaseDetails)
+            .AsNoTracking()
+            .ToListAsync();
         }
 
         public async Task AddAsync(PurchaseProposal proposal)

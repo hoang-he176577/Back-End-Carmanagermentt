@@ -83,20 +83,13 @@ builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalReposito
 
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
-builder.Services.AddScoped<IBranchRepository, BranchRepository>();
-
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
-<<<<<<< Updated upstream
 
-=======
-builder.Services.AddScoped<ITripLogsService, TripLogService>();
-builder.Services.AddScoped<IBranchService, BranchService>();
->>>>>>> Stashed changes
 
 // 🔥 ADD USER REPO & SERVICE
 builder.Services.AddScoped<IUserRepository, UserRepository>();
