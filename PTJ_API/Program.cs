@@ -8,6 +8,8 @@ using Data.Repositories.MaintenanceRequests.Implementations;
 using Data.Repositories.MaintenanceRequests.Interfaces;
 using Data.Repositories.VehicleAssets.Implementations;
 using Data.Repositories.VehicleAssets.Interfaces;
+using Data.Repositories.DisposalProposals.Implementations;
+using Data.Repositories.DisposalProposals.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +23,8 @@ using Service.Services.MaintenanceRequests.Implementations;
 using Service.Services.MaintenanceRequests.Interfaces;
 using Service.Services.VehicleAssets.Implementations;
 using Service.Services.VehicleAssets.Interfaces;
+using Service.Services.DisposalProposals.Implementations;
+using Service.Services.DisposalProposals.Interfaces;
 using Data.Repositories.Implementations;
 using Data.Repositories.Interfaces;
 using Service.Services.Implementations;
@@ -91,6 +95,8 @@ builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 
 builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
 builder.Services.AddScoped<IAccessoryService, AccessoryService>();
+builder.Services.AddScoped<IDisposalProposalRepository, DisposalProposalRepository>();
+builder.Services.AddScoped<IDisposalProposalService, DisposalProposalService>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
