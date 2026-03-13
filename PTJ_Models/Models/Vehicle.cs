@@ -33,6 +33,8 @@ public partial class Vehicle
 
     public DateTime? DeletedAt { get; set; }
 
+    public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
+
     public virtual ICollection<AssetChangeLog> AssetChangeLogs { get; set; } = new List<AssetChangeLog>();
 
     public virtual ICollection<CheckRecord> CheckRecords { get; set; } = new List<CheckRecord>();
@@ -54,6 +56,8 @@ public partial class Vehicle
     public virtual ICollection<RegistrationRecord> RegistrationRecords { get; set; } = new List<RegistrationRecord>();
 
     public virtual ICollection<TransferPlan> TransferPlans { get; set; } = new List<TransferPlan>();
+
+    public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
 
     public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
 
