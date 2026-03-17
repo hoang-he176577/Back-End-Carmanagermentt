@@ -103,11 +103,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
+builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
+builder.Services.AddScoped<ITripLogService, TripLogService>();
 
-builder.Services.AddScoped<ITripLogsService, TripLogService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 
-builder.Services.AddScoped<ITripLogsService, TripLogService>();
+
 
 
 // 🔥 ADD USER REPO & SERVICE

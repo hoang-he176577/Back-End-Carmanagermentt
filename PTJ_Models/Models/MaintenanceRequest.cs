@@ -35,10 +35,6 @@ public partial class MaintenanceRequest
 
     public DateTime? DeletedAt { get; set; }
 
-    public string? ApprovalNote { get; set; }
-
-    public string? RejectionReason { get; set; }
-
     public virtual User? Accountant { get; set; }
 
     public virtual User? Operator { get; set; }
