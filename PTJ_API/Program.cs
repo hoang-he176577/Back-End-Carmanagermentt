@@ -91,6 +91,8 @@ builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalReposito
 builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
+builder.Services.AddScoped<IBranchRepository, BranchRepository>();
+
 builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
 builder.Services.AddScoped<IAccessoryService, AccessoryService>();
 builder.Services.AddScoped<IDisposalProposalRepository, DisposalProposalRepository>();
@@ -101,7 +103,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
-builder.Services.AddScoped<ITripLogsService, TripLogService>();
+builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
+builder.Services.AddScoped<ITripLogService, TripLogService>();
+
+builder.Services.AddScoped<IBranchService, BranchService>();
+
+
+
 
 // 🔥 ADD USER REPO & SERVICE
 builder.Services.AddScoped<IUserRepository, UserRepository>();

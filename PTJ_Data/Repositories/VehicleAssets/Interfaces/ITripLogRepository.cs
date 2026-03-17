@@ -1,22 +1,28 @@
-﻿using Models.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models.DTO.PurchaseProposal;
+using Models.Models;
 
 namespace Data.Repositories.VehicleAssets.Interfaces
 {
     public interface ITripLogRepository
     {
-        Task<List<TripLog>> GetAllAsync();
+        Task<TripLog> CreateAsync(TripLog trip);
 
-        Task<TripLog?> GetByIdAsync(int id);
+        Task<TripLog?> GetRunningTripByVehicleIdAsync(int vehicleId);
+        Task<TripLog?> GetLastCompletedTripByVehicleIdAsync(int vehicleId);
+        Task<TripLog?> GetLastCompletedTripByDriverIdAsync(int driverId);
 
-        Task<bool> HasActiveTripAsync(int vehicleId);
+        Task<TripLog?> GetByIdAsync(int tripId);
 
-        Task AddAsync(TripLog trip);
+        Task UpdateAsync(TripLog trip);
 
-        Task SaveChangesAsync();
+        Task<List<TripLog>> GetTripHistoryByVehicleAsync(int? vehicleId);
+
+        Task<List<Vehicle>> GetVehiclesDropAsync();
+        Task<UserBasicDto?> GetDriverByVehicleIdAsync(int vehicleId);
+
+        Task<Vehicle?> GetVehicleByIdAsync(int vehicleId);
+        Task<List<Vehicle>> GetVehiclesByBranchAsync(int branchId);
+        Task<List<TripLog>> GetRunningTripsByBranchAsync(int branchId);
+        Task UpdateVehicleStatusAsync(int vehicleId, string status);
     }
 }

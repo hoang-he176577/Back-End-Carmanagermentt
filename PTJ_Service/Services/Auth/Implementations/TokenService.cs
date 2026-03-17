@@ -134,6 +134,11 @@ namespace Service.Services.Auth.Implementations
                 new Claim("verified", (user.EmailVerified ?? false).ToString().ToLowerInvariant())
             };
 
+            if (user.BranchId.HasValue)
+            {
+                claims.Add(new Claim("branchId", user.BranchId.Value.ToString()));
+            }
+
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
             return claims;
         }
