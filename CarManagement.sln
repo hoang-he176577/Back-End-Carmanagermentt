@@ -29,6 +29,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "CarManagements-frontend", "
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "57880"
+		SlnRelativePath = "..\CarManagements-frontend\"
 	EndProjectSection
 EndProject
 Global
