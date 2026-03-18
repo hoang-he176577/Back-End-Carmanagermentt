@@ -43,17 +43,18 @@ public partial class PurchaseProposal
     private const string RejectedStatus = "Rejected";
     private const string DeletedStatus = "Deleted";
 
-    // =============================
+        // =============================
     // METHODS
     // =============================
 
-    public void InitCreate(string? description)
+    public void InitCreate(string? description, int proposerId) 
     {
         Description = description;
         Status = PendingStatus;
         CreatedDate = DateOnly.FromDateTime(DateTime.Now);
         CreatedAt = DateTime.Now;
         ProposedCost = 0;
+        ProposerId = proposerId; 
     }
 
     public void AddDetail(BulkPurchaseDetail detail)
@@ -174,6 +175,13 @@ public partial class PurchaseProposal
     {
         Description = (Description ?? "") + $"\n[Xác nhận từ chi nhánh]: {notes} vào ngày {DateTime.Now}";
         Status = "Completed";
+        UpdatedAt = DateTime.Now;
+    }
+
+    public void RevertToApproved(string reason)
+    {
+        Status = ApprovedStatus;
+        Description = (Description ?? "") + $"\n[Hoàn tác đối chiếu]: {reason}";
         UpdatedAt = DateTime.Now;
     }
 }

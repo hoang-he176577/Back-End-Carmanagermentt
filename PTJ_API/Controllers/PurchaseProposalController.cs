@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Models.DTO.PurchaseProposal;
 using Service.Services.Interfaces;
 
@@ -7,6 +8,7 @@ namespace API.Controllers
 {
 
     [Route("api/purchase-proposals")]
+    [Authorize] // require authentication for all endpoints
     public class PurchaseProposalController : BaseController
     {
         private readonly IPurchaseProposalService _service;
@@ -42,7 +44,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePurchaseProposalDto dto)
         {
-            var result = await _service.CreateAsync(dto);
+            var result = await _service.CreateAsync(dto, GetUserId(), GetBranchId());
             return HandleCreated(result,"Create proposal successfully");
         }
 
@@ -101,5 +103,59 @@ namespace API.Controllers
             return HandleResult(data);
         }
 
+        // ==============================
+        // GET PURCHASE PLANS
+        // ==============================
+        /// <summary>
+        /// Lấy danh sách kế hoạch mua (approved proposals)
+        /// - Manager: xem tất cả kế hoạch của tất cả chi nhánh
+        /// - Operator: xem chỉ kế hoạch của chi nhánh mình
+        /// </summary>
+        [HttpGet("purchase-plans")]
+        public async Task<IActionResult> GetPurchasePlans([FromQuery] int? branchId = null)
+        {
+            // Kiểm tra vai trò để xác định phạm vi hiển thị
+            var userRoles = GetUserRoles();
+            bool isManager = userRoles?.Any(r => r == "Manager" || r == "Executive Management") ?? false;
+
+            // Nếu không truyền branchId thì dùng branchId trong token
+            if (!branchId.HasValue || branchId.Value <= 0)
+            {
+                if (!isManager)
+                {
+                    branchId = GetBranchId();
+                }
+                else
+                {
+                    // manager có thể xem toàn bộ nên để null
+                    branchId = null;
+                }
+            }
+
+            var plans = await _service.GetPurchasePlanAsync(branchId);
+            return HandleResult(plans);
+        }
+
+        // ==============================
+        // CONFIRM PAYMENT (Kế Toán Tạo Xe)
+        // ==============================
+        [HttpPost("{id}/confirm-payment")]
+        [Authorize(Roles = "Branch Asset Accountant,Chief Accountant,Admin")]
+        public async Task<IActionResult> ConfirmPayment(int id)
+        {
+            await _service.ConfirmPaymentAsync(id, GetUserId());
+            return HandleSuccess("Xác nhận thanh toán thành công. Xe mới đã được đưa vào kho tài sản.");
+        }
+
+        // ==============================
+        // ROLLBACK RECEPTION (Hủy Đối Chiếu, Trả Về Operator)
+        // ==============================
+        [HttpPost("{id}/rollback-reception")]
+        [Authorize(Roles = "Branch Asset Accountant,Chief Accountant,Admin")]
+        public async Task<IActionResult> RollbackReception(int id, [FromBody] RejectRequest request)
+        {
+            await _service.RollbackReceptionAsync(id, request.Reason);
+            return HandleSuccess("Đã hoàn tác đối chiếu xe. Operator có thể thực hiện lại.");
+        }
     }
 }
