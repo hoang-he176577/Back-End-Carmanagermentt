@@ -7,13 +7,11 @@ namespace API.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-        private readonly IWebHostEnvironment _env;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IWebHostEnvironment env)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
-            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -41,21 +39,12 @@ namespace API.Middlewares
             {
                 _logger.LogError(ex, "[Unhandled Exception]");
 
-                // expose details in development for easier debugging
-                string message = "An unexpected error occurred.";
-                object? data = null;
-                if (_env.IsDevelopment())
-                {
-                    message = ex.Message;
-                    data = ex.StackTrace;
-                }
-
                 var response = new ApiResponse<object>
                 {
                     StatusCode = 500,
                     Success = false,
-                    Message = message,
-                    Data = data
+                    Message = "An unexpected error occurred.",
+                    Data = null
                 };
 
                 context.Response.StatusCode = 500;

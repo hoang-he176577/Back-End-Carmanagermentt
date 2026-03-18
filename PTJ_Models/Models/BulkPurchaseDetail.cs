@@ -1,4 +1,4 @@
-﻿﻿namespace Models.Models;
+﻿namespace Models.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 public partial class BulkPurchaseDetail
 {
@@ -12,12 +12,6 @@ public partial class BulkPurchaseDetail
 
     [Column("unit_price")]
     public decimal UnitPrice { get; set; }
-
-    [Column("seats")]
-    public int? Seats { get; set; }
-
-    [Column("manufacturer")]
-    public string? Manufacturer { get; set; }
 
     public string? BranchNotes { get; private set; }
 
