@@ -23,7 +23,21 @@ public partial class VehicleAccessory
 
     public DateTime? DeletedAt { get; set; }
 
+    public int Quantity { get; set; }
+
+    public string Status { get; set; } = null!;
+
+    public int? InstalledBy { get; set; }
+
+    public int? RemovedBy { get; set; }
+
     public virtual Accessory? Accessory { get; set; }
+
+    public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
+
+    public virtual User? InstalledByNavigation { get; set; }
+
+    public virtual User? RemovedByNavigation { get; set; }
 
     public virtual Vehicle? Vehicle { get; set; }
 }

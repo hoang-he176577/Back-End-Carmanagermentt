@@ -1,3 +1,5 @@
+using Models.DTO.Vehicles;
+
 namespace Models.DTO.VehicleDistribution;
 
 public sealed class BranchStockSummaryDto
@@ -7,4 +9,6 @@ public sealed class BranchStockSummaryDto
     public int TotalVehicles { get; set; }
     public int ActiveVehicles { get; set; }
     public int InTransferVehicles { get; set; }
+
+    public List<VehicleAssetDto>? Vehicles { get; set; }
 }

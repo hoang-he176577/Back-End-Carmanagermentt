@@ -91,6 +91,22 @@ namespace API.Controllers.Auth
             return HandleSuccess("Verification email has been resent.");
         }
 
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+        {
+            await _authService.RequestPasswordResetAsync(request.Email);
+            return HandleSuccess("If the email exists, password reset instructions have been sent.");
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            await _authService.ResetPasswordAsync(request);
+            return HandleSuccess("Password has been reset successfully.");
+        }
+
         [HttpGet("me")]
         [Authorize]
         public async Task<IActionResult> Me()

@@ -108,7 +108,19 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
                 BranchName = b.Name,
                 TotalVehicles = b.Vehicles.Count(v => v.DeletedAt == null),
                 ActiveVehicles = b.Vehicles.Count(v => v.DeletedAt == null && v.Status == "Active"),
-                InTransferVehicles = b.Vehicles.Count(v => v.DeletedAt == null && v.Status == "InTransfer")
+                InTransferVehicles = b.Vehicles.Count(v => v.DeletedAt == null && v.Status == "InTransfer"),
+                Vehicles = b.Vehicles
+                .Where(v => v.DeletedAt == null)
+                .Select(v => new Models.DTO.Vehicles.VehicleAssetDto
+                {
+                    Id = v.Id,
+                    LicensePlate = v.LicensePlate,
+                    Manufacturer = v.Model != null ? v.Model.Manufacturer : "N/A",
+                    ModelName = v.Model != null ? v.Model.ModelName : "N/A",
+                    Status = v.Status,
+                    CurrentBranchId = v.CurrentBranchId,
+                    CurrentBranchName = b.Name // Tên chi nhánh hiện tại
+                }).ToList() 
             })
             .ToListAsync();
 
