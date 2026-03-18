@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -494,7 +494,7 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("proposed_cost");
             entity.Property(e => e.ProposerId).HasColumnName("proposer_id");
             entity.Property(e => e.Status)
-                .HasMaxLength(20)
+                .HasMaxLength(50)
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -828,6 +828,11 @@ public partial class CarManagerContext : DbContext
 
             entity.ToTable("vehicle_reception_record");
 
+            // Cấu hình Indexes (Chỉ mục) từ SQL Script
+            entity.HasIndex(e => e.PurchaseProposalId, "IX_VehicleReception_PurchaseProposalId");
+            entity.HasIndex(e => e.BranchId, "IX_VehicleReception_BranchId");
+            entity.HasIndex(e => e.Status, "IX_VehicleReception_Status");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.PurchaseProposalId).HasColumnName("purchase_proposal_id");
             entity.Property(e => e.BranchId).HasColumnName("branch_id");
@@ -844,14 +849,15 @@ public partial class CarManagerContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("engine_number");
             entity.Property(e => e.ReceiptImageUrl)
-                .HasMaxLength(500)
                 .HasColumnName("receipt_image_url");
             entity.Property(e => e.Notes)
                 .HasMaxLength(1000)
                 .HasColumnName("notes");
             entity.Property(e => e.Status)
-                .HasMaxLength(20)
+                .HasMaxLength(50)
                 .HasColumnName("status");
+            entity.Property(e => e.Reason)
+                .HasColumnName("reason");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

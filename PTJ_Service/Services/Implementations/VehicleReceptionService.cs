@@ -2,6 +2,7 @@ using Data.Repositories.Interfaces;
 using Models.DTO.PurchaseProposal;
 using Models.Models;
 using Service.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,12 @@ namespace Service.Services.Implementations
     public class VehicleReceptionService : IVehicleReceptionService
     {
         private readonly IVehicleReceptionRepository _repository;
+        private readonly CarManagerContext _context;
 
-        public VehicleReceptionService(IVehicleReceptionRepository repository)
+        public VehicleReceptionService(IVehicleReceptionRepository repository, CarManagerContext context)
         {
             _repository = repository;
+            _context = context;
         }
 
         public async Task<VehicleReceptionRecordDto?> GetByIdAsync(int id)
@@ -53,6 +56,33 @@ namespace Service.Services.Implementations
 
         public async Task<VehicleReceptionRecordDto> CreateAsync(CreateVehicleReceptionDto dto, int operatorId, DateOnly requestedDate)
         {
+            // 1. KIỂM TRA TÍNH HỢP LỆ CỦA ĐỀ XUẤT VÀ CHI NHÁNH
+            var proposal = await _context.PurchaseProposals.FindAsync(dto.PurchaseProposalId);
+            if (proposal == null) 
+                throw new Exception($"Đề xuất mua #{dto.PurchaseProposalId} không tồn tại trong hệ thống.");
+            if (proposal.Status != "Approved") 
+                throw new Exception($"Đề xuất #{dto.PurchaseProposalId} chưa được duyệt hoặc đã xử lý xong.");
+
+            var branchExists = await _context.Branches.AnyAsync(b => b.Id == dto.BranchId);
+            if (!branchExists) 
+                throw new Exception($"Chi nhánh #{dto.BranchId} không tồn tại.");
+
+            // 2. KIỂM TRA DỮ LIỆU ĐẦU VÀO KHÔNG ĐƯỢC TRỐNG
+            if (string.IsNullOrWhiteSpace(dto.LicensePlate)) throw new Exception("Biển số xe không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.ChassisNumber)) throw new Exception("Số khung (Chassis) không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.EngineNumber)) throw new Exception("Số máy (Engine) không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.ReceiptImageUrl)) throw new Exception("Vui lòng tải lên ảnh chứng minh khi nhận xe.");
+
+            // 3. KIỂM TRA TRÙNG BIỂN SỐ (UNIQUE CONSTRAINT)
+            bool isPlateInVehicle = await _context.Vehicles.AnyAsync(v => v.LicensePlate == dto.LicensePlate);
+            if (isPlateInVehicle) 
+                throw new Exception($"Biển số xe {dto.LicensePlate} đã tồn tại trong kho tài sản!");
+
+            bool isPlateInReception = await _context.VehicleReceptionRecords
+                .AnyAsync(r => r.LicensePlate == dto.LicensePlate && r.Status != "Rejected" && r.PurchaseProposalId != dto.PurchaseProposalId);
+            if (isPlateInReception) 
+                throw new Exception($"Biển số xe {dto.LicensePlate} đang được chờ xử lý ở một đề xuất khác!");
+
             var record = new VehicleReceptionRecord();
             record.InitCreate(dto.PurchaseProposalId, dto.BranchId, operatorId, requestedDate);
 
@@ -68,6 +98,11 @@ namespace Service.Services.Implementations
             }
 
             var created = await _repository.AddAsync(record);
+
+            // TỰ ĐỘNG CHUYỂN TRẠNG THÁI CỦA ĐỀ XUẤT SANG CHỜ THANH TOÁN
+            proposal.MarkAsReceived(dto.LicensePlate, operatorId);
+            await _context.SaveChangesAsync();
+
             return MapToDto(created);
         }
 
@@ -75,6 +110,23 @@ namespace Service.Services.Implementations
         {
             var record = await _repository.GetByIdAsync(id)
                 ?? throw new Exception("Reception record not found");
+
+            if (string.IsNullOrWhiteSpace(dto.LicensePlate)) throw new Exception("Biển số xe không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.ChassisNumber)) throw new Exception("Số khung (Chassis) không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.EngineNumber)) throw new Exception("Số máy (Engine) không được để trống.");
+
+            // KIỂM TRA TRÙNG BIỂN SỐ KHI CẬP NHẬT (NẾU ĐỔI BIỂN KHÁC)
+            if (dto.LicensePlate != record.LicensePlate)
+            {
+                bool isPlateInVehicle = await _context.Vehicles.AnyAsync(v => v.LicensePlate == dto.LicensePlate);
+                if (isPlateInVehicle) 
+                    throw new Exception($"Biển số xe {dto.LicensePlate} đã tồn tại trong kho tài sản!");
+
+                bool isPlateInReception = await _context.VehicleReceptionRecords
+                    .AnyAsync(r => r.LicensePlate == dto.LicensePlate && r.Id != id && r.Status != "Rejected");
+                if (isPlateInReception) 
+                    throw new Exception($"Biển số xe {dto.LicensePlate} đang được chờ xử lý ở một đề xuất khác!");
+            }
 
             record.UpdateReceptionDetails(
                 dto.LicensePlate,

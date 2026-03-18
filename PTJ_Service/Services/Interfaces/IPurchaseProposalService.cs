@@ -7,9 +7,9 @@ namespace Service.Services.Interfaces
 {
     public interface IPurchaseProposalService
     {
-        Task<List<PurchaseProposalListDto>> GetAllAsync();
+        Task<List<PurchasePlanDto>> GetAllAsync();
         Task<PurchaseProposal?> GetByIdAsync(int id);
-        Task<object> CreateAsync(CreatePurchaseProposalDto dto);
+        Task<object> CreateAsync(CreatePurchaseProposalDto dto, int proposerId, int branchId);
         Task ApproveByManagerAsync(int proposalId, int managerId);
         Task RejectAsync(int proposalId, string reason);
         Task DeleteAsync(int proposalId);
@@ -23,6 +23,7 @@ namespace Service.Services.Interfaces
         /// Dùng cho hiển thị tab "Kế hoạch mua"
         /// </summary>
         Task<List<PurchasePlanDto>> GetPurchasePlanAsync(int? branchId = null);
-
+        Task ConfirmPaymentAsync(int proposalId, int accountantId);
+        Task RollbackReceptionAsync(int proposalId, string reason);
     }
 }

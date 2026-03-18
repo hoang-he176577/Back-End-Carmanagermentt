@@ -44,7 +44,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePurchaseProposalDto dto)
         {
-            var result = await _service.CreateAsync(dto);
+            var result = await _service.CreateAsync(dto, GetUserId(), GetBranchId());
             return HandleCreated(result,"Create proposal successfully");
         }
 
@@ -136,5 +136,26 @@ namespace API.Controllers
             return HandleResult(plans);
         }
 
+        // ==============================
+        // CONFIRM PAYMENT (Kế Toán Tạo Xe)
+        // ==============================
+        [HttpPost("{id}/confirm-payment")]
+        [Authorize(Roles = "Branch Asset Accountant,Chief Accountant,Admin")]
+        public async Task<IActionResult> ConfirmPayment(int id)
+        {
+            await _service.ConfirmPaymentAsync(id, GetUserId());
+            return HandleSuccess("Xác nhận thanh toán thành công. Xe mới đã được đưa vào kho tài sản.");
+        }
+
+        // ==============================
+        // ROLLBACK RECEPTION (Hủy Đối Chiếu, Trả Về Operator)
+        // ==============================
+        [HttpPost("{id}/rollback-reception")]
+        [Authorize(Roles = "Branch Asset Accountant,Chief Accountant,Admin")]
+        public async Task<IActionResult> RollbackReception(int id, [FromBody] RejectRequest request)
+        {
+            await _service.RollbackReceptionAsync(id, request.Reason);
+            return HandleSuccess("Đã hoàn tác đối chiếu xe. Operator có thể thực hiện lại.");
+        }
     }
 }

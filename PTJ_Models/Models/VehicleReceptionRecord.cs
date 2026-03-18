@@ -1,50 +1,70 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Models.Models;
 
 /// <summary>
 /// Bảng đối chiếu xe khi nhận xe từ đề xuất mua
 /// </summary>
+[Table("vehicle_reception_record")]
 public partial class VehicleReceptionRecord
 {
+    [Column("id")]
     public int Id { get; set; }
 
     // Liên kết đến đề xuất mua
+    [Column("purchase_proposal_id")]
     public int PurchaseProposalId { get; set; }
 
     // Liên kết đến chi nhánh nhận xe
+    [Column("branch_id")]
     public int BranchId { get; set; }
 
     // Người thực hiện đối chiếu (Operator)
+    [Column("operator_id")]
     public int? OperatorId { get; set; }
 
     // Ngày yêu cầu mua (từ đề xuất)
+    [Column("requested_date")]
     public DateOnly? RequestedDate { get; set; }
 
-    // Ngày xe thực tế đã về
+    // Ngày nhận xe thực tế
+    [Column("received_date")]
     public DateOnly? ReceivedDate { get; set; }
 
     // Biển số xe
+    [Column("license_plate")]
     public string? LicensePlate { get; set; }
 
     // Số chassis
+    [Column("chassis_number")]
     public string? ChassisNumber { get; set; }
 
     // Số máy
+    [Column("engine_number")]
     public string? EngineNumber { get; set; }
 
     // Ảnh chứng minh (VIN, Biển số, ...)
+    [Column("receipt_image_url")]
     public string? ReceiptImageUrl { get; set; }
 
     // Mô tả chi tiết
+    [Column("notes")]
     public string? Notes { get; set; }
 
     // Trạng thái: Pending, Completed, Rejected
+    [Column("status")]
     public string? Status { get; set; }
 
-    // Thời gian thực hiện
+    [Column("reason")]
+    public string? Reason { get; set; } // Map với SQL Script (Lý do từ chối)
+
+    [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 
+    [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; }
 
+    [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
 
     // =============================
@@ -59,9 +79,9 @@ public partial class VehicleReceptionRecord
     // =============================
     // STATUS CONSTANTS
     // =============================
-    private const string PendingStatus = "Pending";
-    private const string CompletedStatus = "Completed";
-    private const string RejectedStatus = "Rejected";
+    public const string ReceivedPendingPaymentStatus = "Received_Pending_Payment";
+    public const string CompletedStatus = "Completed";
+    public const string RejectedStatus = "Rejected";
 
     // =============================
     // METHODS
@@ -73,7 +93,7 @@ public partial class VehicleReceptionRecord
         BranchId = branchId;
         OperatorId = operatorId;
         RequestedDate = requestedDate;
-        Status = PendingStatus;
+        Status = ReceivedPendingPaymentStatus;
         CreatedAt = DateTime.Now;
     }
 
@@ -84,23 +104,26 @@ public partial class VehicleReceptionRecord
         EngineNumber = engineNumber;
         ReceiptImageUrl = imageUrl;
         Notes = notes;
-        ReceivedDate = DateOnly.FromDateTime(DateTime.Now);
         UpdatedAt = DateTime.Now;
     }
 
     public void Complete()
     {
-        if (Status != PendingStatus)
-            throw new Exception("Record must be in Pending status to complete");
+        if (Status != ReceivedPendingPaymentStatus)
+            throw new Exception("Record must be in Received_Pending_Payment status to complete");
 
         Status = CompletedStatus;
+        ReceivedDate = DateOnly.FromDateTime(DateTime.Now);
         UpdatedAt = DateTime.Now;
     }
 
-    public void Reject(string? reason)
+    public void Reject(string? notes)
     {
         Status = RejectedStatus;
-        Notes = reason;
+        if (!string.IsNullOrEmpty(notes))
+        {
+            Notes = string.IsNullOrEmpty(Notes) ? notes : $"{Notes}\n{notes}";
+        }
         UpdatedAt = DateTime.Now;
     }
 
@@ -115,10 +138,9 @@ public partial class VehicleReceptionRecord
 
     public int GetDaysDelay()
     {
-        if (ReceivedDate.HasValue && RequestedDate.HasValue)
+        if (ReceivedDate.HasValue && RequestedDate.HasValue && IsLate())
         {
-            var delay = (ReceivedDate.Value.ToDateTime(TimeOnly.MinValue) - RequestedDate.Value.ToDateTime(TimeOnly.MinValue)).Days;
-            return delay > 0 ? delay : 0;
+            return (ReceivedDate.Value.DayNumber - RequestedDate.Value.DayNumber);
         }
         return 0;
     }

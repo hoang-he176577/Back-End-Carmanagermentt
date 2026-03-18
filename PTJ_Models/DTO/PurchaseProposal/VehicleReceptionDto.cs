@@ -73,6 +73,10 @@ public class BranchPurchaseDetailDto
 
     public decimal UnitPrice { get; set; }
 
+    public int? Seats { get; set; }
+
+    public string? Manufacturer { get; set; }
+
     public decimal TotalPrice => ProposedQuantity * UnitPrice;
 
     public string? BranchNotes { get; set; }
