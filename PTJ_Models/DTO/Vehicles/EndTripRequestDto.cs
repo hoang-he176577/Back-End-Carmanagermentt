@@ -9,8 +9,9 @@ namespace Models.DTO.Vehicles
 {
     public class EndTripRequestDto
     {
-        public int EndedBy { get; set; }
-
+        [Required]
         public decimal EndMileage { get; set; }
+        [Required]
+        public string Destination { get; set; }
     }
 }

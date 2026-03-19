@@ -1,9 +1,11 @@
 ﻿using Data.Repositories.VehicleAssets.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Models.DTO.PurchaseProposal;
 using Models.Models;
-using NHibernate.Loader.Custom;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Data.Repositories.VehicleAssets.Implementations
 {
@@ -16,124 +18,32 @@ namespace Data.Repositories.VehicleAssets.Implementations
             _context = context;
         }
 
-        public async Task<TripLog> CreateAsync(TripLog trip)
+        public async Task<List<TripLog>> GetAllAsync()
         {
-            await _context.TripLogs.AddAsync(trip);
-            await _context.SaveChangesAsync();
-            return trip;
-        }
-
-        public async Task<TripLog?> GetRunningTripByVehicleIdAsync(int vehicleId)
-        {
-            return await _context.TripLogs
-                .Include(t => t.Vehicle)
-                .FirstOrDefaultAsync(t => t.VehicleId == vehicleId && t.EndTime == null);
-        }
-
-        public async Task<TripLog?> GetLastCompletedTripByVehicleIdAsync(int vehicleId)
-        {
-            return await _context.TripLogs
-                .Where(t => t.VehicleId == vehicleId && t.EndTime != null)
-                .OrderByDescending(t => t.EndTime)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<TripLog?> GetLastCompletedTripByDriverIdAsync(int driverId)
-        {
-            return await _context.TripLogs
-                .Where(t => t.DriverId == driverId && t.EndTime != null)
-                .OrderByDescending(t => t.EndTime)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<TripLog?> GetByIdAsync(int tripId)
-        {
-            return await _context.TripLogs
-                .FirstOrDefaultAsync(t => t.Id == tripId);
-        }
-
-        public async Task UpdateAsync(TripLog trip)
-        {
-            _context.TripLogs.Update(trip);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<List<TripLog>> GetTripHistoryByVehicleAsync(int? vehicleId)
-        {
-            if(vehicleId == null)
-            {
-                return await _context.TripLogs
-                .Include(v => v.Driver)
-                .OrderByDescending(t => t.StartTime)
-                .ToListAsync();
-            }
-            return await _context.TripLogs
-                .Include(v => v.Driver)
-                .Where(t => t.VehicleId == vehicleId)
-                .OrderByDescending(t => t.StartTime)
+            return await _context.TripLog
+                .OrderByDescending(x => x.StartTime)
                 .ToListAsync();
         }
 
-        public async Task<List<Vehicle>> GetVehiclesDropAsync()
+        public async Task<TripLog?> GetByIdAsync(int id)
         {
-            return await _context.Vehicles
-                .Include(v => v.Model)
-                .Where(v => v.DeletedAt == null)
-                .AsNoTracking()
-                .ToListAsync();
+            return await _context.TripLog
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<UserBasicDto?> GetDriverByVehicleIdAsync(int vehicleId)
+        public async Task<bool> HasActiveTripAsync(int vehicleId)
         {
-            return await _context.Vehicles
-        .Where(v => v.Id == vehicleId && v.CurrentDriver != null)
-        .Select(v => new UserBasicDto
-        {
-            Id = v.CurrentDriver!.Id,
-            Name = v.CurrentDriver.Name!
-        })
-        .AsNoTracking()
-        .FirstOrDefaultAsync();
+            return await _context.TripLog
+                .AnyAsync(x => x.VehicleId == vehicleId && x.EndTime == null);
         }
 
-        public async Task<Vehicle?> GetVehicleByIdAsync(int vehicleId)
+        public async Task AddAsync(TripLog trip)
         {
-            return await _context.Vehicles
-                .Include(v => v.CurrentBranch)
-                .Include(v => v.CurrentDriver)
-                .FirstOrDefaultAsync(v => v.Id == vehicleId && v.DeletedAt == null);
+            await _context.TripLog.AddAsync(trip);
         }
 
-        public async Task<List<Vehicle>> GetVehiclesByBranchAsync(int branchId)
+        public async Task SaveChangesAsync()
         {
-            return await _context.Vehicles
-                .Include(v => v.CurrentBranch)
-                .Include(v => v.CurrentDriver)
-                .Where(v => v.DeletedAt == null && v.CurrentBranchId == branchId)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task<List<TripLog>> GetRunningTripsByBranchAsync(int branchId)
-        {
-            return await _context.TripLogs
-                .Include(t => t.Vehicle)
-                .Include(t => t.Driver)
-                .Where(t => t.EndTime == null && t.Vehicle.CurrentBranchId == branchId)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task UpdateVehicleStatusAsync(int vehicleId, string status)
-        {
-            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId);
-            if (vehicle == null)
-            {
-                return;
-            }
-
-            vehicle.Status = status;
-            vehicle.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
         }
     }

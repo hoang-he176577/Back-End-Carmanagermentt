@@ -6,56 +6,45 @@ using Service.Services.VehicleAssets.Interfaces;
 namespace API.Controllers;
 
 [ApiController]
-[Route("api/trips")]
-public class TripLogsController : BaseController
+[Route("api/[controller]")]
+public class TripLogController : ControllerBase
 {
-    private readonly ITripLogService _tripService;
+    private readonly ITripLogsService _service;
 
-    public TripLogsController(ITripLogService tripService)
+    public TripLogController(ITripLogsService service)
     {
-        _tripService = tripService;
+        _service = service;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _service.GetAllAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var result = await _service.GetByIdAsync(id);
+
+        if (result == null)
+            return NotFound();
+
+        return Ok(result);
     }
 
     [HttpPost("start")]
-    public async Task<IActionResult> StartTrip(StartTripRequestDto dto){
-        dto.OperatorId = GetUserId();
-        return HandleCreated(await _tripService.StartTripAsync(dto), "Start trip successfully");
-    } 
-
-    [HttpPost("end/{tripId}")]
-    public async Task<IActionResult> EndTrip(int tripId, EndTripRequestDto dto)
+    public async Task<IActionResult> StartTrip(StartTripRequestDto request)
     {
-        dto.EndedBy = GetUserId();
-        await _tripService.EndTripAsync(tripId, dto);
-
-        return Ok("Trip ended successfully");
-    }
-
-    [HttpGet("vehicle/{vehicleId}/history")]
-    public async Task<IActionResult> GetVehicleTripHistory(int vehicleId)
-    {
-        var result = await _tripService.GetVehicleTripHistoryAsync(vehicleId);
+        var result = await _service.StartTripAsync(request);
         return Ok(result);
     }
 
-    [HttpGet("vehicle/history")]
-    public async Task<IActionResult> GetVehicleTripHistoryLegacy([FromQuery] int vehicleId)
-        => await GetVehicleTripHistory(vehicleId);
-
-    [HttpGet("manage/vehicles")]
-    public async Task<IActionResult> GetManageVehicles([FromQuery] string? tab)
+    [HttpPut("{id}/end")]
+    public async Task<IActionResult> EndTrip(int id, EndTripRequestDto request)
     {
-        var branchId = GetBranchId();
-        var result = await _tripService.GetManageVehiclesAsync(branchId, tab);
+        var result = await _service.EndTripAsync(id, request);
         return Ok(result);
     }
-    [HttpGet("vehicle-drop")]
-    public async Task<IActionResult> GetVehicleDropHistory()
-    {
-        var result = await _tripService.GetVehicleDropAsync();
-        return Ok(result);
-    }
-    [HttpGet("vehicle/{vehicleId}/driver")]
-    public async Task<IActionResult> GetDriverByVehicleId(int vehicleId)
-        => HandleResult(await _tripService.GetDriverByVehicleIdAsync(vehicleId));
 }
