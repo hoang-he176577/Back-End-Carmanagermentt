@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,7 +49,11 @@ public partial class CarManagerContext : DbContext
 
     public virtual DbSet<TransferPlan> TransferPlans { get; set; }
 
+
     public virtual DbSet<TripLog> TripLogs { get; set; }
+
+    public virtual DbSet<VehicleReceptionRecord> VehicleReceptionRecords { get; set; }
+
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -550,7 +554,7 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("proposed_cost");
             entity.Property(e => e.ProposerId).HasColumnName("proposer_id");
             entity.Property(e => e.Status)
-                .HasMaxLength(20)
+                .HasMaxLength(50)
                 .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -938,6 +942,70 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.YearFrom).HasColumnName("year_from");
             entity.Property(e => e.YearTo).HasColumnName("year_to");
+        });
+
+        // ===== VEHICLE RECEPTION RECORD =====
+        modelBuilder.Entity<VehicleReceptionRecord>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__vehicle_reception__ID");
+
+            entity.ToTable("vehicle_reception_record");
+
+            // Cấu hình Indexes (Chỉ mục) từ SQL Script
+            entity.HasIndex(e => e.PurchaseProposalId, "IX_VehicleReception_PurchaseProposalId");
+            entity.HasIndex(e => e.BranchId, "IX_VehicleReception_BranchId");
+            entity.HasIndex(e => e.Status, "IX_VehicleReception_Status");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.PurchaseProposalId).HasColumnName("purchase_proposal_id");
+            entity.Property(e => e.BranchId).HasColumnName("branch_id");
+            entity.Property(e => e.OperatorId).HasColumnName("operator_id");
+            entity.Property(e => e.RequestedDate).HasColumnName("requested_date");
+            entity.Property(e => e.ReceivedDate).HasColumnName("received_date");
+            entity.Property(e => e.LicensePlate)
+                .HasMaxLength(50)
+                .HasColumnName("license_plate");
+            entity.Property(e => e.ChassisNumber)
+                .HasMaxLength(100)
+                .HasColumnName("chassis_number");
+            entity.Property(e => e.EngineNumber)
+                .HasMaxLength(100)
+                .HasColumnName("engine_number");
+            entity.Property(e => e.ReceiptImageUrl)
+                .HasColumnName("receipt_image_url");
+            entity.Property(e => e.Notes)
+                .HasMaxLength(1000)
+                .HasColumnName("notes");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasColumnName("status");
+            entity.Property(e => e.Reason)
+                .HasColumnName("reason");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.DeletedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("deleted_at");
+
+            entity.HasOne(d => d.PurchaseProposal)
+                .WithMany()
+                .HasForeignKey(d => d.PurchaseProposalId)
+                .HasConstraintName("FK__vehicle_reception__proposal");
+
+            entity.HasOne(d => d.Branch)
+                .WithMany()
+                .HasForeignKey(d => d.BranchId)
+                .HasConstraintName("FK__vehicle_reception__branch");
+
+            entity.HasOne(d => d.Operator)
+                .WithMany()
+                .HasForeignKey(d => d.OperatorId)
+                .HasConstraintName("FK__vehicle_reception__operator");
         });
 
         OnModelCreatingPartial(modelBuilder);

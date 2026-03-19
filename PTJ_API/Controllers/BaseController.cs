@@ -33,6 +33,17 @@ namespace API.Controllers
 
             return branchId;
         }
+
+        // ===== ROLES LIST FROM JWT =====
+        protected List<string>? GetUserRoles()
+        {
+            // assume roles claim stored as comma-separated string
+            var rolesClaim = User.FindFirst("roles")?.Value;
+            if (string.IsNullOrWhiteSpace(rolesClaim))
+                return null;
+
+            return rolesClaim.Split(',').Select(r => r.Trim()).ToList();
+        }
         // ===== STANDARD RESPONSE =====
         protected IActionResult HandleResult<T>(T result, string? message = null)
         {

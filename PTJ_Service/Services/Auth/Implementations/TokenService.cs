@@ -131,7 +131,9 @@ namespace Service.Services.Auth.Implementations
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.Email ?? string.Empty),
                 new Claim("full_name", user.Name ?? string.Empty),
-                new Claim("verified", (user.EmailVerified ?? false).ToString().ToLowerInvariant())
+                new Claim("verified", (user.EmailVerified ?? false).ToString().ToLowerInvariant()),
+                // Thêm branchId vào token (để controller có thể lấy)
+                new Claim("branchId", (user.BranchId ?? 0).ToString())
             };
 
             if (user.BranchId.HasValue)

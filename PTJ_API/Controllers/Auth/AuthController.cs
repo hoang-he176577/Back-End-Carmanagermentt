@@ -111,36 +111,45 @@ namespace API.Controllers.Auth
         [Authorize]
         public async Task<IActionResult> Me()
         {
-            var id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-            var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
-            var fullName = User.FindFirstValue("full_name");
-            var verified = User.FindFirstValue("verified");
-            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value);
-
-            // Fetch branch info from DB
-            int? branchId = null;
-            string? branchName = null;
-            if (int.TryParse(id, out var userId))
+            try
             {
-                var userInfo = await _authService.GetUserBranchInfoAsync(userId);
-                if (userInfo != null)
+                var id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+                var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+                var fullName = User.FindFirstValue("full_name");
+                var verified = User.FindFirstValue("verified");
+                var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value);
+
+                // Fetch branch info from DB
+                int? branchId = null;
+                string? branchName = null;
+                if (int.TryParse(id, out var userId))
                 {
-                    branchId = userInfo.Value.branchId;
-                    branchName = userInfo.Value.branchName;
-                    verified = userInfo.Value.emailVerified.ToString().ToLowerInvariant();
-                }
-            }
 
-            return Ok(new
+                    var userInfo = await _authService.GetUserBranchInfoAsync(userId);
+                    if (userInfo != null)
+                    {
+                        branchId = userInfo.Value.branchId;
+                        branchName = userInfo.Value.branchName;
+                    }
+
+                }
+
+                return Ok(new
+                {
+                    id,
+                    email,
+                    fullName,
+                    verified,
+                    roles,
+                    branchId,
+                    branchName
+                });
+            }
+            catch (Exception ex)
             {
-                id,
-                email,
-                fullName,
-                verified,
-                roles,
-                branchId,
-                branchName
-            });
+                // return error details for debugging
+                return StatusCode(500, new { success = false, message = ex.Message, stack = ex.StackTrace });
+            }
         }
     }
 }
