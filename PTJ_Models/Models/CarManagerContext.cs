@@ -47,6 +47,12 @@ public partial class CarManagerContext : DbContext
 
     public virtual DbSet<TransferPlan> TransferPlans { get; set; }
 
+
+    public virtual DbSet<TripLog> TripLogs { get; set; }
+
+    public virtual DbSet<VehicleReceptionRecord> VehicleReceptionRecords { get; set; }
+
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Vehicle> Vehicles { get; set; }
