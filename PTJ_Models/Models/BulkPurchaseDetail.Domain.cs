@@ -42,13 +42,13 @@ public partial class BulkPurchaseDetail
 
     public decimal GetTotalPrice()
     {
-        return (ProposedQuantity ?? 0) * (UnitPrice ?? 0);
+        return ProposedQuantity * UnitPrice;
     }
 
     public bool IsValid()
     {
-        return (BranchId ?? 0) > 0
-            && (ProposedQuantity ?? 0) > 0
-            && (UnitPrice ?? 0) > 0;
+        return BranchId > 0
+            && ProposedQuantity > 0
+            && UnitPrice > 0;
     }
 }

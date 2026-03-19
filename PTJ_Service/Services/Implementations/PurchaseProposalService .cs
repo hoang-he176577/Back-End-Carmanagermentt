@@ -9,9 +9,6 @@ using System;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-
-using Models.Models;
-using Service.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -121,23 +118,6 @@ using Microsoft.EntityFrameworkCore;
 
             await _repository.AddAsync(proposal);
             await _repository.SaveChangesAsync();
-
-            
-                var proposal = new PurchaseProposal();
-                proposal.InitCreate(dto.Description);
-
-                if (dto.Details != null)
-                {
-                    foreach (var detail in dto.Details)
-                    {
-                        var bulkDetail = new BulkPurchaseDetail();
-                        bulkDetail.InitCreate(detail.BranchId, detail.Quantity, detail.UnitPrice, detail.Notes);
-                        proposal.AddDetail(bulkDetail);
-                    }
-                }
-
-                await _repository.AddAsync(proposal);
-                await _repository.SaveChangesAsync();
 
                 return proposal;
             }
