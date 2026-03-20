@@ -18,5 +18,6 @@ public interface IVehicleDistributionRepository
     Task<bool> HasActiveTransferAsync(int vehicleId);
     Task UpdateVehicleBranchAsync(int vehicleId, int newBranchId);
     Task UpdateVehicleStatusAsync(int vehicleId, string status);
+    Task UnassignVehicleDriverAsync(int vehicleId);
     Task<int?> GetUserBranchIdAsync(int userId);
 }
