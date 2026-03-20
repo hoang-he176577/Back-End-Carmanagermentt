@@ -705,7 +705,9 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.StartTime)
                 .HasColumnType("datetime")
                 .HasColumnName("start_time");
-            entity.Property(e => e.StartedBy).HasColumnName("started_by");
+            entity.Property(e => e.StartedBy)
+                .HasColumnName("started_by")
+                .HasDefaultValue(0);
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.TripLogs)
