@@ -41,6 +41,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyNullableJsonConverter());
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
@@ -234,6 +235,13 @@ app.UseCustomExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Serve uploaded files from wwwroot
+app.UseStaticFiles();
+
+// Ensure upload directory exists
+var uploadsPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "uploads", "vehicles");
+Directory.CreateDirectory(uploadsPath);
 
 app.MapControllers();
 app.Run();
