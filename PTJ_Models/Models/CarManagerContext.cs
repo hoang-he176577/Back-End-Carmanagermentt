@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -656,6 +656,14 @@ public partial class CarManagerContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+
+            entity.Property(e => e.CheckoutDate)
+                .HasColumnType("datetime")
+                .HasColumnName("checkout_date");
+
+            entity.Property(e => e.CheckinDate)
+                .HasColumnType("datetime")
+                .HasColumnName("checkin_date");
 
             entity.HasOne(d => d.FromBranch).WithMany(p => p.TransferPlanFromBranches)
                 .HasForeignKey(d => d.FromBranchId)
