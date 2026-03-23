@@ -11,7 +11,10 @@ namespace Data.Repositories.VehicleAssets.Interfaces
     {
         Task<List<TripLog>> GetAllAsync();
 
-        Task<TripLog?> GetByIdAsync(int id);
+        Task<TripLog?> GetRunningTripByVehicleIdAsync(int vehicleId);
+        Task<TripLog?> GetLastCompletedTripByVehicleIdAsync(int vehicleId);
+        Task<TripLog?> GetLastCompletedTripByDriverIdAsync(int driverId);
+        Task<List<TripLog>> GetLastCompletedTripsByVehicleIdsAsync(List<int> vehicleIds);
 
         Task<bool> HasActiveTripAsync(int vehicleId);
 

@@ -612,6 +612,52 @@ public partial class CarManagerContext : DbContext
                 .HasConstraintName("FK__transfer___vehic__7C4F7684");
         });
 
+        modelBuilder.Entity<TripLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__trip_log__3213E83F3D094675");
+
+            entity.ToTable("trip_log", tb => tb.HasTrigger("TR_trip_log"));
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Destination)
+                .HasMaxLength(255)
+                .HasColumnName("destination");
+            entity.Property(e => e.DriverId).HasColumnName("driver_id");
+            entity.Property(e => e.EndMileage)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("end_mileage");
+            entity.Property(e => e.EndTime)
+                .HasColumnType("datetime")
+                .HasColumnName("end_time");
+            entity.Property(e => e.EndedBy).HasColumnName("ended_by");
+            entity.Property(e => e.Origin)
+                .HasMaxLength(255)
+                .HasColumnName("origin");
+            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.StartMileage)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("start_mileage");
+            entity.Property(e => e.StartTime)
+                .HasColumnType("datetime")
+                .HasColumnName("start_time");
+            entity.Property(e => e.StartedBy).HasColumnName("started_by");
+            entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+
+            entity.HasOne(d => d.Driver).WithMany(p => p.TripLogs)
+                .HasForeignKey(d => d.DriverId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_triplog_driver");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.TripLogs)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_triplog_vehicle");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__user__3213E83F9F82830B");
@@ -680,7 +726,7 @@ public partial class CarManagerContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__vehicle__3213E83FE10D0D00");
 
-            entity.ToTable("vehicle");
+            entity.ToTable("vehicle", tb => tb.HasTrigger("TR_vehicle"));
 
             entity.HasIndex(e => e.LicensePlate, "UQ__vehicle__F72CD56EDBC929E2").IsUnique();
 

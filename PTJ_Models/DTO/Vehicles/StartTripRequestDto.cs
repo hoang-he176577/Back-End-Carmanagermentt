@@ -20,5 +20,9 @@ namespace Models.DTO.Vehicles
         public string Destination { get; set; } 
 
         public string? Purpose { get; set; }
+        public int? PlannedDurationDays { get; set; }
+        public int? PlannedDurationHours { get; set; }
+        public int? PlannedDurationMinutes { get; set; }
+        public int OperatorId { get; set; }
     }
 }
