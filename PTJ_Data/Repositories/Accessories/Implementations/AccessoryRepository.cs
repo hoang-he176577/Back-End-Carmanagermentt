@@ -16,7 +16,9 @@ public sealed class AccessoryRepository : IAccessoryRepository
 
     public async Task<List<AccessoryDto>> GetAccessoriesAsync(string? keyword, string? type, bool? isActive, int? page, int? pageSize)
     {
-        var query = _context.Accessories.AsNoTracking().AsQueryable();
+        var query = _context.Accessories.AsNoTracking()
+            .Where(x => x.DeletedAt == null)
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(keyword))
         {
@@ -51,10 +53,11 @@ public sealed class AccessoryRepository : IAccessoryRepository
             Code = x.Code,
             Name = x.Name,
             Type = x.Type,
-            QuantityInStock = x.QuantityInStock ?? 0,
+            QuantityInStock = x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
             UnitPrice = x.UnitPrice,
             MinimumStock = x.MinimumStock,
             IsActive = x.IsActive,
+            ImageUrl = x.ImageUrl,
             CreatedAt = x.CreatedAt,
             UpdatedAt = x.UpdatedAt
         }).ToListAsync();
@@ -63,17 +66,18 @@ public sealed class AccessoryRepository : IAccessoryRepository
     public async Task<AccessoryDto?> GetAccessoryByIdAsync(int id)
     {
         return await _context.Accessories.AsNoTracking()
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == id && x.DeletedAt == null)
             .Select(x => new AccessoryDto
             {
                 Id = x.Id,
                 Code = x.Code,
                 Name = x.Name,
                 Type = x.Type,
-                QuantityInStock = x.QuantityInStock ?? 0,
+                QuantityInStock = x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
                 UnitPrice = x.UnitPrice,
                 MinimumStock = x.MinimumStock,
                 IsActive = x.IsActive,
+                ImageUrl = x.ImageUrl,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt
             })
@@ -82,12 +86,12 @@ public sealed class AccessoryRepository : IAccessoryRepository
 
     public Task<Accessory?> GetAccessoryEntityByIdAsync(int id)
     {
-        return _context.Accessories.FirstOrDefaultAsync(x => x.Id == id);
+        return _context.Accessories.FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt == null);
     }
 
     public Task<bool> AccessoryCodeExistsAsync(string code, int? excludeId = null)
     {
-        var query = _context.Accessories.AsNoTracking().Where(x => x.Code == code);
+        var query = _context.Accessories.AsNoTracking().Where(x => x.Code == code && x.DeletedAt == null);
         if (excludeId.HasValue)
         {
             query = query.Where(x => x.Id != excludeId.Value);
@@ -126,14 +130,14 @@ public sealed class AccessoryRepository : IAccessoryRepository
 
     public Task<VehicleAccessory?> GetVehicleAccessoryEntityByIdAsync(int id)
     {
-        return _context.VehicleAccessories.FirstOrDefaultAsync(x => x.Id == id);
+        return _context.VehicleAccessories.FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt == null);
     }
 
     public Task<VehicleAccessory?> GetVehicleAccessoryWithAccessoryAsync(int id)
     {
         return _context.VehicleAccessories
             .Include(x => x.Accessory)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt == null);
     }
 
     public async Task<VehicleAccessory> AddVehicleAccessoryAsync(VehicleAccessory vehicleAccessory)
@@ -147,7 +151,7 @@ public sealed class AccessoryRepository : IAccessoryRepository
     {
         var query = _context.VehicleAccessories.AsNoTracking()
             .Include(x => x.Accessory)
-            .Where(x => x.VehicleId == vehicleId);
+            .Where(x => x.VehicleId == vehicleId && x.DeletedAt == null);
 
         if (activeOnly)
         {
@@ -224,11 +228,7 @@ public sealed class AccessoryRepository : IAccessoryRepository
         if (branchId.HasValue)
         {
             var scopedBranchId = branchId.Value;
-            query = query.Where(x =>
-                (x.Vehicle != null && x.Vehicle.CurrentBranchId == scopedBranchId) ||
-                (x.VehicleId == null &&
-                 x.PerformedByNavigation != null &&
-                 x.PerformedByNavigation.BranchId == scopedBranchId));
+            query = query.Where(x => x.BranchId == scopedBranchId);
         }
 
         query = query.OrderByDescending(x => x.TransactionDate).ThenByDescending(x => x.Id);
@@ -243,9 +243,16 @@ public sealed class AccessoryRepository : IAccessoryRepository
         {
             Id = x.Id,
             AccessoryId = x.AccessoryId,
+            AccessoryCode = x.Accessory != null ? x.Accessory.Code : null,
+            AccessoryName = x.Accessory != null ? x.Accessory.Name : null,
+            BranchId = x.BranchId,
+            BranchName = x.Branch != null ? x.Branch.Name : null,
             VehicleId = x.VehicleId,
+            VehicleLicensePlate = x.Vehicle != null ? x.Vehicle.LicensePlate : null,
             VehicleAccessoryId = x.VehicleAccessoryId,
             TransactionType = x.TransactionType,
+            ReferenceType = x.ReferenceType,
+            ReferenceId = x.ReferenceId,
             Quantity = x.Quantity,
             TransactionDate = x.TransactionDate,
             UnitPrice = x.UnitPrice,

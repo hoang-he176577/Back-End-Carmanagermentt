@@ -27,6 +27,8 @@ public partial class Driver
 
     public virtual Branch? Branch { get; set; }
 
+    public virtual ICollection<DriverTransferDetail> DriverTransferDetails { get; set; } = new List<DriverTransferDetail>();
+
     public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
 
     public virtual ICollection<VehicleDriverHistory> VehicleDriverHistories { get; set; } = new List<VehicleDriverHistory>();

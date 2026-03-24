@@ -17,11 +17,19 @@ public partial class Branch
 
     public DateTime? DeletedAt { get; set; }
 
+    public virtual ICollection<AccessoryGoodsReceipt> AccessoryGoodsReceipts { get; set; } = new List<AccessoryGoodsReceipt>();
+
+    public virtual ICollection<AccessoryPurchaseRequest> AccessoryPurchaseRequests { get; set; } = new List<AccessoryPurchaseRequest>();
+
+    public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
+
+    public virtual ICollection<BranchAccessoryStock> BranchAccessoryStocks { get; set; } = new List<BranchAccessoryStock>();
+
     public virtual ICollection<BulkPurchaseDetail> BulkPurchaseDetails { get; set; } = new List<BulkPurchaseDetail>();
 
     public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
 
-    public virtual ICollection<DriverTransferDetail> DriverTransferDetailsFromBranch { get; set; } = new List<DriverTransferDetail>();
+    public virtual ICollection<DriverTransferDetail> DriverTransferDetails { get; set; } = new List<DriverTransferDetail>();
 
     public virtual ICollection<DriverTransferRequest> DriverTransferRequests { get; set; } = new List<DriverTransferRequest>();
 
@@ -30,6 +38,10 @@ public partial class Branch
     public virtual ICollection<TransferPlan> TransferPlanToBranches { get; set; } = new List<TransferPlan>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
+
+    public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
+
+    public virtual ICollection<VehicleReceptionRecord> VehicleReceptionRecords { get; set; } = new List<VehicleReceptionRecord>();
 
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

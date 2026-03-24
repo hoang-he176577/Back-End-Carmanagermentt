@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Mvc;
 using Models.DTO.Vehicles;
 using Service.Services.VehicleAssets.Interfaces;
 
@@ -17,21 +16,28 @@ public class TripLogsController : BaseController
     }
 
     [HttpPost("start")]
-    public async Task<IActionResult> StartTrip(StartTripRequestDto dto){
+    public async Task<IActionResult> StartTrip(StartTripRequestDto dto)
+    {
         dto.OperatorId = GetUserId();
         return HandleCreated(await _tripService.StartTripAsync(dto), "Start trip successfully");
-    } 
+    }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpPut("{tripId:int}/end")]
+    public async Task<IActionResult> EndTrip(int tripId, EndTripRequestDto dto)
     {
         dto.EndedBy = GetUserId();
         await _tripService.EndTripAsync(tripId, dto);
-
         return Ok("Trip ended successfully");
     }
 
-    [HttpGet("vehicle/{vehicleId}/history")]
+    [HttpGet("history")]
+    public async Task<IActionResult> GetAllHistory()
+    {
+        var result = await _tripService.GetAllTripHistoryAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("vehicle/{vehicleId:int}/history")]
     public async Task<IActionResult> GetVehicleTripHistory(int vehicleId)
     {
         var result = await _tripService.GetVehicleTripHistoryAsync(vehicleId);
@@ -50,20 +56,14 @@ public class TripLogsController : BaseController
         return Ok(result);
     }
 
-    [HttpGet("history")]
-    public async Task<IActionResult> GetAllHistory()
-    {
-        var result = await _service.GetAllTripHistoryAsync();
-        return Ok(result);
-    }
-
-    [HttpGet("vehicle/{vehicleId}/history")]
-    public async Task<IActionResult> GetVehicleHistory(int vehicleId)
+    [HttpGet("vehicles/dropdown")]
+    public async Task<IActionResult> GetVehicleDrop()
     {
         var result = await _tripService.GetVehicleDropAsync();
         return Ok(result);
     }
-    [HttpGet("vehicle/{vehicleId}/driver")]
+
+    [HttpGet("vehicle/{vehicleId:int}/driver")]
     public async Task<IActionResult> GetDriverByVehicleId(int vehicleId)
         => HandleResult(await _tripService.GetDriverByVehicleIdAsync(vehicleId));
 }

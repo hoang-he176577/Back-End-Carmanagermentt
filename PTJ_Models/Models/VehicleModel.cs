@@ -27,5 +27,7 @@ public partial class VehicleModel
 
     public DateTime? DeletedAt { get; set; }
 
+    public virtual ICollection<VehicleAccessoryRequirement> VehicleAccessoryRequirements { get; set; } = new List<VehicleAccessoryRequirement>();
+
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

@@ -25,11 +25,21 @@ public partial class AccessoryTransaction
 
     public int? PerformedBy { get; set; }
 
+    public int? BranchId { get; set; }
+
+    public string? ReferenceType { get; set; }
+
+    public int? ReferenceId { get; set; }
+
     public virtual Accessory Accessory { get; set; } = null!;
+
+    public virtual Branch? Branch { get; set; }
 
     public virtual User? PerformedByNavigation { get; set; }
 
     public virtual Vehicle? Vehicle { get; set; }
+
+    public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
 
     public virtual VehicleAccessory? VehicleAccessory { get; set; }
 }

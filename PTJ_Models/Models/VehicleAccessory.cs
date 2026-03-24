@@ -31,13 +31,21 @@ public partial class VehicleAccessory
 
     public int? RemovedBy { get; set; }
 
+    public int? BranchId { get; set; }
+
+    public int? SourceTransactionId { get; set; }
+
     public virtual Accessory? Accessory { get; set; }
 
     public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
 
+    public virtual Branch? Branch { get; set; }
+
     public virtual User? InstalledByNavigation { get; set; }
 
     public virtual User? RemovedByNavigation { get; set; }
+
+    public virtual AccessoryTransaction? SourceTransaction { get; set; }
 
     public virtual Vehicle? Vehicle { get; set; }
 }

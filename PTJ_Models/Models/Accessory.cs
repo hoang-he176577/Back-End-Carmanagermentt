@@ -27,7 +27,17 @@ public partial class Accessory
 
     public bool IsActive { get; set; }
 
+    public string? ImageUrl { get; set; }
+
+    public virtual ICollection<AccessoryGoodsReceiptDetail> AccessoryGoodsReceiptDetails { get; set; } = new List<AccessoryGoodsReceiptDetail>();
+
+    public virtual ICollection<AccessoryPurchaseRequestDetail> AccessoryPurchaseRequestDetails { get; set; } = new List<AccessoryPurchaseRequestDetail>();
+
     public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
 
+    public virtual ICollection<BranchAccessoryStock> BranchAccessoryStocks { get; set; } = new List<BranchAccessoryStock>();
+
     public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
+
+    public virtual ICollection<VehicleAccessoryRequirement> VehicleAccessoryRequirements { get; set; } = new List<VehicleAccessoryRequirement>();
 }

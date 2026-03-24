@@ -91,7 +91,7 @@ public sealed class MaintenanceRequestsController : ControllerBase
     }
 
     [HttpPatch("{id:int}/approval")]
-    [Authorize(Roles = "Branch Asset Accountant")]
+    [Authorize(Roles = "Executive Management,Manager")]
     [ProducesResponseType(typeof(MaintenanceRequestDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -102,12 +102,12 @@ public sealed class MaintenanceRequestsController : ControllerBase
             ?? User.FindFirstValue(ClaimTypes.Name)
             ?? User.FindFirstValue("sub");
 
-        if (!int.TryParse(actorClaim, out var accountantUserId))
+        if (!int.TryParse(actorClaim, out var approverUserId))
         {
             return Unauthorized(new { message = "Invalid user identity in token." });
         }
 
-        var result = await _service.ApproveOrRejectAsync(id, accountantUserId, request);
+        var result = await _service.ApproveOrRejectAsync(id, approverUserId, request);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });

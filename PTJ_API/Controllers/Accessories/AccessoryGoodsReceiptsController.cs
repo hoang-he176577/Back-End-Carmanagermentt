@@ -8,32 +8,32 @@ namespace API.Controllers.Accessories;
 
 [ApiController]
 [Authorize]
-[Route("api/accessories")]
-public sealed class AccessoriesController : ControllerBase
+[Route("api/accessory-goods-receipts")]
+public sealed class AccessoryGoodsReceiptsController : ControllerBase
 {
     private readonly IAccessoryService _service;
 
-    public AccessoriesController(IAccessoryService service)
+    public AccessoryGoodsReceiptsController(IAccessoryService service)
     {
         _service = service;
     }
 
     [HttpGet]
     [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
-    [ProducesResponseType(typeof(List<AccessoryDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<AccessoryDto>>> GetList(
-        [FromQuery] string? keyword,
-        [FromQuery] string? type,
-        [FromQuery] bool? isActive,
-        [FromQuery] int? page,
-        [FromQuery] int? pageSize)
+    [ProducesResponseType(typeof(List<AccessoryGoodsReceiptDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<AccessoryGoodsReceiptDto>>> GetList(
+        [FromQuery] int? branchId,
+        [FromQuery] int? purchaseRequestId,
+        [FromQuery] string? status,
+        [FromQuery] int? page = null,
+        [FromQuery] int? pageSize = null)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.GetAccessoriesAsync(actorUserId, roles, keyword, type, isActive, page, pageSize);
+        var result = await _service.GetGoodsReceiptsAsync(actorUserId, roles, branchId, purchaseRequestId, status, page, pageSize);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
@@ -44,16 +44,15 @@ public sealed class AccessoriesController : ControllerBase
 
     [HttpGet("{id:int}")]
     [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<AccessoryDto>> GetById([FromRoute] int id)
+    [ProducesResponseType(typeof(AccessoryGoodsReceiptDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AccessoryGoodsReceiptDto>> GetById([FromRoute] int id)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.GetAccessoryByIdAsync(actorUserId, roles, id);
+        var result = await _service.GetGoodsReceiptByIdAsync(actorUserId, roles, id);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
@@ -63,36 +62,35 @@ public sealed class AccessoriesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Operator,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status201Created)]
-    public async Task<ActionResult<AccessoryDto>> Create([FromBody] AccessoryCreateRequestDto request)
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(typeof(AccessoryGoodsReceiptDto), StatusCodes.Status201Created)]
+    public async Task<ActionResult<AccessoryGoodsReceiptDto>> Create([FromBody] AccessoryGoodsReceiptCreateRequestDto request)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.CreateAccessoryAsync(actorUserId, roles, request);
+        var result = await _service.CreateGoodsReceiptAsync(actorUserId, roles, request);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
-        var created = result.Data!;
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
-    [HttpPut("{id:int}")]
-    [Authorize(Roles = "Operator,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AccessoryDto>> Update([FromRoute] int id, [FromBody] AccessoryUpdateRequestDto request)
+    [HttpPost("{id:int}/complete")]
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(typeof(AccessoryGoodsReceiptDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AccessoryGoodsReceiptDto>> Complete([FromRoute] int id, [FromBody] AccessoryGoodsReceiptCompleteRequestDto request)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.UpdateAccessoryAsync(actorUserId, roles, id, request);
+        var result = await _service.CompleteGoodsReceiptAsync(actorUserId, roles, id, request);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
@@ -101,17 +99,17 @@ public sealed class AccessoriesController : ControllerBase
         return Ok(result.Data);
     }
 
-    [HttpPost("{id:int}/import")]
-    [Authorize(Roles = "Operator,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AccessoryDto>> ImportStock([FromRoute] int id, [FromBody] AccessoryImportRequestDto request)
+    [HttpPost("{id:int}/cancel")]
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(typeof(AccessoryGoodsReceiptDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AccessoryGoodsReceiptDto>> Cancel([FromRoute] int id, [FromBody] AccessoryPurchaseRequestRejectRequestDto request)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.ImportAccessoryAsync(actorUserId, roles, id, request);
+        var result = await _service.CancelGoodsReceiptAsync(actorUserId, roles, id, request.Notes);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });

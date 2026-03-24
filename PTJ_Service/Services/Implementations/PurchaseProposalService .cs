@@ -45,10 +45,10 @@ using Microsoft.EntityFrameworkCore;
                     Priority = CalculatePriority(p),
                     BranchDetails = p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
                     {
-                        BranchId = d.BranchId,
+                        BranchId = d.BranchId ?? 0,
                         BranchName = d.Branch?.Name,
-                        ProposedQuantity = d.ProposedQuantity,
-                        UnitPrice = d.UnitPrice,
+                        ProposedQuantity = d.ProposedQuantity ?? 0,
+                        UnitPrice = d.UnitPrice ?? 0,
                         Seats = d.Seats,
                         Manufacturer = d.Manufacturer,
                         BranchNotes = d.BranchNotes,
@@ -321,10 +321,10 @@ using Microsoft.EntityFrameworkCore;
                         .Where(d => d.BranchId == branchId.Value)
                         .Select(d => new BranchPurchaseDetailDto
                         {
-                            BranchId = d.BranchId,
+                            BranchId = d.BranchId ?? 0,
                             BranchName = d.Branch?.Name,
-                            ProposedQuantity = d.ProposedQuantity,
-                            UnitPrice = d.UnitPrice,
+                            ProposedQuantity = d.ProposedQuantity ?? 0,
+                            UnitPrice = d.UnitPrice ?? 0,
                             Seats = d.Seats,
                             Manufacturer = d.Manufacturer,
                             BranchNotes = d.BranchNotes,
@@ -333,10 +333,10 @@ using Microsoft.EntityFrameworkCore;
                         .ToList()
                     : p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
                     {
-                        BranchId = d.BranchId,
+                        BranchId = d.BranchId ?? 0,
                         BranchName = d.Branch?.Name,
-                        ProposedQuantity = d.ProposedQuantity,
-                        UnitPrice = d.UnitPrice,
+                        ProposedQuantity = d.ProposedQuantity ?? 0,
+                        UnitPrice = d.UnitPrice ?? 0,
                         Seats = d.Seats,
                         Manufacturer = d.Manufacturer,
                         BranchNotes = d.BranchNotes,

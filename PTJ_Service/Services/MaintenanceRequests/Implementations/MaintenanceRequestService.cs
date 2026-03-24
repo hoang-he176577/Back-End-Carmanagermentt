@@ -42,10 +42,11 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<List<MaintenanceRequestDto>>.Fail(400, "Invalid maintenanceType.");
         }
 
-        // Executive Management can see all branches; others see only their branch
+        // Executive Management and Manager can see all branches; others see only their branch
         int? branchId = null;
-        var isExec = string.Equals(userRole, "Executive Management", StringComparison.OrdinalIgnoreCase);
-        if (!isExec && userId > 0)
+        var isManager = string.Equals(userRole, "Executive Management", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(userRole, "Manager", StringComparison.OrdinalIgnoreCase);
+        if (!isManager && userId > 0)
         {
             branchId = await _repository.GetUserBranchIdAsync(userId);
         }
@@ -146,12 +147,12 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
                 return ServiceResult<MaintenanceRequestDto>.Fail(400, "Xe đã được thanh lý, không thể tạo yêu cầu bảo trì.");
             }
 
-            entity.VehicleId = request.VehicleId.Value;
+            return ServiceResult<MaintenanceRequestDto>.Fail(403, "Vehicle cannot be changed after maintenance request is created.");
         }
 
         if (request.RequestDate.HasValue)
         {
-            entity.RequestDate = request.RequestDate.Value;
+            return ServiceResult<MaintenanceRequestDto>.Fail(403, "RequestDate cannot be changed after maintenance request is created.");
         }
 
         if (request.Description != null)
@@ -234,16 +235,16 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         return ServiceResult<MaintenanceRequestDto>.SuccessResult(dto);
     }
 
-    public async Task<ServiceResult<MaintenanceRequestDto>> ApproveOrRejectAsync(int id, int accountantUserId, MaintenanceApprovalRequestDto request)
+    public async Task<ServiceResult<MaintenanceRequestDto>> ApproveOrRejectAsync(int id, int approverUserId, MaintenanceApprovalRequestDto request)
     {
         if (request == null)
         {
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "Request body is required.");
         }
 
-        if (accountantUserId <= 0 || !await _repository.UserExistsAsync(accountantUserId))
+        if (approverUserId <= 0 || !await _repository.UserExistsAsync(approverUserId))
         {
-            return ServiceResult<MaintenanceRequestDto>.Fail(400, "Accountant user not found.");
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "Approver user not found.");
         }
 
         var entity = await _repository.GetEntityByIdAsync(id);
@@ -266,7 +267,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         }
 
         entity.Status = NormalizeStatus(targetStatus);
-        entity.AccountantId = accountantUserId;
+        entity.AccountantId = approverUserId;
         entity.ApprovedDate = request.ApprovedDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
         entity.UpdatedAt = DateTime.UtcNow;
 

@@ -1,15 +1,10 @@
-﻿using Data.Repositories.VehicleAssets.Interfaces;
+using Data.Repositories.VehicleAssets.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.PurchaseProposal;
 using Models.DTO.Vehicles;
 using Models.Models;
 using Service.Exceptions;
 using Service.Services.VehicleAssets.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service.Services.VehicleAssets.Implementations
 {
@@ -52,11 +47,10 @@ namespace Service.Services.VehicleAssets.Implementations
             }
 
             var runningTrip = await _tripRepo.GetRunningTripByVehicleIdAsync(dto.VehicleId);
-            if (runningTrip != null) { 
+            if (runningTrip != null)
+            {
                 throw BusinessErrors.BadRequest($"Vehicle with ID {dto.VehicleId} already has an active trip.");
             }
-
-            var startTime = now;
 
             var lastDriverTrip = await _tripRepo.GetLastCompletedTripByDriverIdAsync(dto.DriverId);
             if (lastDriverTrip?.EndMileage != null && dto.StartMileage < lastDriverTrip.EndMileage.Value)
@@ -68,15 +62,14 @@ namespace Service.Services.VehicleAssets.Implementations
             {
                 VehicleId = dto.VehicleId,
                 DriverId = dto.DriverId,
-                StartTime = startTime,
+                StartTime = dto.StartTime ?? now,
                 StartMileage = dto.StartMileage,
                 Origin = dto.Origin,
                 Destination = dto.Destination,
                 Purpose = dto.Purpose,
                 StartedBy = dto.OperatorId,
-                CreatedAt = now,
+                CreatedAt = now
             };
-            trip.StartedBy = dto.OperatorId;
 
             var created = await _tripRepo.CreateAsync(trip);
             await _tripRepo.UpdateVehicleStatusAsync(dto.VehicleId, "Moving");
@@ -89,10 +82,14 @@ namespace Service.Services.VehicleAssets.Implementations
             var trip = await _tripRepo.GetByIdAsync(tripId);
 
             if (trip == null)
+            {
                 throw BusinessErrors.NotFound("Trip not found");
+            }
 
             if (trip.EndTime != null)
+            {
                 throw BusinessErrors.BadRequest("Trip already ended");
+            }
 
             if (dto.EndMileage < trip.StartMileage)
             {
@@ -119,6 +116,12 @@ namespace Service.Services.VehicleAssets.Implementations
             }
         }
 
+        public async Task<List<TripHistoryResponseDto>> GetAllTripHistoryAsync()
+        {
+            var trips = await _tripRepo.GetTripHistoryByVehicleAsync(null);
+            return trips.Select(MapTripHistory).ToList();
+        }
+
         public async Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId)
         {
             var vehicle = await _tripRepo.GetVehicleByIdAsync(vehicleId);
@@ -128,22 +131,6 @@ namespace Service.Services.VehicleAssets.Implementations
             }
 
             var trips = await _tripRepo.GetTripHistoryByVehicleAsync(vehicleId);
-            var now = DateTime.Now;
-
-            var tripDtos = trips.Select(t => new TripHistoryResponseDto
-            {
-                TripId = t.Id,
-                VehicleId = t.VehicleId,
-                DriverId = t.DriverId,
-                DriverName = t.Driver.Name!,
-                StartTime = t.StartTime,
-                EndTime = t.EndTime,
-                StartMileage = t.StartMileage,
-                EndMileage = t.EndMileage,
-                Origin = t.Origin,
-                Destination = t.Destination,
-                Purpose = t.Purpose
-            }).ToList();
 
             return new TripHistoryByVehicleResponseDto
             {
@@ -154,7 +141,7 @@ namespace Service.Services.VehicleAssets.Implementations
                 CurrentBranchName = vehicle.CurrentBranch?.Name,
                 CurrentDriverId = vehicle.CurrentDriverId,
                 CurrentDriverName = vehicle.CurrentDriver?.Name,
-                Trips = tripDtos
+                Trips = trips.Select(MapTripHistory).ToList()
             };
         }
 
@@ -170,7 +157,7 @@ namespace Service.Services.VehicleAssets.Implementations
 
         public async Task<UserBasicDto> GetDriverByVehicleIdAsync(int vehicleId)
             => await _tripRepo.GetDriverByVehicleIdAsync(vehicleId) ??
-            throw BusinessErrors.NotFound($"No driver found for vehicle with ID {vehicleId}.");
+               throw BusinessErrors.NotFound($"No driver found for vehicle with ID {vehicleId}.");
 
         public async Task<List<ManageVehicleTripDto>> GetManageVehiclesAsync(int branchId, string? tab)
         {
@@ -210,88 +197,26 @@ namespace Service.Services.VehicleAssets.Implementations
             return FilterManageVehicles(items, tab);
         }
 
-        public async Task<List<TripHistoryResponseDto>> GetAllTripHistoryAsync()
+        private static TripHistoryResponseDto MapTripHistory(TripLog trip)
         {
-            var trips = await _repo.GetAllAsync();
-
-            return trips.Select(t =>
+            return new TripHistoryResponseDto
             {
-                var meta = ParseMeta(t.Purpose);
-                return new TripHistoryResponseDto
-                {
-                    TripId = t.Id,
-                    VehicleId = t.VehicleId,
-                    VehicleLicensePlate = t.Vehicle?.LicensePlate,
-                    DriverId = t.DriverId,
-                    DriverName = t.Driver?.Name,
-                    StartTime = t.StartTime,
-                    EndTime = t.EndTime,
-                    StartMileage = t.StartMileage,
-                    EndMileage = t.EndMileage,
-                    Origin = t.Origin,
-                    Destination = t.Destination,
-                    Purpose = meta.PurposeText ?? t.Purpose,
-                    PlannedDurationMinutes = meta.PlannedDurationMinutes,
-                    IsStopDifferent = meta.IsStopDifferent,
-                    ActualStop = meta.ActualStop,
-                    StopDeviationReason = meta.StopDeviationReason,
-                    OvertimeReason = meta.OvertimeReason,
-                    ExtensionMinutes = meta.ExtensionMinutes
-                };
-            }).ToList();
-        }
-
-        public async Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId)
-        {
-            if (string.IsNullOrWhiteSpace(status))
-            {
-                return false;
-            }
-
-            var trips = await _repo.GetTripHistoryByVehicleAsync(vehicleId);
-
-            var tripDtos = trips.Select(t =>
-            {
-                var meta = ParseMeta(t.Purpose);
-                return new TripHistoryResponseDto
-                {
-                    TripId = t.Id,
-                    VehicleId = t.VehicleId,
-                    VehicleLicensePlate = vehicle.LicensePlate,
-                    DriverId = t.DriverId,
-                    DriverName = t.Driver?.Name,
-                    StartTime = t.StartTime,
-                    EndTime = t.EndTime,
-                    StartMileage = t.StartMileage,
-                    EndMileage = t.EndMileage,
-                    Origin = t.Origin,
-                    Destination = t.Destination,
-                    Purpose = meta.PurposeText ?? t.Purpose,
-                    PlannedDurationMinutes = meta.PlannedDurationMinutes,
-                    IsStopDifferent = meta.IsStopDifferent,
-                    ActualStop = meta.ActualStop,
-                    StopDeviationReason = meta.StopDeviationReason,
-                    OvertimeReason = meta.OvertimeReason,
-                    ExtensionMinutes = meta.ExtensionMinutes
-                };
-            }).ToList();
-
-            return new TripHistoryByVehicleResponseDto
-            {
-                VehicleId = vehicle.Id,
-                LicensePlate = vehicle.LicensePlate,
-                Status = vehicle.Status,
-                CurrentBranchId = vehicle.CurrentBranchId,
-                CurrentBranchName = vehicle.CurrentBranch?.Name,
-                CurrentDriverId = vehicle.CurrentDriverId,
-                CurrentDriverName = vehicle.CurrentDriver?.Name,
-                Trips = tripDtos
+                TripId = trip.Id,
+                VehicleId = trip.VehicleId,
+                VehicleLicensePlate = trip.Vehicle?.LicensePlate,
+                DriverId = trip.DriverId,
+                DriverName = trip.Driver?.Name,
+                StartTime = trip.StartTime,
+                EndTime = trip.EndTime,
+                StartMileage = trip.StartMileage,
+                EndMileage = trip.EndMileage,
+                Origin = trip.Origin,
+                Destination = trip.Destination,
+                Purpose = trip.Purpose
             };
         }
 
-        private static List<ManageVehicleTripDto> FilterManageVehicles(
-            List<ManageVehicleTripDto> items,
-            string? tab)
+        private static List<ManageVehicleTripDto> FilterManageVehicles(List<ManageVehicleTripDto> items, string? tab)
         {
             if (string.IsNullOrWhiteSpace(tab))
             {
@@ -310,6 +235,7 @@ namespace Service.Services.VehicleAssets.Implementations
             }
         }
 
-
+        private static bool IsReadyStatus(string? status)
+            => !string.IsNullOrWhiteSpace(status) && ReadyStatuses.Contains(status);
     }
 }

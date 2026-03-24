@@ -8,32 +8,27 @@ namespace API.Controllers.Accessories;
 
 [ApiController]
 [Authorize]
-[Route("api/accessories")]
-public sealed class AccessoriesController : ControllerBase
+[Route("api/vehicle-accessory-requirements")]
+public sealed class VehicleAccessoryRequirementsController : ControllerBase
 {
     private readonly IAccessoryService _service;
 
-    public AccessoriesController(IAccessoryService service)
+    public VehicleAccessoryRequirementsController(IAccessoryService service)
     {
         _service = service;
     }
 
     [HttpGet]
     [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
-    [ProducesResponseType(typeof(List<AccessoryDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<AccessoryDto>>> GetList(
-        [FromQuery] string? keyword,
-        [FromQuery] string? type,
-        [FromQuery] bool? isActive,
-        [FromQuery] int? page,
-        [FromQuery] int? pageSize)
+    [ProducesResponseType(typeof(List<VehicleAccessoryRequirementDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<VehicleAccessoryRequirementDto>>> GetList([FromQuery] int? modelId)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.GetAccessoriesAsync(actorUserId, roles, keyword, type, isActive, page, pageSize);
+        var result = await _service.GetVehicleAccessoryRequirementsAsync(actorUserId, roles, modelId);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
@@ -42,18 +37,17 @@ public sealed class AccessoriesController : ControllerBase
         return Ok(result.Data);
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("check/vehicle/{vehicleId:int}")]
     [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<AccessoryDto>> GetById([FromRoute] int id)
+    [ProducesResponseType(typeof(VehicleAccessoryRequirementCheckResultDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<VehicleAccessoryRequirementCheckResultDto>> Check([FromRoute] int vehicleId)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.GetAccessoryByIdAsync(actorUserId, roles, id);
+        var result = await _service.CheckVehicleAccessoryRequirementsAsync(actorUserId, roles, vehicleId);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
@@ -63,36 +57,35 @@ public sealed class AccessoriesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Operator,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status201Created)]
-    public async Task<ActionResult<AccessoryDto>> Create([FromBody] AccessoryCreateRequestDto request)
+    [Authorize(Roles = "Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(typeof(VehicleAccessoryRequirementDto), StatusCodes.Status201Created)]
+    public async Task<ActionResult<VehicleAccessoryRequirementDto>> Create([FromBody] VehicleAccessoryRequirementUpsertRequestDto request)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.CreateAccessoryAsync(actorUserId, roles, request);
+        var result = await _service.CreateVehicleAccessoryRequirementAsync(actorUserId, roles, request);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
-        var created = result.Data!;
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        return StatusCode(StatusCodes.Status201Created, result.Data);
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Operator,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AccessoryDto>> Update([FromRoute] int id, [FromBody] AccessoryUpdateRequestDto request)
+    [Authorize(Roles = "Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(typeof(VehicleAccessoryRequirementDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<VehicleAccessoryRequirementDto>> Update([FromRoute] int id, [FromBody] VehicleAccessoryRequirementUpsertRequestDto request)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.UpdateAccessoryAsync(actorUserId, roles, id, request);
+        var result = await _service.UpdateVehicleAccessoryRequirementAsync(actorUserId, roles, id, request);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
@@ -101,23 +94,23 @@ public sealed class AccessoriesController : ControllerBase
         return Ok(result.Data);
     }
 
-    [HttpPost("{id:int}/import")]
-    [Authorize(Roles = "Operator,Executive Management")]
-    [ProducesResponseType(typeof(AccessoryDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<AccessoryDto>> ImportStock([FromRoute] int id, [FromBody] AccessoryImportRequestDto request)
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Delete([FromRoute] int id)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.ImportAccessoryAsync(actorUserId, roles, id, request);
+        var result = await _service.DeleteVehicleAccessoryRequirementAsync(actorUserId, roles, id);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
-        return Ok(result.Data);
+        return NoContent();
     }
 
     private bool TryGetActor(out int actorUserId, out IReadOnlyCollection<string> roles, out ActionResult? errorResult)

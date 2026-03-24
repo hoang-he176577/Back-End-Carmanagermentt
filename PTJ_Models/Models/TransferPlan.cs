@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -34,7 +34,6 @@ public partial class TransferPlan
     public DateTime? CheckinDate { get; set; }
 
     public int? CheckinByUserId { get; set; }
-
     public virtual Branch? FromBranch { get; set; }
 
     public virtual User? Manager { get; set; }

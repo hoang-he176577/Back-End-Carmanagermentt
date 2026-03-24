@@ -47,6 +47,10 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
             {
                 Id = x.Id,
                 VehicleId = x.VehicleId,
+                VehicleLicensePlate = x.Vehicle != null ? x.Vehicle.LicensePlate : null,
+                VehicleModelName = x.Vehicle != null && x.Vehicle.Model != null
+                    ? ((x.Vehicle.Model.Manufacturer ?? "") + " " + (x.Vehicle.Model.ModelName ?? "")).Trim()
+                    : null,
                 OperatorId = x.OperatorId,
                 RequestDate = x.RequestDate,
                 Description = x.Description,
@@ -54,6 +58,7 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
                 Status = x.Status,
                 MaintenanceType = x.MaintenanceType,
                 AccountantId = x.AccountantId,
+                ApproverName = x.Accountant != null ? x.Accountant.Name : null,
                 ApprovedDate = x.ApprovedDate,
                 ActualCost = x.ActualCost,
                 CompletionDate = x.CompletionDate,
@@ -76,6 +81,10 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
         {
             Id = x.Id,
             VehicleId = x.VehicleId,
+            VehicleLicensePlate = x.Vehicle != null ? x.Vehicle.LicensePlate : null,
+            VehicleModelName = x.Vehicle != null && x.Vehicle.Model != null
+                ? ((x.Vehicle.Model.Manufacturer ?? "") + " " + (x.Vehicle.Model.ModelName ?? "")).Trim()
+                : null,
             OperatorId = x.OperatorId,
             RequestDate = x.RequestDate,
             Description = x.Description,
@@ -83,6 +92,7 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
             Status = x.Status,
             MaintenanceType = x.MaintenanceType,
             AccountantId = x.AccountantId,
+            ApproverName = x.Accountant != null ? x.Accountant.Name : null,
             ApprovedDate = x.ApprovedDate,
             ActualCost = x.ActualCost,
             CompletionDate = x.CompletionDate,

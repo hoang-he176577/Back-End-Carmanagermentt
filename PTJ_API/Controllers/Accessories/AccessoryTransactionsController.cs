@@ -19,12 +19,14 @@ public sealed class AccessoryTransactionsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Operator,Branch Asset Accountant,Executive Management")]
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
     [ProducesResponseType(typeof(List<AccessoryTransactionDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<AccessoryTransactionDto>>> GetList(
+        [FromQuery] int? branchId,
         [FromQuery] int? accessoryId,
         [FromQuery] int? vehicleId,
         [FromQuery] string? transactionType,
+        [FromQuery] string? referenceType,
         [FromQuery] DateTime? fromDate,
         [FromQuery] DateTime? toDate,
         [FromQuery] int? page,
@@ -38,9 +40,11 @@ public sealed class AccessoryTransactionsController : ControllerBase
         var result = await _service.GetTransactionsAsync(
             actorUserId,
             roles,
+            branchId,
             accessoryId,
             vehicleId,
             transactionType,
+            referenceType,
             fromDate,
             toDate,
             page,

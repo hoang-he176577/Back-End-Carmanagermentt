@@ -19,7 +19,7 @@ public sealed class VehicleAccessoriesController : ControllerBase
     }
 
     [HttpPost("issue")]
-    [Authorize(Roles = "Operator,Executive Management")]
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
     [ProducesResponseType(typeof(IssueVehicleAccessoryResponseDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<IssueVehicleAccessoryResponseDto>> Issue([FromBody] IssueVehicleAccessoryRequestDto request)
     {
@@ -38,7 +38,7 @@ public sealed class VehicleAccessoriesController : ControllerBase
     }
 
     [HttpPost("{id:int}/return")]
-    [Authorize(Roles = "Operator,Executive Management")]
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
     [ProducesResponseType(typeof(VehicleAccessoryDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<VehicleAccessoryDto>> ReturnOrDamageOrLost([FromRoute] int id, [FromBody] ReturnVehicleAccessoryRequestDto request)
     {

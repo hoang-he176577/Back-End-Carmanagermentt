@@ -36,4 +36,6 @@ public partial class PurchaseProposal
     public virtual User? Manager { get; set; }
 
     public virtual User? Proposer { get; set; }
+
+    public virtual ICollection<VehicleReceptionRecord> VehicleReceptionRecords { get; set; } = new List<VehicleReceptionRecord>();
 }

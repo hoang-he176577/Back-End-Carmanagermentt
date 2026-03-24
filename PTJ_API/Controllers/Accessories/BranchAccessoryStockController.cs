@@ -8,29 +8,51 @@ namespace API.Controllers.Accessories;
 
 [ApiController]
 [Authorize]
-[Route("api/vehicles")]
-public sealed class VehicleAccessoryLookupController : ControllerBase
+[Route("api/branch-accessory-stock")]
+public sealed class BranchAccessoryStockController : ControllerBase
 {
     private readonly IAccessoryService _service;
 
-    public VehicleAccessoryLookupController(IAccessoryService service)
+    public BranchAccessoryStockController(IAccessoryService service)
     {
         _service = service;
     }
 
-    [HttpGet("{vehicleId:int}/accessories")]
+    [HttpGet]
     [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
-    [ProducesResponseType(typeof(List<VehicleAccessoryDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<VehicleAccessoryDto>>> GetVehicleAccessories(
-        [FromRoute] int vehicleId,
-        [FromQuery] bool activeOnly = false)
+    [ProducesResponseType(typeof(List<BranchAccessoryStockDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<BranchAccessoryStockDto>>> GetList(
+        [FromQuery] int? branchId,
+        [FromQuery] int? accessoryId,
+        [FromQuery] bool belowMinimumOnly = false,
+        [FromQuery] int? page = null,
+        [FromQuery] int? pageSize = null)
     {
         if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
         {
             return errorResult!;
         }
 
-        var result = await _service.GetVehicleAccessoriesAsync(actorUserId, roles, vehicleId, activeOnly);
+        var result = await _service.GetBranchStocksAsync(actorUserId, roles, branchId, accessoryId, belowMinimumOnly, page, pageSize);
+        if (!result.Success)
+        {
+            return StatusCode(result.StatusCode, new { message = result.Message });
+        }
+
+        return Ok(result.Data);
+    }
+
+    [HttpPut]
+    [Authorize(Roles = "Branch Asset Accountant,Manager,Executive Management")]
+    [ProducesResponseType(typeof(BranchAccessoryStockDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<BranchAccessoryStockDto>> Upsert([FromBody] BranchAccessoryStockUpsertRequestDto request)
+    {
+        if (!TryGetActor(out var actorUserId, out var roles, out var errorResult))
+        {
+            return errorResult!;
+        }
+
+        var result = await _service.UpsertBranchStockAsync(actorUserId, roles, request);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });
