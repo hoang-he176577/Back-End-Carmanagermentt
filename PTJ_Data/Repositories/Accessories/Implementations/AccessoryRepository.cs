@@ -1,6 +1,5 @@
 using Data.Repositories.Accessories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Models.DTO.Accessories;
 using Models.Models;
 
@@ -251,13 +250,28 @@ public sealed class AccessoryRepository : IAccessoryRepository
             TransactionDate = x.TransactionDate,
             UnitPrice = x.UnitPrice,
             Notes = x.Notes,
-            PerformedBy = x.PerformedBy
+            PerformedBy = x.PerformedBy,
+            PerformedByName = x.PerformedByNavigation != null ? x.PerformedByNavigation.Name : null
         }).ToListAsync();
     }
 
-    public Task<IDbContextTransaction> BeginTransactionAsync()
+    public Task ExecuteInTransactionAsync(Func<Task> operation)
     {
-        return _context.Database.BeginTransactionAsync();
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await operation();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+        });
     }
 
     public Task SaveChangesAsync()

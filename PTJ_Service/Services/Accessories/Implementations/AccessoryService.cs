@@ -8,6 +8,9 @@ namespace Service.Services.Accessories.Implementations;
 
 public sealed class AccessoryService : IAccessoryService
 {
+    private const string DisposedVehicleStatus = "Disposed";
+    private const string LiquidatedVehicleStatus = "Liquidated";
+
     private static readonly HashSet<string> GlobalRoles = new(StringComparer.OrdinalIgnoreCase)
     {
         "executivemanagement"
@@ -287,6 +290,8 @@ public sealed class AccessoryService : IAccessoryService
         accessory.QuantityInStock = (accessory.QuantityInStock ?? 0) + request.Quantity;
         accessory.UpdatedAt = DateTime.UtcNow;
 
+        var performedBy = request.PerformedBy ?? actorUserId;
+
         await _repository.AddAccessoryTransactionAsync(new AccessoryTransaction
         {
             AccessoryId = accessory.Id,
@@ -296,7 +301,7 @@ public sealed class AccessoryService : IAccessoryService
             Quantity = request.Quantity,
             UnitPrice = accessory.UnitPrice,
             Notes = request.Notes,
-            PerformedBy = request.PerformedBy,
+            PerformedBy = performedBy,
             TransactionDate = DateTime.UtcNow
         });
 
@@ -344,6 +349,11 @@ public sealed class AccessoryService : IAccessoryService
             return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(404, "Vehicle not found.");
         }
 
+        if (IsDisposed(vehicle.Status))
+        {
+            return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, "Disposed or liquidated vehicles cannot be assigned accessories.");
+        }
+
         var scope = access.Data!;
         if (scope.RestrictedBranchId.HasValue && vehicle.CurrentBranchId != scope.RestrictedBranchId.Value)
         {
@@ -356,10 +366,11 @@ public sealed class AccessoryService : IAccessoryService
             return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, "Not enough stock to issue accessory.");
         }
 
-        await using var tx = await _repository.BeginTransactionAsync();
-        try
+        ServiceResult<IssueVehicleAccessoryResponseDto>? result = null;
+        await _repository.ExecuteInTransactionAsync(async () =>
         {
             var now = DateTime.UtcNow;
+            var installedBy = request.InstalledBy ?? actorUserId;
             var vehicleAccessory = new VehicleAccessory
             {
                 VehicleId = request.VehicleId,
@@ -367,7 +378,7 @@ public sealed class AccessoryService : IAccessoryService
                 Quantity = request.Quantity,
                 InstallDate = request.InstallDate ?? DateOnly.FromDateTime(now),
                 Notes = request.Notes,
-                InstalledBy = request.InstalledBy,
+                InstalledBy = installedBy,
                 Status = "Installed",
                 CreatedAt = now,
                 UpdatedAt = now
@@ -388,30 +399,24 @@ public sealed class AccessoryService : IAccessoryService
                 Quantity = request.Quantity,
                 UnitPrice = accessory.UnitPrice,
                 Notes = request.Notes,
-                PerformedBy = request.InstalledBy,
+                PerformedBy = installedBy,
                 TransactionDate = now
             });
 
             var persisted = await _repository.GetVehicleAccessoryWithAccessoryAsync(createdVehicleAccessory.Id);
             if (persisted == null)
             {
-                await tx.RollbackAsync();
-                return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(500, "Failed to load created vehicle accessory.");
+                throw new InvalidOperationException("Failed to load created vehicle accessory.");
             }
 
-            await tx.CommitAsync();
-
-            return ServiceResult<IssueVehicleAccessoryResponseDto>.SuccessResult(new IssueVehicleAccessoryResponseDto
+            result = ServiceResult<IssueVehicleAccessoryResponseDto>.SuccessResult(new IssueVehicleAccessoryResponseDto
             {
                 VehicleAccessory = MapVehicleAccessory(persisted),
                 RemainingStock = accessory.QuantityInStock ?? 0
             }, 201);
-        }
-        catch
-        {
-            await tx.RollbackAsync();
-            throw;
-        }
+        });
+
+        return result ?? ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(500, "Failed to issue accessory.");
     }
 
     public async Task<ServiceResult<VehicleAccessoryDto>> HandleVehicleAccessoryActionAsync(
@@ -474,12 +479,13 @@ public sealed class AccessoryService : IAccessoryService
             }
         }
 
-        await using var tx = await _repository.BeginTransactionAsync();
-        try
+        ServiceResult<VehicleAccessoryDto>? result = null;
+        await _repository.ExecuteInTransactionAsync(async () =>
         {
             var now = DateTime.UtcNow;
+            var removedBy = request.RemovedBy ?? actorUserId;
             entity.RemoveDate = request.RemoveDate ?? DateOnly.FromDateTime(now);
-            entity.RemovedBy = request.RemovedBy;
+            entity.RemovedBy = removedBy;
             entity.Notes = request.Notes;
             entity.UpdatedAt = now;
 
@@ -516,18 +522,14 @@ public sealed class AccessoryService : IAccessoryService
                 Quantity = entity.Quantity,
                 UnitPrice = entity.Accessory.UnitPrice,
                 Notes = request.Notes,
-                PerformedBy = request.RemovedBy,
+                PerformedBy = removedBy,
                 TransactionDate = now
             });
 
-            await tx.CommitAsync();
-            return ServiceResult<VehicleAccessoryDto>.SuccessResult(MapVehicleAccessory(entity));
-        }
-        catch
-        {
-            await tx.RollbackAsync();
-            throw;
-        }
+            result = ServiceResult<VehicleAccessoryDto>.SuccessResult(MapVehicleAccessory(entity));
+        });
+
+        return result ?? ServiceResult<VehicleAccessoryDto>.Fail(500, "Failed to process vehicle accessory action.");
     }
 
     public async Task<ServiceResult<List<VehicleAccessoryDto>>> GetVehicleAccessoriesAsync(
@@ -674,6 +676,12 @@ public sealed class AccessoryService : IAccessoryService
             .Replace("-", string.Empty)
             .Trim()
             .ToLowerInvariant();
+    }
+
+    private static bool IsDisposed(string? status)
+    {
+        return string.Equals(status, DisposedVehicleStatus, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(status, LiquidatedVehicleStatus, StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed record AccessScope(int? RestrictedBranchId);

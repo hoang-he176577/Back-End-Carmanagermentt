@@ -1,6 +1,5 @@
 using Data.Repositories.DisposalProposals.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Models.DTO.DisposalProposals;
 using Models.Models;
 using System.Linq.Expressions;
@@ -161,6 +160,15 @@ public sealed class DisposalProposalRepository : IDisposalProposalRepository
                 x.Status == "Pending");
     }
 
+    public Task<bool> HasActiveAccessoriesAsync(int vehicleId)
+    {
+        return _context.VehicleAccessories.AsNoTracking()
+            .AnyAsync(x =>
+                x.VehicleId == vehicleId &&
+                x.DeletedAt == null &&
+                x.Status == "Installed");
+    }
+
     public Task AddProposalAsync(DisposalProposal proposal)
     {
         _context.DisposalProposals.Add(proposal);
@@ -173,9 +181,23 @@ public sealed class DisposalProposalRepository : IDisposalProposalRepository
         return Task.CompletedTask;
     }
 
-    public Task<IDbContextTransaction> BeginTransactionAsync()
+    public Task ExecuteInTransactionAsync(Func<Task> operation)
     {
-        return _context.Database.BeginTransactionAsync();
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await operation();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+        });
     }
 
     public Task SaveChangesAsync()

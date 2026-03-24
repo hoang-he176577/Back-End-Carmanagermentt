@@ -10,6 +10,10 @@ using Data.Repositories.VehicleAssets.Implementations;
 using Data.Repositories.VehicleAssets.Interfaces;
 using Data.Repositories.DisposalProposals.Implementations;
 using Data.Repositories.DisposalProposals.Interfaces;
+using Data.Repositories.DriverTransfer.Implementations;
+using Data.Repositories.DriverTransfer.Interfaces;
+using Data.Repositories.Drivers.Implementations;
+using Data.Repositories.Drivers.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -25,6 +29,10 @@ using Service.Services.VehicleAssets.Implementations;
 using Service.Services.VehicleAssets.Interfaces;
 using Service.Services.DisposalProposals.Implementations;
 using Service.Services.DisposalProposals.Interfaces;
+using Service.Services.DriverTransfer.Implementations;
+using Service.Services.DriverTransfer.Interfaces;
+using Service.Services.Drivers.Implementations;
+using Service.Services.Drivers.Interfaces;
 using Data.Repositories.Implementations;
 using Data.Repositories.Interfaces;
 using Service.Services.Implementations;
@@ -98,6 +106,10 @@ builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
 builder.Services.AddScoped<IAccessoryService, AccessoryService>();
 builder.Services.AddScoped<IDisposalProposalRepository, DisposalProposalRepository>();
 builder.Services.AddScoped<IDisposalProposalService, DisposalProposalService>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<IDriverTransferRepository, DriverTransferRepository>();
+builder.Services.AddScoped<IDriverTransferService, DriverTransferService>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -112,19 +124,19 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 
 
 
-// 🔥 ADD USER REPO & SERVICE
+// ≡ƒöÑ ADD USER REPO & SERVICE
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// 🔥 ADD PENDING REQUEST REPO & SERVICE
+// ≡ƒöÑ ADD PENDING REQUEST REPO & SERVICE
 builder.Services.AddScoped<IPendingRequestRepository, PendingRequestRepository>();
 builder.Services.AddScoped<IPendingRequestService, PendingRequestService>();
 
-// 🔥 ADD VEHICLE RECEPTION REPO & SERVICE
+// ≡ƒöÑ ADD VEHICLE RECEPTION REPO & SERVICE
 builder.Services.AddScoped<IVehicleReceptionRepository, VehicleReceptionRepository>();
 builder.Services.AddScoped<IVehicleReceptionService, VehicleReceptionService>();
 
-// 🔥 ADD VEHICLE DISTRIBUTION REPO & SERVICE
+// ≡ƒöÑ ADD VEHICLE DISTRIBUTION REPO & SERVICE
 builder.Services.AddScoped<IVehicleDistributionRepository, VehicleDistributionRepository>();
 builder.Services.AddScoped<IVehicleDistributionService, VehicleDistributionService>();
 
@@ -207,7 +219,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 🔥 CORS – cho phép frontend gọi API
+// ≡ƒöÑ CORS ΓÇô cho ph├⌐p frontend gß╗ìi API
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -229,7 +241,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection(); // tắt để tránh redirect CORS khi dev
+// app.UseHttpsRedirection(); // tß║»t ─æß╗â tr├ính redirect CORS khi dev
 app.UseCors("AllowFrontend");
 app.UseCustomExceptionHandler();
 
