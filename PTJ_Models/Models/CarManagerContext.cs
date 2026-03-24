@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,10 +30,6 @@ public partial class CarManagerContext : DbContext
     public virtual DbSet<DisposalProposal> DisposalProposals { get; set; }
 
     public virtual DbSet<Driver> Drivers { get; set; }
-
-    public virtual DbSet<DriverTransferDetail> DriverTransferDetails { get; set; }
-
-    public virtual DbSet<DriverTransferRequest> DriverTransferRequests { get; set; }
 
     public virtual DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
@@ -318,83 +314,6 @@ public partial class CarManagerContext : DbContext
                 .HasConstraintName("FK__driver__branch_i__4BAC3F29");
         });
 
-        modelBuilder.Entity<DriverTransferRequest>(entity =>
-        {
-            entity.ToTable("driver_transfer_request");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.RequestingBranchId).HasColumnName("requesting_branch_id");
-            entity.Property(e => e.RequestedQuantity).HasColumnName("requested_quantity");
-            entity.Property(e => e.FulfilledQuantity)
-                .HasDefaultValue(0)
-                .HasColumnName("fulfilled_quantity");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .HasDefaultValue("Pending")
-                .HasColumnName("status");
-            entity.Property(e => e.Reason).HasColumnName("reason");
-            entity.Property(e => e.CreatedByUserId).HasColumnName("created_by_user_id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.DeletedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("deleted_at");
-
-            entity.HasOne(d => d.RequestingBranch).WithMany(p => p.DriverTransferRequests)
-                .HasForeignKey(d => d.RequestingBranchId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_driver_transfer_request_branch");
-
-            entity.HasOne(d => d.CreatedByUser).WithMany(p => p.DriverTransferRequestsCreatedByUser)
-                .HasForeignKey(d => d.CreatedByUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_driver_transfer_request_user");
-        });
-
-        modelBuilder.Entity<DriverTransferDetail>(entity =>
-        {
-            entity.ToTable("driver_transfer_detail");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.TransferRequestId).HasColumnName("transfer_request_id");
-            entity.Property(e => e.DriverId).HasColumnName("driver_id");
-            entity.Property(e => e.FromBranchId).HasColumnName("from_branch_id");
-            entity.Property(e => e.ConfirmedByUserId).HasColumnName("confirmed_by_user_id");
-            entity.Property(e => e.TransferDate)
-                .HasColumnType("datetime")
-                .HasColumnName("transfer_date");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-
-            entity.HasOne(d => d.TransferRequest).WithMany(p => p.TransferDetails)
-                .HasForeignKey(d => d.TransferRequestId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_driver_transfer_detail_request");
-
-            entity.HasOne(d => d.Driver).WithMany()
-                .HasForeignKey(d => d.DriverId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_driver_transfer_detail_driver");
-
-            entity.HasOne(d => d.FromBranch).WithMany(p => p.DriverTransferDetailsFromBranch)
-                .HasForeignKey(d => d.FromBranchId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_driver_transfer_detail_branch");
-
-            entity.HasOne(d => d.ConfirmedByUser).WithMany(p => p.DriverTransferDetailsConfirmedByUser)
-                .HasForeignKey(d => d.ConfirmedByUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_driver_transfer_detail_user");
-        });
-
         modelBuilder.Entity<EmailVerificationToken>(entity =>
         {
             entity.HasKey(e => e.EvtokenId);
@@ -676,14 +595,6 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
 
-            entity.Property(e => e.CheckoutDate)
-                .HasColumnType("datetime")
-                .HasColumnName("checkout_date");
-
-            entity.Property(e => e.CheckinDate)
-                .HasColumnType("datetime")
-                .HasColumnName("checkin_date");
-
             entity.HasOne(d => d.FromBranch).WithMany(p => p.TransferPlanFromBranches)
                 .HasForeignKey(d => d.FromBranchId)
                 .HasConstraintName("FK__transfer___from___7D439ABD");
@@ -733,9 +644,7 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.StartTime)
                 .HasColumnType("datetime")
                 .HasColumnName("start_time");
-            entity.Property(e => e.StartedBy)
-                .HasColumnName("started_by")
-                .HasDefaultValue(0);
+            entity.Property(e => e.StartedBy).HasColumnName("started_by");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.TripLogs)
@@ -961,10 +870,7 @@ public partial class CarManagerContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__trip_log__3213E83F3639C1E1");
 
-            // Cß║Ñu h├¼nh Indexes (Chß╗ë mß╗Ñc) tß╗½ SQL Script
-            entity.HasIndex(e => e.PurchaseProposalId, "IX_VehicleReception_PurchaseProposalId");
-            entity.HasIndex(e => e.BranchId, "IX_VehicleReception_BranchId");
-            entity.HasIndex(e => e.Status, "IX_VehicleReception_Status");
+            entity.ToTable("trip_log", tb => tb.HasTrigger("TRG_UpdateVehicleMileage"));
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
