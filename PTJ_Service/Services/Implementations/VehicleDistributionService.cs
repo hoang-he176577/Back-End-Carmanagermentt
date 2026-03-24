@@ -139,6 +139,7 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
             // Operator at source branch confirms vehicle departure
             plan.Status = "InTransit";
             plan.CheckoutDate = DateTime.Now;
+            plan.CheckoutByUserId = userId;
 
             if (plan.VehicleId.HasValue)
             {
@@ -152,6 +153,7 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
             // Operator at destination branch confirms vehicle arrival
             plan.Status = "Completed";
             plan.CheckinDate = DateTime.Now;
+            plan.CheckinByUserId = userId;
             plan.ExecutedDate = DateOnly.FromDateTime(DateTime.Now);
 
             if (plan.VehicleId.HasValue)

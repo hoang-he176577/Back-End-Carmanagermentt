@@ -29,7 +29,9 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         ExecutedDate = t.ExecutedDate,
         Status = t.Status,
         CheckoutDate = t.CheckoutDate,
+        CheckoutByName = t.CheckoutByUser != null ? t.CheckoutByUser.Name : null,
         CheckinDate = t.CheckinDate,
+        CheckinByName = t.CheckinByUser != null ? t.CheckinByUser.Name : null,
         CreatedAt = t.CreatedAt
     };
 
@@ -110,7 +112,7 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
                 BranchName = b.Name,
                 TotalVehicles = b.Vehicles.Count(v => v.DeletedAt == null),
                 ActiveVehicles = b.Vehicles.Count(v => v.DeletedAt == null && v.Status == "Active"),
-                InTransferVehicles = b.Vehicles.Count(v => v.DeletedAt == null && v.Status == "InTransfer"),
+                InTransferVehicles = b.TransferPlanFromBranches.Count(t => t.DeletedAt == null && (t.Status == "Pending" || t.Status == "InTransit")),
                 Vehicles = b.Vehicles
                 .Where(v => v.DeletedAt == null)
                 .Select(v => new Models.DTO.Vehicles.VehicleAssetDto

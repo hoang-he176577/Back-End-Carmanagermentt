@@ -662,9 +662,15 @@ public partial class CarManagerContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("checkout_date");
 
+            entity.Property(e => e.CheckoutByUserId)
+                .HasColumnName("checkout_by_user_id");
+
             entity.Property(e => e.CheckinDate)
                 .HasColumnType("datetime")
                 .HasColumnName("checkin_date");
+
+            entity.Property(e => e.CheckinByUserId)
+                .HasColumnName("checkin_by_user_id");
 
             entity.HasOne(d => d.FromBranch).WithMany(p => p.TransferPlanFromBranches)
                 .HasForeignKey(d => d.FromBranchId)
@@ -681,6 +687,14 @@ public partial class CarManagerContext : DbContext
             entity.HasOne(d => d.Vehicle).WithMany(p => p.TransferPlans)
                 .HasForeignKey(d => d.VehicleId)
                 .HasConstraintName("FK__transfer___vehic__45BE5BA9");
+
+            entity.HasOne(d => d.CheckoutByUser).WithMany()
+                .HasForeignKey(d => d.CheckoutByUserId)
+                .HasConstraintName("FK_transfer_plan_checkout_by");
+
+            entity.HasOne(d => d.CheckinByUser).WithMany()
+                .HasForeignKey(d => d.CheckinByUserId)
+                .HasConstraintName("FK_transfer_plan_checkin_by");
         });
 
         modelBuilder.Entity<TripLog>(entity =>

@@ -17,6 +17,8 @@ public sealed class TransferPlanDto
     public DateOnly? ExecutedDate { get; set; }
     public string? Status { get; set; }
     public DateTime? CheckoutDate { get; set; }
+    public string? CheckoutByName { get; set; }
     public DateTime? CheckinDate { get; set; }
+    public string? CheckinByName { get; set; }
     public DateTime? CreatedAt { get; set; }
 }
