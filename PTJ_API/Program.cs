@@ -2,18 +2,10 @@
 using API.Middlewares;
 using Data.Repositories.Auth.Implementations;
 using Data.Repositories.Auth.Interfaces;
-using Data.Repositories.Accessories.Implementations;
-using Data.Repositories.Accessories.Interfaces;
 using Data.Repositories.MaintenanceRequests.Implementations;
 using Data.Repositories.MaintenanceRequests.Interfaces;
 using Data.Repositories.VehicleAssets.Implementations;
 using Data.Repositories.VehicleAssets.Interfaces;
-using Data.Repositories.DisposalProposals.Implementations;
-using Data.Repositories.DisposalProposals.Interfaces;
-using Data.Repositories.DriverTransfer.Implementations;
-using Data.Repositories.DriverTransfer.Interfaces;
-using Data.Repositories.Drivers.Implementations;
-using Data.Repositories.Drivers.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,18 +13,10 @@ using Microsoft.OpenApi.Models;
 using Models.Models;
 using Service.Services.Auth.Implementations;
 using Service.Services.Auth.Interfaces;
-using Service.Services.Accessories.Implementations;
-using Service.Services.Accessories.Interfaces;
 using Service.Services.MaintenanceRequests.Implementations;
 using Service.Services.MaintenanceRequests.Interfaces;
 using Service.Services.VehicleAssets.Implementations;
 using Service.Services.VehicleAssets.Interfaces;
-using Service.Services.DisposalProposals.Implementations;
-using Service.Services.DisposalProposals.Interfaces;
-using Service.Services.DriverTransfer.Implementations;
-using Service.Services.DriverTransfer.Interfaces;
-using Service.Services.Drivers.Implementations;
-using Service.Services.Drivers.Interfaces;
 using Data.Repositories.Implementations;
 using Data.Repositories.Interfaces;
 using Service.Services.Implementations;
@@ -49,7 +33,6 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-        options.JsonSerializerOptions.Converters.Add(new DateOnlyNullableJsonConverter());
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
@@ -100,43 +83,23 @@ builder.Services.AddScoped<IPurchaseProposalRepository, PurchaseProposalReposito
 builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
-builder.Services.AddScoped<IBranchRepository, BranchRepository>();
-
-builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
-builder.Services.AddScoped<IAccessoryService, AccessoryService>();
-builder.Services.AddScoped<IDisposalProposalRepository, DisposalProposalRepository>();
-builder.Services.AddScoped<IDisposalProposalService, DisposalProposalService>();
-builder.Services.AddScoped<IDriverRepository, DriverRepository>();
-builder.Services.AddScoped<IDriverService, DriverService>();
-builder.Services.AddScoped<IDriverTransferRepository, DriverTransferRepository>();
-builder.Services.AddScoped<IDriverTransferService, DriverTransferService>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IPurchaseProposalService, PurchaseProposalService>();
-builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
-builder.Services.AddScoped<ITripLogService, TripLogService>();
+builder.Services.AddScoped<ITripLogsService, TripLogService>();
 
-builder.Services.AddScoped<IBranchService, BranchService>();
-
-
-
-
-// ≡ƒöÑ ADD USER REPO & SERVICE
+// 🔥 ADD USER REPO & SERVICE
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// ≡ƒöÑ ADD PENDING REQUEST REPO & SERVICE
+// 🔥 ADD PENDING REQUEST REPO & SERVICE
 builder.Services.AddScoped<IPendingRequestRepository, PendingRequestRepository>();
 builder.Services.AddScoped<IPendingRequestService, PendingRequestService>();
 
-// ≡ƒöÑ ADD VEHICLE RECEPTION REPO & SERVICE
-builder.Services.AddScoped<IVehicleReceptionRepository, VehicleReceptionRepository>();
-builder.Services.AddScoped<IVehicleReceptionService, VehicleReceptionService>();
-
-// ≡ƒöÑ ADD VEHICLE DISTRIBUTION REPO & SERVICE
+// 🔥 ADD VEHICLE DISTRIBUTION REPO & SERVICE
 builder.Services.AddScoped<IVehicleDistributionRepository, VehicleDistributionRepository>();
 builder.Services.AddScoped<IVehicleDistributionService, VehicleDistributionService>();
 
@@ -219,7 +182,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// ≡ƒöÑ CORS ΓÇô cho ph├⌐p frontend gß╗ìi API
+// 🔥 CORS – cho phép frontend gọi API
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -241,19 +204,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection(); // tß║»t ─æß╗â tr├ính redirect CORS khi dev
+// app.UseHttpsRedirection(); // tắt để tránh redirect CORS khi dev
 app.UseCors("AllowFrontend");
 app.UseCustomExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Serve uploaded files from wwwroot
-app.UseStaticFiles();
-
-// Ensure upload directory exists
-var uploadsPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "uploads", "vehicles");
-Directory.CreateDirectory(uploadsPath);
 
 app.MapControllers();
 app.Run();

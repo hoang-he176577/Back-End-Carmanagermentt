@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -32,8 +32,6 @@ public partial class Vehicle
     public DateTime? UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
-
-    public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
 
     public virtual ICollection<AssetChangeLog> AssetChangeLogs { get; set; } = new List<AssetChangeLog>();
 

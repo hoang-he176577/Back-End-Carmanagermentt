@@ -27,8 +27,6 @@ public partial class User
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
-
     public virtual ICollection<AssetChangeLog> AssetChangeLogs { get; set; } = new List<AssetChangeLog>();
 
     public virtual Branch? Branch { get; set; }
@@ -40,10 +38,6 @@ public partial class User
     public virtual ICollection<DisposalProposal> DisposalProposalManagers { get; set; } = new List<DisposalProposal>();
 
     public virtual ICollection<DisposalProposal> DisposalProposalProposers { get; set; } = new List<DisposalProposal>();
-
-    public virtual ICollection<DriverTransferDetail> DriverTransferDetailsConfirmedByUser { get; set; } = new List<DriverTransferDetail>();
-
-    public virtual ICollection<DriverTransferRequest> DriverTransferRequestsCreatedByUser { get; set; } = new List<DriverTransferRequest>();
 
     public virtual ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
 
@@ -60,10 +54,6 @@ public partial class User
     public virtual ICollection<PurchaseProposal> PurchaseProposalProposers { get; set; } = new List<PurchaseProposal>();
 
     public virtual ICollection<TransferPlan> TransferPlans { get; set; } = new List<TransferPlan>();
-
-    public virtual ICollection<VehicleAccessory> VehicleAccessoryInstalledByNavigations { get; set; } = new List<VehicleAccessory>();
-
-    public virtual ICollection<VehicleAccessory> VehicleAccessoryRemovedByNavigations { get; set; } = new List<VehicleAccessory>();
 
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 }
