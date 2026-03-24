@@ -21,6 +21,10 @@ public partial class Branch
 
     public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
 
+    public virtual ICollection<DriverTransferDetail> DriverTransferDetailsFromBranch { get; set; } = new List<DriverTransferDetail>();
+
+    public virtual ICollection<DriverTransferRequest> DriverTransferRequests { get; set; } = new List<DriverTransferRequest>();
+
     public virtual ICollection<TransferPlan> TransferPlanFromBranches { get; set; } = new List<TransferPlan>();
 
     public virtual ICollection<TransferPlan> TransferPlanToBranches { get; set; } = new List<TransferPlan>();

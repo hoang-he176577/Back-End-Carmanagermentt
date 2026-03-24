@@ -39,6 +39,10 @@ public partial class User
 
     public virtual ICollection<DisposalProposal> DisposalProposalProposers { get; set; } = new List<DisposalProposal>();
 
+    public virtual ICollection<DriverTransferDetail> DriverTransferDetailsConfirmedByUser { get; set; } = new List<DriverTransferDetail>();
+
+    public virtual ICollection<DriverTransferRequest> DriverTransferRequestsCreatedByUser { get; set; } = new List<DriverTransferRequest>();
+
     public virtual ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
 
     public virtual ICollection<MaintenanceRequest> MaintenanceRequestAccountants { get; set; } = new List<MaintenanceRequest>();

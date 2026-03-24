@@ -65,10 +65,10 @@ public sealed class VehicleDistributionController : BaseController
     }
 
     /// <summary>
-    /// Tạo kế hoạch điều chuyển mới (chỉ Branch Asset Accountant).
+    /// Tạo yêu cầu điều chuyển mới (chỉ Executive Management).
     /// </summary>
     [HttpPost("transfers")]
-    [Authorize(Roles = "Branch Asset Accountant")]
+    [Authorize(Roles = "Executive Management")]
     [ProducesResponseType(typeof(TransferPlanDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -84,10 +84,10 @@ public sealed class VehicleDistributionController : BaseController
     }
 
     /// <summary>
-    /// Cập nhật trạng thái kế hoạch điều chuyển (phê duyệt/từ chối/thực hiện/hủy).
+    /// Cập nhật trạng thái kế hoạch điều chuyển (Checkout/Checkin/Cancelled).
     /// </summary>
     [HttpPut("transfers/{id:int}/status")]
-    [Authorize(Roles = "Executive Management,Branch Asset Accountant,Operator")]
+    [Authorize(Roles = "Executive Management,Operator")]
     [ProducesResponseType(typeof(TransferPlanDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

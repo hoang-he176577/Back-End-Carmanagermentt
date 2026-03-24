@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.DTO.Vehicles;
 using Models.Models;
 using Service.Services.VehicleAssets.Interfaces;
@@ -212,6 +213,157 @@ public sealed class VehicleAssetsController : ControllerBase
         }
 
         return Ok(result.Data);
+    }
+
+    // ───────────────── Vehicle Image ─────────────────
+
+    [HttpGet("{id:int}/image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleImage([FromRoute] int id)
+    {
+        try
+        {
+            var db = HttpContext.RequestServices.GetRequiredService<CarManagerContext>();
+            var result = await db.Database
+                .SqlQueryRaw<string>("SELECT image_url AS [Value] FROM vehicle WHERE id = {0}", id)
+                .FirstOrDefaultAsync();
+            return Ok(new { imageUrl = result });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[GetVehicleImage] Error: {ex}");
+            return Ok(new { imageUrl = (string?)null });
+        }
+    }
+
+    [HttpPost("{id:int}/image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UploadVehicleImage([FromRoute] int id, IFormFile file)
+    {
+        try
+        {
+            if (!TryGetActor(out _, out _, out var errorResult))
+            {
+                return errorResult!;
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No file uploaded." });
+            }
+
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+            if (!allowedTypes.Contains(file.ContentType.ToLower()))
+            {
+                return BadRequest(new { message = "Only JPEG, PNG, GIF, and WebP images are allowed." });
+            }
+
+            if (file.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "File size must be less than 5MB." });
+            }
+
+            // Check vehicle exists
+            var db = HttpContext.RequestServices.GetRequiredService<CarManagerContext>();
+            var vehicleExists = await db.Vehicles.AnyAsync(v => v.Id == id);
+            if (!vehicleExists)
+            {
+                return NotFound(new { message = "Vehicle not found." });
+            }
+
+            // Get old image URL via raw SQL to delete the old file
+            var oldImageUrl = await db.Database
+                .SqlQueryRaw<string>("SELECT image_url AS [Value] FROM vehicle WHERE id = {0}", id)
+                .FirstOrDefaultAsync();
+
+            var env = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            var webRoot = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
+
+            if (!string.IsNullOrEmpty(oldImageUrl))
+            {
+                var oldPath = Path.Combine(webRoot, oldImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(oldPath))
+                {
+                    System.IO.File.Delete(oldPath);
+                }
+            }
+
+            // Save new file
+            var uploadsFolder = Path.Combine(webRoot, "uploads", "vehicles");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var ext = Path.GetExtension(file.FileName);
+            var fileName = $"{id}_{Guid.NewGuid()}{ext}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageUrl = $"/uploads/vehicles/{fileName}";
+
+            // Update via raw SQL — completely isolated from EF Core model
+            await db.Database.ExecuteSqlRawAsync(
+                "UPDATE vehicle SET image_url = {0}, updated_at = GETDATE() WHERE id = {1}",
+                imageUrl, id);
+
+            return Ok(new { imageUrl });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[UploadVehicleImage] Error: {ex}");
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id:int}/image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteVehicleImage([FromRoute] int id)
+    {
+        try
+        {
+            if (!TryGetActor(out _, out _, out var errorResult))
+            {
+                return errorResult!;
+            }
+
+            var db = HttpContext.RequestServices.GetRequiredService<CarManagerContext>();
+            var vehicleExists = await db.Vehicles.AnyAsync(v => v.Id == id);
+            if (!vehicleExists)
+            {
+                return NotFound(new { message = "Vehicle not found." });
+            }
+
+            // Get current image URL
+            var imageUrl = await db.Database
+                .SqlQueryRaw<string>("SELECT image_url AS [Value] FROM vehicle WHERE id = {0}", id)
+                .FirstOrDefaultAsync();
+
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                var env = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+                var webRoot = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
+                var fullPath = Path.Combine(webRoot, imageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(fullPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                }
+            }
+
+            await db.Database.ExecuteSqlRawAsync(
+                "UPDATE vehicle SET image_url = NULL, updated_at = GETDATE() WHERE id = {0}", id);
+
+            return Ok(new { message = "Image deleted." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DeleteVehicleImage] Error: {ex}");
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     private bool TryGetActor(out int actorUserId, out IReadOnlyCollection<string> roles, out ActionResult? errorResult)

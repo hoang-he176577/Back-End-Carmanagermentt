@@ -15,7 +15,7 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
     private static readonly HashSet<string> AllowedStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Approved", "Rejected", "Executed", "Cancelled"
+        "Checkout", "Checkin", "Cancelled"
     };
 
     public VehicleDistributionService(IVehicleDistributionRepository repository)
@@ -69,6 +69,12 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
         if (request.FromBranchId == request.ToBranchId)
             return ServiceResult<TransferPlanDto>.Fail(400, "FromBranchId and ToBranchId must be different.");
 
+        if (request.PlanDate is null)
+            return ServiceResult<TransferPlanDto>.Fail(400, "PlanDate is required.");
+
+        if (request.PlanDate < DateOnly.FromDateTime(DateTime.Now))
+            return ServiceResult<TransferPlanDto>.Fail(400, "PlanDate cannot be in the past.");
+
         // Validate existence
         if (!await _repository.VehicleExistsAsync(request.VehicleId.Value))
             return ServiceResult<TransferPlanDto>.Fail(400, "Vehicle not found.");
@@ -79,14 +85,9 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
         if (!await _repository.BranchExistsAsync(request.ToBranchId.Value))
             return ServiceResult<TransferPlanDto>.Fail(400, "ToBranch not found.");
 
-        // Validate that the creator belongs to the fromBranch
-        var userBranchId = await _repository.GetUserBranchIdAsync(managerId);
-        if (userBranchId == null || userBranchId != request.FromBranchId)
-            return ServiceResult<TransferPlanDto>.Fail(403, "You can only create transfer plans from your own branch.");
-
         // Check no active transfer for this vehicle
         if (await _repository.HasActiveTransferAsync(request.VehicleId.Value))
-            return ServiceResult<TransferPlanDto>.Fail(409, "Vehicle already has a pending or approved transfer.");
+            return ServiceResult<TransferPlanDto>.Fail(409, "Vehicle already has a pending or in-transit transfer.");
 
         var plan = new TransferPlan
         {
@@ -119,7 +120,7 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
         if (!AllowedStatuses.Contains(newStatus))
             return ServiceResult<TransferPlanDto>.Fail(400,
-                "Invalid status. Allowed: Approved, Rejected, Executed, Cancelled.");
+                "Invalid status. Allowed: Checkout, Checkin, Cancelled.");
 
         var plan = await _repository.GetTransferPlanEntityAsync(id);
         if (plan == null)
@@ -127,24 +128,35 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
         // ── State-machine validation ──
         var current = plan.Status ?? string.Empty;
-        var error = ValidateTransition(current, newStatus, userRole, userId, plan.ManagerId);
+        var userBranchId = await _repository.GetUserBranchIdAsync(userId);
+        var error = ValidateTransition(current, newStatus, userRole, userBranchId, plan.FromBranchId, plan.ToBranchId);
         if (error != null)
             return ServiceResult<TransferPlanDto>.Fail(403, error);
 
-        plan.Status = newStatus;
-
-        if (plan.VehicleId.HasValue)
+        // ── Apply state change ──
+        if (string.Equals(newStatus, "Checkout", StringComparison.OrdinalIgnoreCase))
         {
-            if (string.Equals(newStatus, "Approved", StringComparison.OrdinalIgnoreCase))
-            {
-                // Xe bắt đầu trong trạng thái điều chuyển
-                await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "InTransfer");
-            }
-            else if (string.Equals(newStatus, "Executed", StringComparison.OrdinalIgnoreCase))
-            {
-                plan.ExecutedDate = DateOnly.FromDateTime(DateTime.Now);
+            // Operator at source branch confirms vehicle departure
+            plan.Status = "InTransit";
+            plan.CheckoutDate = DateTime.Now;
 
-                // Chuyển xe sang chi nhánh mới và đặt lại Active
+            if (plan.VehicleId.HasValue)
+            {
+                await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "InTransfer");
+                // Gỡ tài xế — tài xế ở lại chi nhánh cũ, xe đi không có tài xế
+                await _repository.UnassignVehicleDriverAsync(plan.VehicleId.Value);
+            }
+        }
+        else if (string.Equals(newStatus, "Checkin", StringComparison.OrdinalIgnoreCase))
+        {
+            // Operator at destination branch confirms vehicle arrival
+            plan.Status = "Completed";
+            plan.CheckinDate = DateTime.Now;
+            plan.ExecutedDate = DateOnly.FromDateTime(DateTime.Now);
+
+            if (plan.VehicleId.HasValue)
+            {
+                // Move vehicle to new branch and set Active
                 if (plan.ToBranchId.HasValue)
                 {
                     await _repository.UpdateVehicleBranchAsync(
@@ -152,14 +164,16 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
                 }
                 await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "Active");
             }
-            else if (string.Equals(newStatus, "Rejected", StringComparison.OrdinalIgnoreCase)
-                  || string.Equals(newStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
+        }
+        else if (string.Equals(newStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
+        {
+            plan.Status = "Cancelled";
+
+            // If vehicle was already InTransfer (from checkout), reset to Active
+            if (plan.VehicleId.HasValue
+                && string.Equals(current, "InTransit", StringComparison.OrdinalIgnoreCase))
             {
-                // Nếu xe đang ở trạng thái InTransfer thì reset lại Active
-                if (string.Equals(current, "Approved", StringComparison.OrdinalIgnoreCase))
-                {
-                    await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "Active");
-                }
+                await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "Active");
             }
         }
 
@@ -172,43 +186,47 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
     // ───────────────── Helpers ─────────────────
 
     private static string? ValidateTransition(
-        string currentStatus, string newStatus, string userRole, int userId, int? planManagerId)
+        string currentStatus, string newStatus, string userRole,
+        int? userBranchId, int? fromBranchId, int? toBranchId)
     {
         var isExec = string.Equals(userRole, "Executive Management", StringComparison.OrdinalIgnoreCase);
-        var isAccountant = string.Equals(userRole, "Branch Asset Accountant", StringComparison.OrdinalIgnoreCase);
         var isOperator = string.Equals(userRole, "Operator", StringComparison.OrdinalIgnoreCase);
 
         switch (currentStatus)
         {
             case "Pending":
-                if (newStatus is "Approved" or "Rejected")
+                if (string.Equals(newStatus, "Checkout", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!isExec)
-                        return "Only Executive Management can approve or reject a transfer.";
+                    if (!isOperator)
+                        return "Only Operator can perform checkout.";
+                    if (userBranchId == null || userBranchId != fromBranchId)
+                        return "Only Operator at the source branch can perform checkout.";
                     return null;
                 }
-                if (newStatus == "Cancelled")
+                if (string.Equals(newStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (isExec || (isAccountant && planManagerId == userId))
-                        return null;
-                    return "You do not have permission to cancel this transfer.";
+                    if (!isExec)
+                        return "Only Executive Management can cancel a transfer.";
+                    return null;
                 }
                 return $"Cannot transition from Pending to {newStatus}.";
 
-            case "Approved":
-                if (newStatus == "Executed")
+            case "InTransit":
+                if (string.Equals(newStatus, "Checkin", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!isOperator)
-                        return "Only Operator can execute a transfer.";
+                        return "Only Operator can perform checkin.";
+                    if (userBranchId == null || userBranchId != toBranchId)
+                        return "Only Operator at the destination branch can perform checkin.";
                     return null;
                 }
-                if (newStatus == "Cancelled")
+                if (string.Equals(newStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (isExec)
-                        return null;
-                    return "Only Executive Management can cancel an approved transfer.";
+                    if (!isExec)
+                        return "Only Executive Management can cancel a transfer.";
+                    return null;
                 }
-                return $"Cannot transition from Approved to {newStatus}.";
+                return $"Cannot transition from InTransit to {newStatus}.";
 
             default:
                 return $"Transfer plan is already '{currentStatus}' and cannot be updated.";

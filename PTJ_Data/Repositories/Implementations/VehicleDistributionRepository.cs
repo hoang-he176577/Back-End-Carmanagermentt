@@ -28,6 +28,8 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         PlanDate = t.PlanDate,
         ExecutedDate = t.ExecutedDate,
         Status = t.Status,
+        CheckoutDate = t.CheckoutDate,
+        CheckinDate = t.CheckinDate,
         CreatedAt = t.CreatedAt
     };
 
@@ -134,7 +136,7 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         return _context.TransferPlans.AsNoTracking()
             .AnyAsync(t => t.VehicleId == vehicleId
                         && t.DeletedAt == null
-                        && (t.Status == "Pending" || t.Status == "Approved"));
+                        && (t.Status == "Pending" || t.Status == "InTransit"));
     }
 
     public async Task UpdateVehicleBranchAsync(int vehicleId, int newBranchId)
@@ -154,6 +156,17 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         if (vehicle != null)
         {
             vehicle.Status = status;
+            vehicle.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task UnassignVehicleDriverAsync(int vehicleId)
+    {
+        var vehicle = await _context.Vehicles.FindAsync(vehicleId);
+        if (vehicle != null)
+        {
+            vehicle.CurrentDriverId = null;
             vehicle.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
         }
