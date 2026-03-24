@@ -42,7 +42,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreatePurchaseProposalDto dto)
         {
-            var result = await _service.CreateAsync(dto);
+            var result = await _service.CreateAsync(dto, GetUserId(), GetBranchId());
             return HandleCreated(result,"Create proposal successfully");
         }
 

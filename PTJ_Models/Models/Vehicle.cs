@@ -55,6 +55,8 @@ public partial class Vehicle
 
     public virtual ICollection<TransferPlan> TransferPlans { get; set; } = new List<TransferPlan>();
 
+    public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
+
     public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
 
     public virtual ICollection<VehicleDriverHistory> VehicleDriverHistories { get; set; } = new List<VehicleDriverHistory>();

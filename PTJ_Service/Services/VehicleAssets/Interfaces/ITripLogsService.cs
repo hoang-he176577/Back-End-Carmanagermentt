@@ -17,5 +17,9 @@ namespace Service.Services.VehicleAssets.Interfaces
         Task<bool> StartTripAsync(StartTripRequestDto request);
 
         Task<bool> EndTripAsync(int tripId, EndTripRequestDto request);
+
+        Task<List<ManageVehicleTripDto>> GetManageVehiclesAsync(int branchId, string? tab);
+
+        Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId);
     }
 }

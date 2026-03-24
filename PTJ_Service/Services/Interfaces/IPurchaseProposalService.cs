@@ -9,7 +9,7 @@ namespace Service.Services.Interfaces
     {
         Task<List<PurchaseProposalListDto>> GetAllAsync();
         Task<PurchaseProposal?> GetByIdAsync(int id);
-        Task<object> CreateAsync(CreatePurchaseProposalDto dto);
+        Task<object> CreateAsync(CreatePurchaseProposalDto dto, int proposerId, int branchId);
         Task ApproveByManagerAsync(int proposalId, int managerId);
         Task RejectAsync(int proposalId, string reason);
         Task DeleteAsync(int proposalId);
