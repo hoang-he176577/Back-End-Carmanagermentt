@@ -22,8 +22,8 @@ public class TripLogsController : BaseController
         return HandleCreated(await _tripService.StartTripAsync(dto), "Start trip successfully");
     } 
 
-    [HttpPost("end/{tripId}")]
-    public async Task<IActionResult> EndTrip(int tripId, EndTripRequestDto dto)
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
     {
         dto.EndedBy = GetUserId();
         await _tripService.EndTripAsync(tripId, dto);
@@ -49,8 +49,16 @@ public class TripLogsController : BaseController
         var result = await _tripService.GetManageVehiclesAsync(branchId, tab);
         return Ok(result);
     }
-    [HttpGet("vehicle-drop")]
-    public async Task<IActionResult> GetVehicleDropHistory()
+
+    [HttpGet("history")]
+    public async Task<IActionResult> GetAllHistory()
+    {
+        var result = await _service.GetAllTripHistoryAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("vehicle/{vehicleId}/history")]
+    public async Task<IActionResult> GetVehicleHistory(int vehicleId)
     {
         var result = await _tripService.GetVehicleDropAsync();
         return Ok(result);

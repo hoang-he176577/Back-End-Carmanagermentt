@@ -10,6 +10,8 @@ namespace Service.Services.VehicleAssets.Interfaces
 
         Task EndTripAsync(int tripId, EndTripRequestDto dto);
 
+        Task<List<TripHistoryResponseDto>> GetAllTripHistoryAsync();
+
         Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId);
 
         Task<List<ManageVehicleTripDto>> GetManageVehiclesAsync(int branchId, string? tab);

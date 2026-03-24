@@ -210,14 +210,83 @@ namespace Service.Services.VehicleAssets.Implementations
             return FilterManageVehicles(items, tab);
         }
 
-        private static bool IsReadyStatus(string? status)
+        public async Task<List<TripHistoryResponseDto>> GetAllTripHistoryAsync()
+        {
+            var trips = await _repo.GetAllAsync();
+
+            return trips.Select(t =>
+            {
+                var meta = ParseMeta(t.Purpose);
+                return new TripHistoryResponseDto
+                {
+                    TripId = t.Id,
+                    VehicleId = t.VehicleId,
+                    VehicleLicensePlate = t.Vehicle?.LicensePlate,
+                    DriverId = t.DriverId,
+                    DriverName = t.Driver?.Name,
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime,
+                    StartMileage = t.StartMileage,
+                    EndMileage = t.EndMileage,
+                    Origin = t.Origin,
+                    Destination = t.Destination,
+                    Purpose = meta.PurposeText ?? t.Purpose,
+                    PlannedDurationMinutes = meta.PlannedDurationMinutes,
+                    IsStopDifferent = meta.IsStopDifferent,
+                    ActualStop = meta.ActualStop,
+                    StopDeviationReason = meta.StopDeviationReason,
+                    OvertimeReason = meta.OvertimeReason,
+                    ExtensionMinutes = meta.ExtensionMinutes
+                };
+            }).ToList();
+        }
+
+        public async Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId)
         {
             if (string.IsNullOrWhiteSpace(status))
             {
                 return false;
             }
 
-            return ReadyStatuses.Contains(status.Trim());
+            var trips = await _repo.GetTripHistoryByVehicleAsync(vehicleId);
+
+            var tripDtos = trips.Select(t =>
+            {
+                var meta = ParseMeta(t.Purpose);
+                return new TripHistoryResponseDto
+                {
+                    TripId = t.Id,
+                    VehicleId = t.VehicleId,
+                    VehicleLicensePlate = vehicle.LicensePlate,
+                    DriverId = t.DriverId,
+                    DriverName = t.Driver?.Name,
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime,
+                    StartMileage = t.StartMileage,
+                    EndMileage = t.EndMileage,
+                    Origin = t.Origin,
+                    Destination = t.Destination,
+                    Purpose = meta.PurposeText ?? t.Purpose,
+                    PlannedDurationMinutes = meta.PlannedDurationMinutes,
+                    IsStopDifferent = meta.IsStopDifferent,
+                    ActualStop = meta.ActualStop,
+                    StopDeviationReason = meta.StopDeviationReason,
+                    OvertimeReason = meta.OvertimeReason,
+                    ExtensionMinutes = meta.ExtensionMinutes
+                };
+            }).ToList();
+
+            return new TripHistoryByVehicleResponseDto
+            {
+                VehicleId = vehicle.Id,
+                LicensePlate = vehicle.LicensePlate,
+                Status = vehicle.Status,
+                CurrentBranchId = vehicle.CurrentBranchId,
+                CurrentBranchName = vehicle.CurrentBranch?.Name,
+                CurrentDriverId = vehicle.CurrentDriverId,
+                CurrentDriverName = vehicle.CurrentDriver?.Name,
+                Trips = tripDtos
+            };
         }
 
         private static List<ManageVehicleTripDto> FilterManageVehicles(
