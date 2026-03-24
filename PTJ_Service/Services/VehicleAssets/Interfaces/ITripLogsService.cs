@@ -1,25 +1,19 @@
-﻿using Models.DTO.Vehicles;
-using Models.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models.DTO.PurchaseProposal;
+using Models.DTO.Vehicles;
+
 
 namespace Service.Services.VehicleAssets.Interfaces
 {
-    public interface ITripLogsService
+    public interface ITripLogService
     {
-        Task<List<TripLog>> GetAllAsync();
+        Task<int> StartTripAsync(StartTripRequestDto dto);
 
-        Task<TripLog?> GetByIdAsync(int id);
-
-        Task<bool> StartTripAsync(StartTripRequestDto request);
-
-        Task<bool> EndTripAsync(int tripId, EndTripRequestDto request);
-
-        Task<List<ManageVehicleTripDto>> GetManageVehiclesAsync(int branchId, string? tab);
+        Task EndTripAsync(int tripId, EndTripRequestDto dto);
 
         Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId);
+
+        Task<List<ManageVehicleTripDto>> GetManageVehiclesAsync(int branchId, string? tab);
+        Task<List<ListVehicleDrop>> GetVehicleDropAsync();
+        Task<UserBasicDto> GetDriverByVehicleIdAsync(int vehicleId);
     }
 }

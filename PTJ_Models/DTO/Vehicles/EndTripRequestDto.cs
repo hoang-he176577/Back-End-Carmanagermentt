@@ -9,16 +9,8 @@ namespace Models.DTO.Vehicles
 {
     public class EndTripRequestDto
     {
-        [Required]
+        public int EndedBy { get; set; }
+
         public decimal EndMileage { get; set; }
-
-        public bool? IsStopDifferent { get; set; }
-        public string? ActualStop { get; set; }
-        public string? StopDeviationReason { get; set; }
-
-        public string? OvertimeReason { get; set; }
-        public int? ExtensionDays { get; set; }
-        public int? ExtensionHours { get; set; }
-        public int? ExtensionMinutes { get; set; }
     }
 }

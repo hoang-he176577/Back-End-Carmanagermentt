@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Common;
 using Models.Models;
 using Service.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 
 namespace API.Controllers
@@ -15,8 +14,7 @@ namespace API.Controllers
         // ===== USER ID FROM JWT =====
         protected int GetUserId()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? User.FindFirstValue("sub");
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!int.TryParse(userIdClaim, out var userId))
                 throw BusinessErrors.Unauthorized("Invalid user ID in token.");
@@ -27,28 +25,24 @@ namespace API.Controllers
         protected int GetBranchId()
         {
            
-            var branchIdClaim = User.FindFirst("branchId")?.Value
-                ?? User.FindFirst("branch_id")?.Value
-                ?? User.FindFirst("branch")?.Value;
+            var branchIdClaim = User.FindFirst("branchId")?.Value;
 
-            if (int.TryParse(branchIdClaim, out var branchId))
-                return branchId;
-
-            // Fallback: resolve from DB if token does not contain branchId
-            var userId = GetUserId();
-            var db = HttpContext?.RequestServices?.GetService<CarManagerContext>();
-            if (db == null)
+            if (!int.TryParse(branchIdClaim, out var branchId))
+                
                 throw BusinessErrors.Unauthorized("Chi nhánh không hợp lệ hoặc không tồn tại trong token.");
 
-            var branchIdFromDb = db.Users
-                .Where(u => u.Id == userId)
-                .Select(u => u.BranchId)
-                .FirstOrDefault();
+            return branchId;
+        }
 
-            if (!branchIdFromDb.HasValue)
-                throw BusinessErrors.Unauthorized("Chi nhánh không hợp lệ hoặc không tồn tại trong token.");
+        // ===== ROLES LIST FROM JWT =====
+        protected List<string>? GetUserRoles()
+        {
+            // assume roles claim stored as comma-separated string
+            var rolesClaim = User.FindFirst("roles")?.Value;
+            if (string.IsNullOrWhiteSpace(rolesClaim))
+                return null;
 
-            return branchIdFromDb.Value;
+            return rolesClaim.Split(',').Select(r => r.Trim()).ToList();
         }
         // ===== STANDARD RESPONSE =====
         protected IActionResult HandleResult<T>(T result, string? message = null)

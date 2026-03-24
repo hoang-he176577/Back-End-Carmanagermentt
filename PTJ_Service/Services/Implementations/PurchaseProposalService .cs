@@ -30,22 +30,35 @@ using Microsoft.EntityFrameworkCore;
             _context = context;
         }
 
-        public async Task<List<PurchaseProposalListDto>> GetAllAsync()
+        public async Task<List<PurchasePlanDto>> GetAllAsync()
         {
             var proposals = await _repository.GetAllAsync();
             return proposals
-                .Select(p => new PurchaseProposalListDto
+                .Select(p => new PurchasePlanDto
                 {
-                    Id = p.Id,
+                    ProposalId = p.Id,
                     Description = p.Description,
                     Status = p.Status,
                     CreatedDate = p.CreatedDate,
                     ProposedCost = p.ProposedCost,
-                    ManagerName = p.Manager?.Name
+                    ManagerName = p.Manager?.Name,
+                    Priority = CalculatePriority(p),
+                    BranchDetails = p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
+                    {
+                        BranchId = d.BranchId,
+                        BranchName = d.Branch?.Name,
+                        ProposedQuantity = d.ProposedQuantity,
+                        UnitPrice = d.UnitPrice,
+                        Seats = d.Seats,
+                        Manufacturer = d.Manufacturer,
+                        BranchNotes = d.BranchNotes,
+                        RequestedDate = p.CreatedDate
+                    }).ToList()
                 })
                 .OrderBy(p => p.Status == "Pending" ? 1 :
                               p.Status == "Received_Pending_Payment" ? 2 :
                               p.Status == "Approved" ? 3 : 4) // 1. Trạng thái cần xử lý xếp lên đầu
+                .ThenBy(p => p.Priority) // 2. Theo mức độ ưu tiên
                 .ThenBy(p => p.CreatedDate) // 3. Theo ngày tạo (cũ nhất xử lý trước)
                 .ThenByDescending(p => p.ProposedCost) // 4. Theo giá trị (chi phí cao hơn xếp trên)
                 .ToList();
@@ -85,12 +98,18 @@ using Microsoft.EntityFrameworkCore;
                     if (detail.Quantity <= 0) throw new Exception("Số lượng xe phải lớn hơn 0.");
                     if (detail.UnitPrice <= 0) throw new Exception("Đơn giá xe phải lớn hơn 0.");
                     if (detail.UnitPrice > 9999999999999M) throw new Exception("Đơn giá xe vượt mức tối đa cho phép của hệ thống.");
+                    if (string.IsNullOrWhiteSpace(detail.Manufacturer)) throw new Exception("Nhãn hiệu xe không được để trống.");
+                    if (detail.Seats.HasValue && detail.Seats.Value <= 0) throw new Exception("Số chỗ ngồi không hợp lệ.");
+
                     var bulkDetail = new BulkPurchaseDetail();
                     bulkDetail.InitCreate(
                         branchId, // Lấy chi nhánh trực tiếp từ token truyền xuống, KHÔNG lấy từ detail DTO nữa
                         detail.Quantity,
                         detail.UnitPrice,
                         detail.Notes ?? detail.Description);
+
+                    bulkDetail.Seats = detail.Seats;
+                    bulkDetail.Manufacturer = detail.Manufacturer;
 
                     proposal.AddDetail(bulkDetail);
                 }
@@ -268,7 +287,7 @@ using Microsoft.EntityFrameworkCore;
         /// - Nếu branchId > 0: lấy chỉ kế hoạch của chi nhánh đó (cho Operator)
         /// Sắp xếp theo ưu tiên (Priority) 
         /// </summary>
-        public async Task<List<PurchaseProposalListDto>> GetPurchasePlanAsync(int? branchId = null)
+        public async Task<List<PurchasePlanDto>> GetPurchasePlanAsync(int? branchId = null)
         {
             var proposals = await _repository.GetAllAsync();
 
@@ -284,17 +303,49 @@ using Microsoft.EntityFrameworkCore;
                     .ToList();
             }
 
-            // Map sang PurchaseProposalListDto
-            var plans = approved.Select(p => new PurchaseProposalListDto
+            // Map sang PurchasePlanDto
+            var plans = approved.Select(p => new PurchasePlanDto
             {
-                Id = p.Id,
+                ProposalId = p.Id,
                 Description = p.Description,
                 Status = p.Status,
                 CreatedDate = p.CreatedDate,
+                ApprovedDate = p.ApprovedDate,
                 ProposedCost = p.ProposedCost,
-                ManagerName = p.Manager?.Name
+                ManagerName = p.Manager?.Name,
+                Priority = CalculatePriority(p), // Tính priority dựa trên ngày + cost
+
+                // Chi tiết theo chi nhánh
+                BranchDetails = (branchId.HasValue && branchId.Value > 0)
+                    ? p.BulkPurchaseDetails
+                        .Where(d => d.BranchId == branchId.Value)
+                        .Select(d => new BranchPurchaseDetailDto
+                        {
+                            BranchId = d.BranchId,
+                            BranchName = d.Branch?.Name,
+                            ProposedQuantity = d.ProposedQuantity,
+                            UnitPrice = d.UnitPrice,
+                            Seats = d.Seats,
+                            Manufacturer = d.Manufacturer,
+                            BranchNotes = d.BranchNotes,
+                            RequestedDate = p.CreatedDate // Ngày yêu cầu
+                        })
+                        .ToList()
+                    : p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
+                    {
+                        BranchId = d.BranchId,
+                        BranchName = d.Branch?.Name,
+                        ProposedQuantity = d.ProposedQuantity,
+                        UnitPrice = d.UnitPrice,
+                        Seats = d.Seats,
+                        Manufacturer = d.Manufacturer,
+                        BranchNotes = d.BranchNotes,
+                        RequestedDate = p.CreatedDate
+                    })
+                    .ToList()
             })
-            .OrderBy(p => p.CreatedDate) // 2. Theo ngày tạo (cũ nhất ưu tiên trước)
+            .OrderBy(p => p.Priority) // 1. Ưu tiên cao nhất
+            .ThenBy(p => p.CreatedDate) // 2. Theo ngày tạo (cũ nhất ưu tiên trước)
             .ThenByDescending(p => p.ProposedCost) // 3. Theo giá trị (cao xếp trước)
             .ToList();
 
