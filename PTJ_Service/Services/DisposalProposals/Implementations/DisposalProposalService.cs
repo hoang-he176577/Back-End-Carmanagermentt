@@ -256,13 +256,18 @@ public sealed class DisposalProposalService : IDisposalProposalService
             return ServiceResult<DisposalProposalDto>.Fail(409, "Vehicle is already disposed/liquidated.");
         }
 
+        var hasActiveAccessories = await _repository.HasActiveAccessoriesAsync(entity.VehicleId.Value);
+        if (hasActiveAccessories)
+        {
+            return ServiceResult<DisposalProposalDto>.Fail(409, "Vehicle still has active accessories. Please process all installed accessories before approving disposal.");
+        }
+
         if (request.AccountantId.HasValue && !await _repository.UserExistsAsync(request.AccountantId.Value))
         {
             return ServiceResult<DisposalProposalDto>.Fail(400, "Accountant user not found.");
         }
 
-        await using var tx = await _repository.BeginTransactionAsync();
-        try
+        await _repository.ExecuteInTransactionAsync(async () =>
         {
             var now = DateTime.UtcNow;
 
@@ -299,13 +304,7 @@ public sealed class DisposalProposalService : IDisposalProposalService
             });
 
             await _repository.SaveChangesAsync();
-            await tx.CommitAsync();
-        }
-        catch
-        {
-            await tx.RollbackAsync();
-            throw;
-        }
+        });
 
         var approved = await _repository.GetByIdAsync(proposalId, null);
         if (approved == null)

@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore.Storage;
 using Models.DTO.DisposalProposals;
 using Models.Models;
 
@@ -23,8 +22,9 @@ public interface IDisposalProposalRepository
     Task<int?> GetUserBranchIdAsync(int userId);
     Task<bool> UserExistsAsync(int userId);
     Task<bool> HasPendingProposalAsync(int vehicleId);
+    Task<bool> HasActiveAccessoriesAsync(int vehicleId);
     Task AddProposalAsync(DisposalProposal proposal);
     Task AddAssetChangeLogAsync(AssetChangeLog log);
-    Task<IDbContextTransaction> BeginTransactionAsync();
+    Task ExecuteInTransactionAsync(Func<Task> operation);
     Task SaveChangesAsync();
 }

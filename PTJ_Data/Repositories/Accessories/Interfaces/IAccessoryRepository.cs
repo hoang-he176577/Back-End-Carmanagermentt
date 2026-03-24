@@ -31,6 +31,6 @@ public interface IAccessoryRepository
         int? page,
         int? pageSize);
 
-    Task<IDbContextTransaction> BeginTransactionAsync();
+    Task ExecuteInTransactionAsync(Func<Task> operation);
     Task SaveChangesAsync();
 }

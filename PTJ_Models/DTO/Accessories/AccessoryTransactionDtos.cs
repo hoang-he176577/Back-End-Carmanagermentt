@@ -12,4 +12,5 @@ public class AccessoryTransactionDto
     public decimal? UnitPrice { get; set; }
     public string? Notes { get; set; }
     public int? PerformedBy { get; set; }
+    public string? PerformedByName { get; set; }
 }
