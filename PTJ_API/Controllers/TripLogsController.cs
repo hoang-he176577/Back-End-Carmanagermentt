@@ -23,7 +23,7 @@ public class TripLogController : BaseController
         return Ok(result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _service.GetByIdAsync(id);
@@ -62,6 +62,13 @@ public class TripLogController : BaseController
     {
         var branchId = GetBranchId();
         var result = await _service.GetManageVehiclesAsync(branchId, tab);
+        return Ok(result);
+    }
+
+    [HttpGet("history")]
+    public async Task<IActionResult> GetAllHistory()
+    {
+        var result = await _service.GetAllTripHistoryAsync();
         return Ok(result);
     }
 

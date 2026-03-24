@@ -249,6 +249,37 @@ namespace Service.Services.VehicleAssets.Implementations
             return FilterManageVehicles(items, tab);
         }
 
+        public async Task<List<TripHistoryResponseDto>> GetAllTripHistoryAsync()
+        {
+            var trips = await _repo.GetAllAsync();
+
+            return trips.Select(t =>
+            {
+                var meta = ParseMeta(t.Purpose);
+                return new TripHistoryResponseDto
+                {
+                    TripId = t.Id,
+                    VehicleId = t.VehicleId,
+                    VehicleLicensePlate = t.Vehicle?.LicensePlate,
+                    DriverId = t.DriverId,
+                    DriverName = t.Driver?.Name,
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime,
+                    StartMileage = t.StartMileage,
+                    EndMileage = t.EndMileage,
+                    Origin = t.Origin,
+                    Destination = t.Destination,
+                    Purpose = meta.PurposeText ?? t.Purpose,
+                    PlannedDurationMinutes = meta.PlannedDurationMinutes,
+                    IsStopDifferent = meta.IsStopDifferent,
+                    ActualStop = meta.ActualStop,
+                    StopDeviationReason = meta.StopDeviationReason,
+                    OvertimeReason = meta.OvertimeReason,
+                    ExtensionMinutes = meta.ExtensionMinutes
+                };
+            }).ToList();
+        }
+
         public async Task<TripHistoryByVehicleResponseDto> GetVehicleTripHistoryAsync(int vehicleId)
         {
             var vehicle = await _repo.GetVehicleByIdAsync(vehicleId);
@@ -266,6 +297,7 @@ namespace Service.Services.VehicleAssets.Implementations
                 {
                     TripId = t.Id,
                     VehicleId = t.VehicleId,
+                    VehicleLicensePlate = vehicle.LicensePlate,
                     DriverId = t.DriverId,
                     DriverName = t.Driver?.Name,
                     StartTime = t.StartTime,

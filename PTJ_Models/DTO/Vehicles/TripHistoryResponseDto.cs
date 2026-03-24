@@ -6,6 +6,7 @@ namespace Models.DTO.Vehicles
     {
         public int TripId { get; set; }
         public int? VehicleId { get; set; }
+        public string? VehicleLicensePlate { get; set; }
         public int? DriverId { get; set; }
         public string? DriverName { get; set; }
         public DateTime? StartTime { get; set; }
