@@ -19,6 +19,8 @@ public partial class BranchAccessoryStock
 
     public DateTime UpdatedAt { get; set; }
 
+    public string StockCondition { get; set; } = null!;
+
     public virtual Accessory Accessory { get; set; } = null!;
 
     public virtual Branch Branch { get; set; } = null!;

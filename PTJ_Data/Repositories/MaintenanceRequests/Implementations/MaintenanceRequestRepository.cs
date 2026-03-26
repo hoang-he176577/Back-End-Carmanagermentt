@@ -110,7 +110,9 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
             query = query.Where(x => x.DeletedAt == null);
         }
 
-        return await query.FirstOrDefaultAsync();
+        return await query
+            .Include(x => x.Vehicle)
+            .FirstOrDefaultAsync();
     }
 
     public Task<bool> VehicleExistsAsync(int vehicleId)

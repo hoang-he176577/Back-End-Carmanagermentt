@@ -66,14 +66,14 @@ public sealed partial class AccessoryService
                 QuantityInStock = scopedBranchId.HasValue
                     ? x.BranchAccessoryStocks
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
-                        .Select(bs => (int?)bs.QuantityInStock)
-                        .FirstOrDefault() ?? 0
+                        .Sum(bs => (int?)bs.QuantityInStock) ?? 0
                     : x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
                 UnitPrice = x.UnitPrice,
                 MinimumStock = scopedBranchId.HasValue
                     ? x.BranchAccessoryStocks
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
-                        .Select(bs => bs.MinimumStock)
+                        .OrderBy(bs => bs.StockCondition == "NEW" ? 0 : 1)
+                        .Select(bs => (int?)bs.MinimumStock)
                         .FirstOrDefault()
                     : x.MinimumStock,
                 IsActive = x.IsActive,
@@ -106,14 +106,14 @@ public sealed partial class AccessoryService
                 QuantityInStock = scopedBranchId.HasValue
                     ? x.BranchAccessoryStocks
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
-                        .Select(bs => (int?)bs.QuantityInStock)
-                        .FirstOrDefault() ?? 0
+                        .Sum(bs => (int?)bs.QuantityInStock) ?? 0
                     : x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
                 UnitPrice = x.UnitPrice,
                 MinimumStock = scopedBranchId.HasValue
                     ? x.BranchAccessoryStocks
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
-                        .Select(bs => bs.MinimumStock)
+                        .OrderBy(bs => bs.StockCondition == "NEW" ? 0 : 1)
+                        .Select(bs => (int?)bs.MinimumStock)
                         .FirstOrDefault()
                     : x.MinimumStock,
                 IsActive = x.IsActive,
@@ -331,6 +331,7 @@ public sealed partial class AccessoryService
                 AccessoryName = x.Accessory.Name,
                 AccessoryType = x.Accessory.Type,
                 ImageUrl = x.Accessory.ImageUrl,
+                StockCondition = x.StockCondition,
                 QuantityInStock = x.QuantityInStock,
                 MinimumStock = x.MinimumStock,
                 IsBelowMinimum = x.MinimumStock.HasValue && x.QuantityInStock < x.MinimumStock.Value,
@@ -369,6 +370,11 @@ public sealed partial class AccessoryService
             return ServiceResult<BranchAccessoryStockDto>.Fail(400, "Stock values must be >= 0.");
         }
 
+        if (string.IsNullOrWhiteSpace(request.StockCondition) || !AllowedStockConditions.Contains(request.StockCondition.Trim()))
+        {
+            return ServiceResult<BranchAccessoryStockDto>.Fail(400, "StockCondition must be NEW, USED, or DAMAGED.");
+        }
+
         var branchExists = await _context.Branches.AnyAsync(x => x.Id == branchIdResult.Data.Value && x.DeletedAt == null);
         var accessory = await _context.Accessories.FirstOrDefaultAsync(x => x.Id == request.AccessoryId && x.DeletedAt == null);
         if (!branchExists || accessory == null)
@@ -380,8 +386,12 @@ public sealed partial class AccessoryService
         await ExecuteInTransactionAsync(async () =>
         {
             var now = DateTime.UtcNow;
+            var stockCondition = NormalizeStockCondition(request.StockCondition);
             stock = await _context.BranchAccessoryStocks
-                .FirstOrDefaultAsync(x => x.BranchId == branchIdResult.Data.Value && x.AccessoryId == request.AccessoryId);
+                .FirstOrDefaultAsync(x =>
+                    x.BranchId == branchIdResult.Data.Value &&
+                    x.AccessoryId == request.AccessoryId &&
+                    x.StockCondition == stockCondition);
 
             var previousQuantity = stock?.QuantityInStock ?? 0;
             if (stock == null)
@@ -390,6 +400,7 @@ public sealed partial class AccessoryService
                 {
                     BranchId = branchIdResult.Data.Value,
                     AccessoryId = request.AccessoryId,
+                    StockCondition = stockCondition,
                     QuantityInStock = request.QuantityInStock,
                     MinimumStock = request.MinimumStock,
                     CreatedAt = now,
@@ -418,6 +429,7 @@ public sealed partial class AccessoryService
                     ReferenceId = stock.Id,
                     Quantity = delta,
                     UnitPrice = accessory.UnitPrice,
+                    StockCondition = stockCondition,
                     Notes = "Manual stock adjustment.",
                     PerformedBy = actorUserId,
                     TransactionDate = now
@@ -443,6 +455,7 @@ public sealed partial class AccessoryService
                 AccessoryName = x.Accessory.Name,
                 AccessoryType = x.Accessory.Type,
                 ImageUrl = x.Accessory.ImageUrl,
+                StockCondition = x.StockCondition,
                 QuantityInStock = x.QuantityInStock,
                 MinimumStock = x.MinimumStock,
                 IsBelowMinimum = x.MinimumStock.HasValue && x.QuantityInStock < x.MinimumStock.Value,
