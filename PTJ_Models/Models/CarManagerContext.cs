@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -954,6 +954,18 @@ public partial class CarManagerContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+            entity.Property(e => e.PlannedDepartureDate)
+                .HasColumnType("datetime")
+                .HasColumnName("planned_departure_date");
+            entity.Property(e => e.PlannedArrivalDate)
+                .HasColumnType("datetime")
+                .HasColumnName("planned_arrival_date");
+            entity.Property(e => e.CheckoutNote)
+                .HasMaxLength(500)
+                .HasColumnName("checkout_note");
+            entity.Property(e => e.CheckinNote)
+                .HasMaxLength(500)
+                .HasColumnName("checkin_note");
 
             entity.HasOne(d => d.CheckinByUser).WithMany(p => p.TransferPlanCheckinByUsers)
                 .HasForeignKey(d => d.CheckinByUserId)
@@ -1015,7 +1027,7 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.Origin)
                 .HasMaxLength(255)
                 .HasColumnName("origin");
-            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.TransferPlanId).HasColumnName("transfer_plan_id");
             entity.Property(e => e.StartMileage)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("start_mileage");
@@ -1034,6 +1046,11 @@ public partial class CarManagerContext : DbContext
                 .HasForeignKey(d => d.VehicleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Trip_Vehicle");
+
+            entity.HasOne(d => d.TransferPlan).WithMany(p => p.TripLogs)
+                .HasForeignKey(d => d.TransferPlanId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_trip_log_transfer_plan");
         });
 
         modelBuilder.Entity<User>(entity =>

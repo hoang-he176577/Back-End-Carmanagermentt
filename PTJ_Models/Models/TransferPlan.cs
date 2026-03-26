@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -34,6 +34,14 @@ public partial class TransferPlan
     public DateTime? CheckinDate { get; set; }
 
     public int? CheckinByUserId { get; set; }
+
+    public DateTime? PlannedDepartureDate { get; set; }
+
+    public DateTime? PlannedArrivalDate { get; set; }
+
+    public string? CheckoutNote { get; set; }
+
+    public string? CheckinNote { get; set; }
     public virtual Branch? FromBranch { get; set; }
 
     public virtual User? Manager { get; set; }
@@ -45,4 +53,6 @@ public partial class TransferPlan
     public virtual User? CheckoutByUser { get; set; }
 
     public virtual User? CheckinByUser { get; set; }
+
+    public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
 }

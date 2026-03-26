@@ -1,4 +1,4 @@
-﻿using Models.DTO.PurchaseProposal;
+using Models.DTO.PurchaseProposal;
 using Models.Models;
 
 namespace Data.Repositories.VehicleAssets.Interfaces
@@ -24,5 +24,16 @@ namespace Data.Repositories.VehicleAssets.Interfaces
         Task<List<Vehicle>> GetVehiclesByBranchAsync(int branchId);
         Task<List<TripLog>> GetRunningTripsByBranchAsync(int branchId);
         Task UpdateVehicleStatusAsync(int vehicleId, string status);
+
+        // Transfer plan integration
+        Task<TransferPlan?> GetTransferPlanWithDetailsAsync(int transferPlanId);
+        Task UpdateTransferPlanAsync(TransferPlan plan);
+        Task UpdateVehicleBranchAsync(int vehicleId, int branchId);
+        Task UnassignVehicleDriverAsync(int vehicleId);
+        Task<List<TransferPlan>> GetPendingTransfersByBranchAsync(int branchId);
+        Task<List<TransferPlan>> GetInTransitTransfersByBranchAsync(int branchId);
+        Task<int?> GetUserBranchIdAsync(int userId);
+        Task UpdateVehicleMileageAsync(int vehicleId, decimal mileage);
+        Task UpdateDriverBranchAsync(int driverId, int newBranchId);
     }
 }

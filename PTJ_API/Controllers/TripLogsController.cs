@@ -66,4 +66,20 @@ public class TripLogsController : BaseController
     [HttpGet("vehicle/{vehicleId:int}/driver")]
     public async Task<IActionResult> GetDriverByVehicleId(int vehicleId)
         => HandleResult(await _tripService.GetDriverByVehicleIdAsync(vehicleId));
+
+    [HttpGet("pending-transfers")]
+    public async Task<IActionResult> GetPendingTransfers()
+    {
+        var branchId = GetBranchId();
+        var result = await _tripService.GetPendingTransfersAsync(branchId);
+        return Ok(result);
+    }
+
+    [HttpGet("intransit-transfers")]
+    public async Task<IActionResult> GetInTransitTransfers()
+    {
+        var branchId = GetBranchId();
+        var result = await _tripService.GetInTransitTransfersAsync(branchId);
+        return Ok(result);
+    }
 }

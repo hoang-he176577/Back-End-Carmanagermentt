@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -6,6 +6,8 @@ namespace Models.Models;
 public partial class TripLog
 {
     public int Id { get; set; }
+
+    public int TransferPlanId { get; set; }
 
     public int VehicleId { get; set; }
 
@@ -23,13 +25,13 @@ public partial class TripLog
 
     public string? Destination { get; set; }
 
-    public string? Purpose { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public int StartedBy { get; set; }
 
     public int? EndedBy { get; set; }
+
+    public virtual TransferPlan TransferPlan { get; set; } = null!;
 
     public virtual Driver Driver { get; set; } = null!;
 
