@@ -1322,6 +1322,10 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.YearFrom).HasColumnName("year_from");
             entity.Property(e => e.YearTo).HasColumnName("year_to");
+            entity.Property(e => e.EnginePower).HasMaxLength(100).HasColumnName("engine_power");
+            entity.Property(e => e.EmissionStandard).HasMaxLength(50).HasColumnName("emission_standard");
+            entity.Property(e => e.PayloadCapacity).HasColumnType("decimal(18, 2)").HasColumnName("payload_capacity");
+            entity.Property(e => e.FuelType).HasMaxLength(50).HasColumnName("fuel_type");
         });
 
         modelBuilder.Entity<VehicleReceptionRecord>(entity =>

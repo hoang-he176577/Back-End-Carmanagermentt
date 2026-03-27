@@ -93,3 +93,28 @@ BEGIN
     ALTER TABLE [dbo].[vehicle] ADD [mileage] DECIMAL(18,2) NULL;
 END
 GO
+
+-- [PHASE 2 - UPDATE 2] Bổ sung cấu hình kỹ thuật vào VehicleModel
+IF COL_LENGTH('dbo.vehicle_model', 'engine_power') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle_model] ADD [engine_power] NVARCHAR(100) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.vehicle_model', 'emission_standard') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle_model] ADD [emission_standard] NVARCHAR(50) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.vehicle_model', 'payload_capacity') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle_model] ADD [payload_capacity] DECIMAL(18,2) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.vehicle_model', 'fuel_type') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle_model] ADD [fuel_type] NVARCHAR(50) NULL;
+END
+GO

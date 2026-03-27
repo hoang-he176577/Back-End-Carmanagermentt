@@ -169,7 +169,7 @@ namespace Service.Services.Implementations
                 .CountAsync(r => r.PurchaseProposalId == dto.PurchaseProposalId && r.Status != VehicleReceptionRecord.RejectedStatus);
 
             // Nếu đã nhận / đang nhận chiếc cuối cùng thì mới chuyển status của Proposal
-            if (totalReceived + 1 >= totalProposedQuantity)
+            if (totalReceived >= totalProposedQuantity)
             {
                 proposal.MarkAsReceived(dto.LicensePlate, operatorId); 
             }
