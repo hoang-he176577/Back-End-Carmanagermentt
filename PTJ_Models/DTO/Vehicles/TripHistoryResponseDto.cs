@@ -5,6 +5,9 @@ namespace Models.DTO.Vehicles
     public class TripHistoryResponseDto
     {
         public int TripId { get; set; }
+        public int TransferPlanId { get; set; }
+        public string? FromBranchName { get; set; }
+        public string? ToBranchName { get; set; }
         public int? VehicleId { get; set; }
         public string? VehicleLicensePlate { get; set; }
         public int? DriverId { get; set; }
@@ -15,7 +18,6 @@ namespace Models.DTO.Vehicles
         public decimal? EndMileage { get; set; }
         public string? Origin { get; set; }
         public string? Destination { get; set; }
-        public string? Purpose { get; set; }
         public int? PlannedDurationMinutes { get; set; }
         public bool? IsStopDifferent { get; set; }
         public string? ActualStop { get; set; }

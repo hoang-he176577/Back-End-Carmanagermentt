@@ -225,6 +225,11 @@ public sealed partial class AccessoryService
             return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, "branchId, accessoryId, vehicleId, and quantity must be greater than 0.");
         }
 
+        if (string.IsNullOrWhiteSpace(request.StockCondition) || !AllowedStockConditions.Contains(request.StockCondition.Trim()))
+        {
+            return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, "StockCondition must be NEW, USED, or DAMAGED.");
+        }
+
         var branchIdResult = await ResolveRequestedBranchIdAsync(access.Data!, request.BranchId);
         if (!branchIdResult.Success || !branchIdResult.Data.HasValue)
         {
@@ -248,11 +253,15 @@ public sealed partial class AccessoryService
             return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, "Disposed or liquidated vehicles cannot be assigned accessories.");
         }
 
+        var stockCondition = NormalizeStockCondition(request.StockCondition);
         var stock = await _context.BranchAccessoryStocks
-            .FirstOrDefaultAsync(x => x.BranchId == branchIdResult.Data.Value && x.AccessoryId == request.AccessoryId);
+            .FirstOrDefaultAsync(x =>
+                x.BranchId == branchIdResult.Data.Value &&
+                x.AccessoryId == request.AccessoryId &&
+                x.StockCondition == stockCondition);
         if (stock == null || stock.QuantityInStock < request.Quantity)
         {
-            return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, "Not enough stock in the selected branch.");
+            return ServiceResult<IssueVehicleAccessoryResponseDto>.Fail(400, $"Not enough {stockCondition} stock in the selected branch.");
         }
 
         IssueVehicleAccessoryResponseDto? response = null;
@@ -290,6 +299,7 @@ public sealed partial class AccessoryService
                 ReferenceId = vehicleAccessory.Id,
                 Quantity = request.Quantity,
                 UnitPrice = accessory.UnitPrice,
+                StockCondition = stockCondition,
                 Notes = request.Notes?.Trim(),
                 PerformedBy = request.InstalledBy ?? actorUserId,
                 TransactionDate = now
@@ -304,7 +314,8 @@ public sealed partial class AccessoryService
             response = new IssueVehicleAccessoryResponseDto
             {
                 VehicleAccessory = await ProjectVehicleAccessoryAsync(vehicleAccessory.Id),
-                RemainingStock = stock.QuantityInStock
+                RemainingStock = stock.QuantityInStock,
+                StockCondition = stockCondition
             };
         });
 
@@ -337,6 +348,7 @@ public sealed partial class AccessoryService
         var entity = await _context.VehicleAccessories
             .Include(x => x.Vehicle)
             .Include(x => x.Accessory)
+            .Include(x => x.SourceTransaction)
             .FirstOrDefaultAsync(x => x.Id == vehicleAccessoryId && x.DeletedAt == null);
         if (entity == null || entity.Accessory == null)
         {
@@ -348,36 +360,76 @@ public sealed partial class AccessoryService
             return ServiceResult<VehicleAccessoryDto>.Fail(400, "Only installed records can be processed.");
         }
 
+        var processedQuantity = request.Quantity ?? entity.Quantity;
+        if (processedQuantity <= 0 || processedQuantity > entity.Quantity)
+        {
+            return ServiceResult<VehicleAccessoryDto>.Fail(400, "Quantity must be greater than 0 and not exceed installed quantity.");
+        }
+
         if (access.Data!.RestrictedBranchId.HasValue && entity.BranchId != access.Data.RestrictedBranchId.Value)
         {
             return ServiceResult<VehicleAccessoryDto>.Fail(403, "You can only process accessories in your branch.");
         }
 
+        VehicleAccessory resultEntity = entity;
+
         await ExecuteInTransactionAsync(async () =>
         {
             var now = DateTime.UtcNow;
-            entity.Status = action switch
+            if (processedQuantity < entity.Quantity)
+            {
+                entity.Quantity -= processedQuantity;
+                entity.UpdatedAt = now;
+
+                resultEntity = new VehicleAccessory
+                {
+                    VehicleId = entity.VehicleId,
+                    AccessoryId = entity.AccessoryId,
+                    InstallDate = entity.InstallDate,
+                    RemoveDate = request.RemoveDate ?? DateOnly.FromDateTime(now),
+                    Notes = request.Notes?.Trim(),
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                    DeletedAt = null,
+                    Quantity = processedQuantity,
+                    Status = entity.Status,
+                    InstalledBy = entity.InstalledBy,
+                    RemovedBy = request.RemovedBy ?? actorUserId,
+                    BranchId = entity.BranchId,
+                    SourceTransactionId = entity.SourceTransactionId
+                };
+
+                _context.VehicleAccessories.Add(resultEntity);
+                await _context.SaveChangesAsync();
+            }
+
+            resultEntity.Status = action switch
             {
                 "RETURN" => "Returned",
                 "DAMAGED" => "Damaged",
                 "LOST" => "Lost",
-                _ => entity.Status
+                _ => resultEntity.Status
             };
-            entity.RemoveDate = request.RemoveDate ?? DateOnly.FromDateTime(now);
-            entity.RemovedBy = request.RemovedBy ?? actorUserId;
-            entity.Notes = request.Notes?.Trim();
-            entity.UpdatedAt = now;
+            resultEntity.RemoveDate = request.RemoveDate ?? DateOnly.FromDateTime(now);
+            resultEntity.RemovedBy = request.RemovedBy ?? actorUserId;
+            resultEntity.Notes = request.Notes?.Trim();
+            resultEntity.UpdatedAt = now;
 
             if (action == "RETURN")
             {
+                var returnStockCondition = "USED";
                 var stock = await _context.BranchAccessoryStocks
-                    .FirstOrDefaultAsync(x => x.BranchId == entity.BranchId && x.AccessoryId == entity.AccessoryId);
+                    .FirstOrDefaultAsync(x =>
+                        x.BranchId == resultEntity.BranchId &&
+                        x.AccessoryId == resultEntity.AccessoryId &&
+                        x.StockCondition == returnStockCondition);
                 if (stock == null)
                 {
                     stock = new BranchAccessoryStock
                     {
-                        BranchId = entity.BranchId!.Value,
-                        AccessoryId = entity.AccessoryId!.Value,
+                        BranchId = resultEntity.BranchId!.Value,
+                        AccessoryId = resultEntity.AccessoryId!.Value,
+                        StockCondition = returnStockCondition,
                         QuantityInStock = 0,
                         MinimumStock = null,
                         CreatedAt = now,
@@ -386,21 +438,28 @@ public sealed partial class AccessoryService
                     _context.BranchAccessoryStocks.Add(stock);
                 }
 
-                stock.QuantityInStock += entity.Quantity;
+                stock.QuantityInStock += processedQuantity;
                 stock.UpdatedAt = now;
             }
 
             _context.AccessoryTransactions.Add(new AccessoryTransaction
             {
-                AccessoryId = entity.AccessoryId!.Value,
-                BranchId = entity.BranchId,
-                VehicleId = entity.VehicleId,
-                VehicleAccessoryId = entity.Id,
+                AccessoryId = resultEntity.AccessoryId!.Value,
+                BranchId = resultEntity.BranchId,
+                VehicleId = resultEntity.VehicleId,
+                VehicleAccessoryId = resultEntity.Id,
                 TransactionType = action,
                 ReferenceType = action,
-                ReferenceId = entity.Id,
-                Quantity = entity.Quantity,
+                ReferenceId = resultEntity.Id,
+                Quantity = processedQuantity,
                 UnitPrice = entity.Accessory.UnitPrice,
+                StockCondition = action switch
+                {
+                    "RETURN" => "USED",
+                    "DAMAGED" => "DAMAGED",
+                    "LOST" => entity.SourceTransaction?.StockCondition ?? "USED",
+                    _ => entity.SourceTransaction?.StockCondition
+                },
                 Notes = request.Notes?.Trim(),
                 PerformedBy = request.RemovedBy ?? actorUserId,
                 TransactionDate = now
@@ -409,7 +468,7 @@ public sealed partial class AccessoryService
             await _context.SaveChangesAsync();
         });
 
-        return ServiceResult<VehicleAccessoryDto>.SuccessResult(await ProjectVehicleAccessoryAsync(entity.Id));
+        return ServiceResult<VehicleAccessoryDto>.SuccessResult(await ProjectVehicleAccessoryAsync(resultEntity.Id));
     }
 
     public async Task<ServiceResult<List<VehicleAccessoryDto>>> GetVehicleAccessoriesAsync(
@@ -559,6 +618,7 @@ public sealed partial class AccessoryService
                 Quantity = x.Quantity,
                 TransactionDate = x.TransactionDate,
                 UnitPrice = x.UnitPrice,
+                StockCondition = x.StockCondition,
                 Notes = x.Notes,
                 PerformedBy = x.PerformedBy,
                 PerformedByName = x.PerformedByNavigation != null ? x.PerformedByNavigation.Name : null

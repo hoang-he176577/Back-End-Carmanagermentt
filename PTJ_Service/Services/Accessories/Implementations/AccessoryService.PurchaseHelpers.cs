@@ -51,6 +51,16 @@ public sealed partial class AccessoryService
             return ServiceResult<bool>.Fail(400, "Accessory lines must be unique within the receipt.");
         }
 
+        if (details.Any(x => string.IsNullOrWhiteSpace(x.StockCondition)))
+        {
+            return ServiceResult<bool>.Fail(400, "StockCondition is required for all receipt lines.");
+        }
+
+        if (details.Any(x => !AllowedStockConditions.Contains(x.StockCondition.Trim())))
+        {
+            return ServiceResult<bool>.Fail(400, "StockCondition must be NEW, USED, or DAMAGED.");
+        }
+
         return ServiceResult<bool>.SuccessResult(true);
     }
 
@@ -234,7 +244,8 @@ public sealed partial class AccessoryService
                     AccessoryName = detail.Accessory.Name,
                     ImageUrl = detail.Accessory.ImageUrl,
                     ReceivedQuantity = detail.ReceivedQuantity,
-                    ActualUnitPrice = detail.ActualUnitPrice
+                    ActualUnitPrice = detail.ActualUnitPrice,
+                    StockCondition = detail.StockCondition
                 })
                 .ToList()
         };

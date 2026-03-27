@@ -29,20 +29,31 @@ public partial class TransferPlan
 
     public DateTime? CheckoutDate { get; set; }
 
-    public int? CheckoutByUserId { get; set; }
-
     public DateTime? CheckinDate { get; set; }
 
+    public int? CheckoutByUserId { get; set; }
+
     public int? CheckinByUserId { get; set; }
+
+    public DateTime? PlannedDepartureDate { get; set; }
+
+    public DateTime? PlannedArrivalDate { get; set; }
+
+    public string? CheckoutNote { get; set; }
+
+    public string? CheckinNote { get; set; }
+
+    public virtual User? CheckinByUser { get; set; }
+
+    public virtual User? CheckoutByUser { get; set; }
+
     public virtual Branch? FromBranch { get; set; }
 
     public virtual User? Manager { get; set; }
 
     public virtual Branch? ToBranch { get; set; }
 
+    public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
+
     public virtual Vehicle? Vehicle { get; set; }
-
-    public virtual User? CheckoutByUser { get; set; }
-
-    public virtual User? CheckinByUser { get; set; }
 }
