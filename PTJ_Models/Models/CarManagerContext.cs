@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -423,6 +423,15 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.UnitPrice)
                 .HasColumnType("decimal(15, 2)")
                 .HasColumnName("unit_price");
+            entity.Property(e => e.AcquisitionMethod).HasMaxLength(50).HasColumnName("acquisition_method");
+            entity.Property(e => e.Version).HasMaxLength(100).HasColumnName("version");
+            entity.Property(e => e.RegistrationTax).HasColumnType("decimal(15, 2)").HasColumnName("registration_tax");
+            entity.Property(e => e.RoadMaintenanceFee).HasColumnType("decimal(15, 2)").HasColumnName("road_maintenance_fee");
+            entity.Property(e => e.LicensePlateFee).HasColumnType("decimal(15, 2)").HasColumnName("license_plate_fee");
+            entity.Property(e => e.InsuranceFee).HasColumnType("decimal(15, 2)").HasColumnName("insurance_fee");
+            entity.Property(e => e.HasCamera158).HasDefaultValue(false).HasColumnName("has_camera_158");
+            entity.Property(e => e.HasGsht).HasDefaultValue(false).HasColumnName("has_gsht");
+            entity.Property(e => e.FuelNorm).HasColumnType("decimal(15, 2)").HasColumnName("fuel_norm");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.BulkPurchaseDetails)
                 .HasForeignKey(d => d.BranchId)
@@ -834,6 +843,7 @@ public partial class CarManagerContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedDate).HasColumnName("created_date");
+            entity.Property(e => e.CompletionDeadline).HasColumnType("datetime").HasColumnName("completion_deadline");
             entity.Property(e => e.DeletedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("deleted_at");
@@ -842,6 +852,9 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.ProposedCost)
                 .HasColumnType("decimal(15, 2)")
                 .HasColumnName("proposed_cost");
+            entity.Property(e => e.ActualCost)
+                .HasColumnType("decimal(15, 2)")
+                .HasColumnName("actual_cost");
             entity.Property(e => e.ProposerId).HasColumnName("proposer_id");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
@@ -1143,6 +1156,15 @@ public partial class CarManagerContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.YearManufacture).HasColumnName("year_manufacture");
+            entity.Property(e => e.Vin).HasMaxLength(100).HasColumnName("vin");
+            entity.Property(e => e.ChassisNumber).HasMaxLength(100).HasColumnName("chassis_number");
+            entity.Property(e => e.EngineNumber).HasMaxLength(100).HasColumnName("engine_number");
+            entity.Property(e => e.TelematicsImei).HasMaxLength(100).HasColumnName("telematics_imei");
+            entity.Property(e => e.RegistrationExpirationDate).HasColumnType("date").HasColumnName("registration_expiration_date");
+            entity.Property(e => e.InsuranceExpirationDate).HasColumnType("date").HasColumnName("insurance_expiration_date");
+            entity.Property(e => e.BadgeType).HasMaxLength(50).HasColumnName("badge_type");
+            entity.Property(e => e.BadgeExpirationDate).HasColumnType("date").HasColumnName("badge_expiration_date");
+            entity.Property(e => e.FuelNorm).HasColumnType("decimal(10, 2)").HasColumnName("fuel_norm");
 
             entity.HasOne(d => d.CurrentBranch).WithMany(p => p.Vehicles)
                 .HasForeignKey(d => d.CurrentBranchId)
@@ -1348,6 +1370,14 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.Version).HasMaxLength(100).HasColumnName("version");
+            entity.Property(e => e.Vin).HasMaxLength(100).HasColumnName("vin");
+            entity.Property(e => e.TelematicsImei).HasMaxLength(100).HasColumnName("telematics_imei");
+            entity.Property(e => e.RegistrationExpirationDate).HasColumnType("date").HasColumnName("registration_expiration_date");
+            entity.Property(e => e.InsuranceExpirationDate).HasColumnType("date").HasColumnName("insurance_expiration_date");
+            entity.Property(e => e.BadgeType).HasMaxLength(50).HasColumnName("badge_type");
+            entity.Property(e => e.BadgeExpirationDate).HasColumnType("date").HasColumnName("badge_expiration_date");
+            entity.Property(e => e.FuelNorm).HasColumnType("decimal(10, 2)").HasColumnName("fuel_norm");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.VehicleReceptionRecords)
                 .HasForeignKey(d => d.BranchId)

@@ -21,13 +21,26 @@ public partial class VehicleReceptionRecord
         DeletedAt = null;
     }
 
-    public void UpdateReceptionDetails(string? licensePlate, string? chassisNumber, string? engineNumber, string? receiptImageUrl, string? notes)
+        decimal? fuelNorm,
+        string? receiptImageUrl, 
+        string? notes,
+        int? yearManufacture,
+        decimal? mileage)
     {
         LicensePlate = licensePlate?.Trim();
+        Vin = vin?.Trim();
         ChassisNumber = chassisNumber?.Trim();
         EngineNumber = engineNumber?.Trim();
+        TelematicsImei = telematicsImei?.Trim();
+        RegistrationExpirationDate = registrationExpirationDate;
+        InsuranceExpirationDate = insuranceExpirationDate;
+        BadgeType = badgeType?.Trim();
+        BadgeExpirationDate = badgeExpirationDate;
+        FuelNorm = fuelNorm;
         ReceiptImageUrl = receiptImageUrl?.Trim();
         Notes = notes?.Trim();
+        YearManufacture = yearManufacture;
+        Mileage = mileage;
         UpdatedAt = DateTime.Now;
     }
 

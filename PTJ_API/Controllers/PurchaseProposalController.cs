@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Models.DTO.PurchaseProposal;
 using Service.Services.Interfaces;
@@ -46,6 +46,16 @@ namespace API.Controllers
         {
             var result = await _service.CreateAsync(dto, GetUserId(), GetBranchId());
             return HandleCreated(result,"Create proposal successfully");
+        }
+
+        // ==============================
+        // UPDATE (EDIT PROPOSAL)
+        // ==============================
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePurchaseProposalDto dto)
+        {
+            var result = await _service.UpdateAsync(id, dto, GetUserId(), GetBranchId());
+            return HandleSuccess("Update proposal successfully");
         }
 
         // ==============================
@@ -141,9 +151,9 @@ namespace API.Controllers
         // ==============================
         [HttpPost("{id}/confirm-payment")]
         [Authorize(Roles = "Branch Asset Accountant,Chief Accountant,Admin")]
-        public async Task<IActionResult> ConfirmPayment(int id)
+        public async Task<IActionResult> ConfirmPayment(int id, [FromBody] ActualCostConfirmationDto dto)
         {
-            await _service.ConfirmPaymentAsync(id, GetUserId());
+            await _service.ConfirmPaymentAsync(id, GetUserId(), dto);
             return HandleSuccess("Xác nhận thanh toán thành công. Xe mới đã được đưa vào kho tài sản.");
         }
 
@@ -156,6 +166,17 @@ namespace API.Controllers
         {
             await _service.RollbackReceptionAsync(id, request.Reason);
             return HandleSuccess("Đã hoàn tác đối chiếu xe. Operator có thể thực hiện lại.");
+        }
+
+        // ==============================
+        // SYNC MISSING VEHICLES (Data Repair Utility)
+        // ==============================
+        [HttpPost("sync-vehicles")]
+        [Authorize(Roles = "Admin,Chief Accountant")]
+        public async Task<IActionResult> SyncVehicles()
+        {
+            var count = await _service.SyncMissingVehiclesAsync();
+            return HandleSuccess($"Đã đồng bộ thành công {count} xe lên kho tài sản.");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Data.Repositories.Interfaces;
+using Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 using System;
@@ -23,6 +23,11 @@ namespace Data.Repositories.Implementations
         {
             return await _context.PurchaseProposals
                 .Include(x => x.BulkPurchaseDetails)
+                    .ThenInclude(d => d.Branch)
+                .Include(x => x.VehicleReceptionRecords)
+                    .ThenInclude(r => r.Branch)
+                .Include(x => x.Proposer)
+                    .ThenInclude(u => u.Branch)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -31,6 +36,11 @@ namespace Data.Repositories.Implementations
             return await _context.PurchaseProposals
                 .Where(x => x.Status != "Deleted")
                 .Include(x => x.BulkPurchaseDetails)
+                    .ThenInclude(d => d.Branch)
+                .Include(x => x.VehicleReceptionRecords)
+                    .ThenInclude(r => r.Branch)
+                .Include(x => x.Proposer)
+                    .ThenInclude(u => u.Branch)
                 .OrderByDescending(x => x.CreatedDate) // record mới nhất lên đầu
                 .AsNoTracking()
                 .ToListAsync();

@@ -1,11 +1,12 @@
-using Data.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Models.DTO.PurchaseProposal;
 using Models.Models;
+using Models.Exceptions;
 using Service.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Service.Services.Implementations
@@ -57,85 +58,275 @@ namespace Service.Services.Implementations
         public async Task<VehicleReceptionRecordDto> CreateAsync(CreateVehicleReceptionDto dto, int operatorId, DateOnly requestedDate)
         {
             // 1. KIỂM TRA TÍNH HỢP LỆ CỦA ĐỀ XUẤT VÀ CHI NHÁNH
-            var proposal = await _context.PurchaseProposals.FindAsync(dto.PurchaseProposalId);
-            if (proposal == null) 
-                throw new Exception($"Đề xuất mua #{dto.PurchaseProposalId} không tồn tại trong hệ thống.");
-            if (proposal.Status != "Approved") 
-                throw new Exception($"Đề xuất #{dto.PurchaseProposalId} chưa được duyệt hoặc đã xử lý xong.");
-
-            var branchExists = await _context.Branches.AnyAsync(b => b.Id == dto.BranchId);
-            if (!branchExists) 
-                throw new Exception($"Chi nhánh #{dto.BranchId} không tồn tại.");
-
-            // 2. KIỂM TRA DỮ LIỆU ĐẦU VÀO KHÔNG ĐƯỢC TRỐNG
-            if (string.IsNullOrWhiteSpace(dto.LicensePlate)) throw new Exception("Biển số xe không được để trống.");
-            if (string.IsNullOrWhiteSpace(dto.ChassisNumber)) throw new Exception("Số khung (Chassis) không được để trống.");
-            if (string.IsNullOrWhiteSpace(dto.EngineNumber)) throw new Exception("Số máy (Engine) không được để trống.");
-            if (string.IsNullOrWhiteSpace(dto.ReceiptImageUrl)) throw new Exception("Vui lòng tải lên ảnh chứng minh khi nhận xe.");
-
-            // 3. KIỂM TRA TRÙNG BIỂN SỐ (UNIQUE CONSTRAINT)
-            bool isPlateInVehicle = await _context.Vehicles.AnyAsync(v => v.LicensePlate == dto.LicensePlate);
-            if (isPlateInVehicle) 
-                throw new Exception($"Biển số xe {dto.LicensePlate} đã tồn tại trong kho tài sản!");
-
-            bool isPlateInReception = await _context.VehicleReceptionRecords
-                .AnyAsync(r => r.LicensePlate == dto.LicensePlate && r.Status != "Rejected" && r.PurchaseProposalId != dto.PurchaseProposalId);
-            if (isPlateInReception) 
-                throw new Exception($"Biển số xe {dto.LicensePlate} đang được chờ xử lý ở một đề xuất khác!");
-
-            var record = new VehicleReceptionRecord();
-            record.InitCreate(dto.PurchaseProposalId, dto.BranchId, operatorId, requestedDate);
-
-            // Nếu có thông tin xe, cập nhật ngay
-            if (!string.IsNullOrEmpty(dto.LicensePlate))
+            var proposal = await _context.PurchaseProposals
+                .Include(p => p.BulkPurchaseDetails)
+                .FirstOrDefaultAsync(p => p.Id == dto.PurchaseProposalId);
+            if (proposal == null)
+                throw new ArgumentException($"Đề xuất mua #{dto.PurchaseProposalId} không tồn tại trong hệ thống.");
+            if (proposal.Status != PurchaseProposal.ApprovedStatus && 
+                proposal.Status != PurchaseProposal.ManagerApprovedStatus &&
+                proposal.Status != VehicleReceptionRecord.ReceivedPendingPaymentStatus)
             {
-                record.UpdateReceptionDetails(
-                    dto.LicensePlate,
-                    dto.ChassisNumber,
-                    dto.EngineNumber,
-                    dto.ReceiptImageUrl,
-                    dto.Notes);
+                throw new ArgumentException($"Đề xuất #{dto.PurchaseProposalId} chưa được duyệt hoặc đã xử lý xong (Trạng thái hiện tại: {proposal.Status}).");
             }
 
-            var created = await _repository.AddAsync(record);
+            var branchExists = await _context.Branches.AnyAsync(b => b.Id == dto.BranchId);
+            if (!branchExists)
+                throw new ArgumentException($"Chi nhánh #{dto.BranchId} không tồn tại.");
 
-            // TỰ ĐỘNG CHUYỂN TRẠNG THÁI CỦA ĐỀ XUẤT SANG CHỜ THANH TOÁN
-            proposal.MarkAsReceived(dto.LicensePlate, operatorId);
-            await _context.SaveChangesAsync();
+            // 2. KIỂM TRA SỐ LƯỢNG VÀ TRÙNG LẶP SỚM ĐỂ LẤY THÔNG TIN CẤU HÌNH
+            var vehicleDetail = proposal.BulkPurchaseDetails.FirstOrDefault(d => d.BranchId == dto.BranchId);
+            if (vehicleDetail == null) throw new ArgumentException("Đề xuất này không có xe nào dành cho chi nhánh của bạn.");
+            int branchProposedQuantity = vehicleDetail.ProposedQuantity ?? 0;
+            bool isGshtRequired = vehicleDetail.HasGsht ?? false;
 
-            return MapToDto(created);
+            // 3. VALIDATION CẤM LỌT LỖI (FMS) - THEO CHUẨN CLEAN CODE
+            var today = DateOnly.FromDateTime(DateTime.Now);
+
+            // 3.1 Biển số xe (Regex + Chuẩn hóa)
+            if (string.IsNullOrWhiteSpace(dto.LicensePlate)) 
+                throw new InvalidLicensePlateException("Biển số xe không được để trống.");
+            
+            var cleanPlate = dto.LicensePlate.ToUpper().Replace(" ", "");
+            if (!Regex.IsMatch(cleanPlate, @"^[0-9]{2}[A-Z]{1,2}-[0-9]{3,5}(\.[0-9]{2})?$"))
+                throw new InvalidLicensePlateException();
+
+            // 3.2 Số VIN (ISO Standard)
+            if (string.IsNullOrWhiteSpace(dto.Vin)) 
+                throw new InvalidVINLengthException("Số VIN không được để trống.");
+            if (dto.Vin.Length != 17)
+                throw new InvalidVINLengthException();
+            if (Regex.IsMatch(dto.Vin, "[IOQioq]"))
+                throw new ForbiddenCharacterException();
+            if (!Regex.IsMatch(dto.Vin, @"^[A-HJ-NPR-Z0-9]{17}$"))
+                throw new ForbiddenCharacterException("Số VIN chứa ký tự không hợp lệ hoặc sai định dạng ISO.");
+
+            // 3.3 Thiết bị GSHT & Camera (Nghị định 10)
+            bool isDecree10Required = (vehicleDetail.Seats >= 9);
+            if (isGshtRequired || isDecree10Required)
+            {
+                if (string.IsNullOrWhiteSpace(dto.TelematicsImei))
+                    throw new LegalComplianceException(isGshtRequired ? "Xe yêu cầu GSHT, vui lòng nhập mã IMEI." : "Xe >= 9 chỗ, thiếu IMEI GSHT theo Nghị định 10.");
+                
+                if (!Regex.IsMatch(dto.TelematicsImei, @"^\d{15}$"))
+                    throw new LegalComplianceException("Mã IMEI phải là dãy 15 chữ số.");
+            }
+
+            // 3.4 Quản lý Ngày tháng (Past Date Exception)
+            if (!dto.RegistrationExpirationDate.HasValue || dto.RegistrationExpirationDate <= today)
+                throw new PastDateException("registrationExpirationDate", "Hạn đăng kiểm không hợp lệ hoặc đã hết hạn.");
+            
+            if (!dto.InsuranceExpirationDate.HasValue || dto.InsuranceExpirationDate <= today)
+                throw new PastDateException("insuranceExpirationDate", "Hạn bảo hiểm không hợp lệ hoặc đã hết hạn.");
+
+            if (dto.BadgeExpirationDate.HasValue && dto.BadgeExpirationDate <= today)
+                throw new PastDateException("badgeExpirationDate", "Hạn phù hiệu đã hết hạn.");
+
+            // 3.5 Các thông tin khác
+            if (string.IsNullOrWhiteSpace(dto.ChassisNumber)) throw new ArgumentException("Số khung (Chassis) không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.EngineNumber)) throw new ArgumentException("Số máy (Engine) không được để trống.");
+            if (string.IsNullOrWhiteSpace(dto.ReceiptImageUrl)) throw new ArgumentException("Vui lòng tải lên ảnh chứng minh khi nhận xe.");
+            
+            int currentlyReceivedByBranch = await _context.VehicleReceptionRecords
+                .CountAsync(r => r.PurchaseProposalId == dto.PurchaseProposalId && r.BranchId == dto.BranchId && r.Status != VehicleReceptionRecord.RejectedStatus);
+
+            if (currentlyReceivedByBranch >= branchProposedQuantity)
+                throw new ArgumentException($"Chi nhánh này chỉ được tiếp nhận tối đa {branchProposedQuantity} xe theo đề xuất. Đã nhận đủ số lượng.");
+
+            bool isPlateInVehicle = await _context.Vehicles.AnyAsync(v => v.LicensePlate == cleanPlate);
+            if (isPlateInVehicle)
+                throw new DuplicateVehicleException("licensePlate", cleanPlate);
+
+            bool isVinInVehicle = await _context.Vehicles.AnyAsync(v => v.Vin == dto.Vin);
+            if(isVinInVehicle)
+                throw new DuplicateVehicleException("vin", dto.Vin);
+
+            bool isPlateInReception = await _context.VehicleReceptionRecords
+                .AnyAsync(r => r.LicensePlate == cleanPlate && r.Status != "Rejected" && r.PurchaseProposalId != dto.PurchaseProposalId);
+            if (isPlateInReception)
+                throw new DuplicateVehicleException("licensePlate", cleanPlate);
+
+            // 4. TẠO RECORD TIẾP NHẬN
+            var record = new VehicleReceptionRecord();
+            record.InitCreate(dto.PurchaseProposalId, dto.BranchId, operatorId, requestedDate);
+            
+            // XÁC NHẬN TRẠNG THÁI CHỜ THANH TOÁN (Kế toán xử lý tiếp)
+            record.Status = VehicleReceptionRecord.ReceivedPendingPaymentStatus;
+
+            record.UpdateReceptionDetails(
+                cleanPlate, dto.Vin, dto.ChassisNumber, dto.EngineNumber, dto.TelematicsImei,
+                dto.RegistrationExpirationDate, dto.InsuranceExpirationDate, dto.BadgeType,
+                dto.BadgeExpirationDate, dto.FuelNorm ?? vehicleDetail?.FuelNorm, dto.ReceiptImageUrl, dto.Notes,
+                dto.YearManufacture, dto.Mileage);
+            
+            record.Version = dto.Version;
+
+            var createdRecord = await _repository.AddAsync(record);
+
+            int totalProposedQuantity = proposal.BulkPurchaseDetails.Sum(d => d.ProposedQuantity ?? 0);
+            int totalReceived = await _context.VehicleReceptionRecords
+                .CountAsync(r => r.PurchaseProposalId == dto.PurchaseProposalId && r.Status != VehicleReceptionRecord.RejectedStatus);
+
+            // Nếu đã nhận / đang nhận chiếc cuối cùng thì mới chuyển status của Proposal
+            if (totalReceived + 1 >= totalProposedQuantity)
+            {
+                proposal.MarkAsReceived(dto.LicensePlate, operatorId); 
+            }
+
+            // 5. ĐỒNG BỘ DỮ LIỆU - TỰ ĐỘNG TẠO XE TRONG KHO TÀI SẢN
+            // 5.1 Tìm hoặc tạo thông tin Model xe (để hiển thị Hãng/Dòng xe)
+            var model = await _context.VehicleModels
+                .FirstOrDefaultAsync(m => m.Manufacturer == vehicleDetail.Manufacturer && m.ModelName == vehicleDetail.Version);
+
+            if (model == null)
+            {
+                model = new VehicleModel
+                {
+                    Manufacturer = vehicleDetail.Manufacturer,
+                    ModelName = vehicleDetail.Version,
+                    Seats = vehicleDetail.Seats,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _context.VehicleModels.Add(model);
+                await _context.SaveChangesAsync();
+            }
+
+            var newVehicle = new Vehicle
+            {
+                LicensePlate = dto.LicensePlate,
+                Status = "Active", // Gán trạng thái hoạt động
+                CurrentBranchId = dto.BranchId,
+                PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
+                OriginalCost = vehicleDetail?.UnitPrice ?? 0,
+                CurrentValue = vehicleDetail?.UnitPrice ?? 0,
+                Mileage = 0,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+
+                // Gán Model và Năm sản xuất
+                ModelId = model.Id,
+                YearManufacture = dto.YearManufacture ?? DateTime.Now.Year,
+
+                // Map toàn bộ thông tin FMS
+                Vin = dto.Vin,
+                ChassisNumber = dto.ChassisNumber,
+                EngineNumber = dto.EngineNumber,
+                TelematicsImei = dto.TelematicsImei,
+                RegistrationExpirationDate = dto.RegistrationExpirationDate,
+                InsuranceExpirationDate = dto.InsuranceExpirationDate,
+                BadgeType = dto.BadgeType,
+                BadgeExpirationDate = dto.BadgeExpirationDate,
+                FuelNorm = dto.FuelNorm ?? vehicleDetail?.FuelNorm,
+                Mileage = dto.Mileage ?? 0
+            };
+            _context.Vehicles.Add(newVehicle);
+
+            await _context.SaveChangesAsync(); // Lưu cả record và vehicle mới
+
+            return MapToDto(createdRecord);
         }
 
         public async Task<VehicleReceptionRecordDto> UpdateAsync(int id, CreateVehicleReceptionDto dto)
         {
             var record = await _repository.GetByIdAsync(id)
-                ?? throw new Exception("Reception record not found");
+                ?? throw new ArgumentException("Reception record not found");
+        
+            var today = DateOnly.FromDateTime(DateTime.Now);
 
-            if (string.IsNullOrWhiteSpace(dto.LicensePlate)) throw new Exception("Biển số xe không được để trống.");
-            if (string.IsNullOrWhiteSpace(dto.ChassisNumber)) throw new Exception("Số khung (Chassis) không được để trống.");
-            if (string.IsNullOrWhiteSpace(dto.EngineNumber)) throw new Exception("Số máy (Engine) không được để trống.");
+            // 1. Biển số xe (Regex + Chuẩn hóa)
+            if (string.IsNullOrWhiteSpace(dto.LicensePlate)) 
+                throw new InvalidLicensePlateException("Biển số xe không được để trống.");
+            
+            var cleanPlate = dto.LicensePlate.ToUpper().Replace(" ", "");
+            if (!Regex.IsMatch(cleanPlate, @"^[0-9]{2}[A-Z]{1,2}-[0-9]{3,5}(\.[0-9]{2})?$"))
+                throw new InvalidLicensePlateException();
 
-            // KIỂM TRA TRÙNG BIỂN SỐ KHI CẬP NHẬT (NẾU ĐỔI BIỂN KHÁC)
-            if (dto.LicensePlate != record.LicensePlate)
+            // 2. Số VIN (ISO Standard)
+            if (string.IsNullOrWhiteSpace(dto.Vin)) 
+                throw new InvalidVINLengthException("Số VIN không được để trống.");
+            if (dto.Vin.Length != 17)
+                throw new InvalidVINLengthException();
+            if (Regex.IsMatch(dto.Vin, "[IOQioq]"))
+                throw new ForbiddenCharacterException();
+            if (!Regex.IsMatch(dto.Vin, @"^[A-HJ-NPR-Z0-9]{17}$"))
+                throw new ForbiddenCharacterException("Số VIN chứa ký tự không hợp lệ hoặc sai định dạng ISO.");
+
+            // 3. Quản lý Ngày tháng (Past Date Exception)
+            if (dto.RegistrationExpirationDate.HasValue && dto.RegistrationExpirationDate <= today)
+                throw new PastDateException("registrationExpirationDate");
+            if (dto.InsuranceExpirationDate.HasValue && dto.InsuranceExpirationDate <= today)
+                throw new PastDateException("insuranceExpirationDate");
+
+            // 4. KIỂM TRA TRÙNG LẶP
+            if (cleanPlate != record.LicensePlate)
             {
-                bool isPlateInVehicle = await _context.Vehicles.AnyAsync(v => v.LicensePlate == dto.LicensePlate);
-                if (isPlateInVehicle) 
-                    throw new Exception($"Biển số xe {dto.LicensePlate} đã tồn tại trong kho tài sản!");
-
-                bool isPlateInReception = await _context.VehicleReceptionRecords
-                    .AnyAsync(r => r.LicensePlate == dto.LicensePlate && r.Id != id && r.Status != "Rejected");
-                if (isPlateInReception) 
-                    throw new Exception($"Biển số xe {dto.LicensePlate} đang được chờ xử lý ở một đề xuất khác!");
+                if (await _context.Vehicles.AnyAsync(v => v.LicensePlate == cleanPlate))
+                    throw new DuplicateVehicleException("licensePlate", cleanPlate);
+                if (await _context.VehicleReceptionRecords.AnyAsync(r => r.LicensePlate == cleanPlate && r.Id != id && r.Status != "Rejected"))
+                    throw new DuplicateVehicleException("licensePlate", cleanPlate);
+            }
+            if (dto.Vin != record.Vin)
+            {
+                if (await _context.Vehicles.AnyAsync(v => v.Vin == dto.Vin))
+                    throw new DuplicateVehicleException("vin", dto.Vin);
             }
 
             record.UpdateReceptionDetails(
-                dto.LicensePlate,
-                dto.ChassisNumber,
-                dto.EngineNumber,
-                dto.ReceiptImageUrl,
-                dto.Notes);
+                cleanPlate, dto.Vin, dto.ChassisNumber, dto.EngineNumber, dto.TelematicsImei,
+                dto.RegistrationExpirationDate, dto.InsuranceExpirationDate, dto.BadgeType,
+                dto.BadgeExpirationDate, dto.FuelNorm ?? record.FuelNorm, dto.ReceiptImageUrl, dto.Notes,
+                dto.YearManufacture, dto.Mileage);
 
             var updated = await _repository.UpdateAsync(record);
+
+            // 6. CẬP NHẬT XE TRONG KHO TÀI SẢN (NẾU ĐÃ TỒN TẠI)
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.LicensePlate == record.LicensePlate);
+            if (vehicle != null)
+            {
+                // Lấy Manufacturer từ đề xuất gốc (vì DTO không gửi lên)
+                var vehicleDetail = await _context.BulkPurchaseDetails
+                    .FirstOrDefaultAsync(d => d.PurchaseProposalId == record.PurchaseProposalId && 
+                                            d.BranchId == record.BranchId && 
+                                            d.Version == record.Version);
+                
+                string manufacturer = vehicleDetail?.Manufacturer ?? "";
+
+                // Cập nhật lại ModelId nếu Hãng/Dòng xe thay đổi
+                var model = await _context.VehicleModels
+                    .FirstOrDefaultAsync(m => m.Manufacturer == manufacturer && m.ModelName == record.Version);
+
+                if (model == null && !string.IsNullOrEmpty(manufacturer))
+                {
+                    model = new VehicleModel
+                    {
+                        Manufacturer = manufacturer,
+                        ModelName = record.Version,
+                        Seats = vehicleDetail?.Seats,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    _context.VehicleModels.Add(model);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (model != null) vehicle.ModelId = model.Id;
+
+                vehicle.Vin = dto.Vin;
+                vehicle.ChassisNumber = dto.ChassisNumber;
+                vehicle.EngineNumber = dto.EngineNumber;
+                vehicle.TelematicsImei = dto.TelematicsImei;
+                vehicle.RegistrationExpirationDate = dto.RegistrationExpirationDate;
+                vehicle.InsuranceExpirationDate = dto.InsuranceExpirationDate;
+                vehicle.BadgeType = dto.BadgeType;
+                vehicle.BadgeExpirationDate = dto.BadgeExpirationDate;
+                vehicle.FuelNorm = dto.FuelNorm;
+                vehicle.YearManufacture = dto.YearManufacture;
+                vehicle.Mileage = dto.Mileage;
+                vehicle.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+            }
+
             return MapToDto(updated);
         }
 
@@ -184,6 +375,8 @@ namespace Service.Services.Implementations
                 Status = record.Status,
                 DaysDelay = record.GetDaysDelay(),
                 IsLate = record.IsLate(),
+                YearManufacture = record.YearManufacture,
+                Mileage = record.Mileage,
                 CreatedAt = record.CreatedAt,
                 UpdatedAt = record.UpdatedAt
             };

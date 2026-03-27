@@ -1,5 +1,6 @@
-﻿using Models.Common;
+using Models.Common;
 using Service.Exceptions;
+using Models.Exceptions;
 
 namespace API.Middlewares
 {
@@ -22,6 +23,21 @@ namespace API.Middlewares
             {
                 await _next(context);
             }
+            catch (VehicleBaseException ex)
+            {
+                _logger.LogWarning("[VehicleException] {Code} on field {Field}: {Message}", ex.ErrorCode, ex.Field, ex.Message);
+
+                var errorResponse = new
+                {
+                    errorCode = ex.ErrorCode,
+                    field = ex.Field,
+                    message = ex.Message,
+                    severity = ex.Severity
+                };
+
+                context.Response.StatusCode = 400; // Bad Request for validation errors
+                await context.Response.WriteAsJsonAsync(errorResponse);
+            }
             catch (BusinessException ex)
             {
                 _logger.LogWarning("[BusinessException] {Code}: {Message}", ex.Code, ex.Message);
@@ -35,6 +51,21 @@ namespace API.Middlewares
                 };
 
                 context.Response.StatusCode = (int)ex.StatusCode;
+                await context.Response.WriteAsJsonAsync(response);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning("[ArgumentException] Invalid argument provided: {Message}", ex.Message);
+
+                var response = new ApiResponse<object>
+                {
+                    StatusCode = 400, // Bad Request
+                    Success = false,
+                    Message = ex.Message,
+                    Data = null
+                };
+
+                context.Response.StatusCode = 400;
                 await context.Response.WriteAsJsonAsync(response);
             }
             catch (Exception ex)

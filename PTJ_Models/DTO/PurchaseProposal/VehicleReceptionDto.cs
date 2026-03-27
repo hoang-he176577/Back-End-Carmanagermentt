@@ -11,9 +11,25 @@ public class CreateVehicleReceptionDto
 
     public string? LicensePlate { get; set; }
 
+    public string? Version { get; set; }
+
     public string? ChassisNumber { get; set; }
 
     public string? EngineNumber { get; set; }
+
+    public string? Vin { get; set; }
+
+    public string? TelematicsImei { get; set; }
+
+    public DateOnly? RegistrationExpirationDate { get; set; }
+
+    public DateOnly? InsuranceExpirationDate { get; set; }
+
+    public string? BadgeType { get; set; }
+
+    public DateOnly? BadgeExpirationDate { get; set; }
+
+    public decimal? FuelNorm { get; set; }
 
     /// <summary>
     /// Ảnh base64 hoặc URL sau khi upload
@@ -21,6 +37,8 @@ public class CreateVehicleReceptionDto
     public string? ReceiptImageUrl { get; set; }
 
     public string? Notes { get; set; }
+    public int? YearManufacture { get; set; }
+    public decimal? Mileage { get; set; }
 }
 
 /// <summary>
@@ -47,6 +65,7 @@ public class PurchasePlanDto
     public DateOnly? CreatedDate { get; set; }
 
     public DateOnly? ApprovedDate { get; set; }
+    public DateTime? CompletionDeadline { get; set; }
 
     public decimal? ProposedCost { get; set; }
 
@@ -61,10 +80,17 @@ public class PurchasePlanDto
     /// Ưu tiên (1=cao, 3=thấp) - dùng để sắp xếp
     /// </summary>
     public int Priority { get; set; } = 3;
+
+    /// <summary>
+    /// Danh sách xe đã tiếp nhận thực tế
+    /// </summary>
+    public List<VehicleReceptionRecordDto>? Receptions { get; set; }
 }
 
 public class BranchPurchaseDetailDto
 {
+    public int Id { get; set; }
+    public string? ProposerBranchName { get; set; }
     public int BranchId { get; set; }
 
     public string? BranchName { get; set; }
@@ -72,10 +98,12 @@ public class BranchPurchaseDetailDto
     public int ProposedQuantity { get; set; }
 
     public decimal UnitPrice { get; set; }
-
+    public decimal? FuelNorm { get; set; }
     public int? Seats { get; set; }
 
     public string? Manufacturer { get; set; }
+
+    public string? Version { get; set; }
 
     public decimal TotalPrice => ProposedQuantity * UnitPrice;
 
@@ -90,4 +118,14 @@ public class BranchPurchaseDetailDto
     /// Ngày yêu cầu
     /// </summary>
     public DateOnly? RequestedDate { get; set; }
+
+    // Các trường TCO & NĐ158 (Phase 2)
+    public decimal? RegistrationTax { get; set; }
+    public decimal? RoadMaintenanceFee { get; set; }
+    public decimal? LicensePlateFee { get; set; }
+    public decimal? InsuranceFee { get; set; }
+    public bool HasCamera158 { get; set; }
+    public bool HasGsht { get; set; }
+    public string? AcquisitionMethod { get; set; }
+    public DateTime? CompletionDeadline { get; set; }
 }

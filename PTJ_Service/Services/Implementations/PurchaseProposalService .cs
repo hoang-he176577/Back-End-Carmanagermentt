@@ -1,4 +1,4 @@
-﻿    using Data.Repositories.Interfaces;
+    using Data.Repositories.Interfaces;
     using Models.Models;
     using Service.Services.Interfaces;
 
@@ -40,19 +40,31 @@ using Microsoft.EntityFrameworkCore;
                     Description = p.Description,
                     Status = p.Status,
                     CreatedDate = p.CreatedDate,
+                    CompletionDeadline = p.CompletionDeadline,
                     ProposedCost = p.ProposedCost,
                     ManagerName = p.Manager?.Name,
                     Priority = CalculatePriority(p),
                     BranchDetails = p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
                     {
+                        ProposerBranchName = p.Proposer?.Branch?.Name,
                         BranchId = d.BranchId ?? 0,
                         BranchName = d.Branch?.Name,
                         ProposedQuantity = d.ProposedQuantity ?? 0,
                         UnitPrice = d.UnitPrice ?? 0,
                         Seats = d.Seats,
                         Manufacturer = d.Manufacturer,
+                        Version = d.Version,
+                        FuelNorm = d.FuelNorm,
+                        RegistrationTax = d.RegistrationTax,
+                        RoadMaintenanceFee = d.RoadMaintenanceFee,
+                        LicensePlateFee = d.LicensePlateFee,
+                        InsuranceFee = d.InsuranceFee,
+                        HasCamera158 = d.HasCamera158 ?? false,
+                        HasGsht = d.HasGsht ?? false,
+                        AcquisitionMethod = d.AcquisitionMethod,
                         BranchNotes = d.BranchNotes,
-                        RequestedDate = p.CreatedDate
+                        RequestedDate = p.CreatedDate,
+                        CompletionDeadline = p.CompletionDeadline
                     }).ToList()
                 })
                 .OrderBy(p => p.Status == "Pending" ? 1 :
@@ -72,55 +84,136 @@ using Microsoft.EntityFrameworkCore;
         public async Task<object> CreateAsync(CreatePurchaseProposalDto dto, int proposerId, int branchId)
         {
             if (dto.Details == null || !dto.Details.Any())
-                throw new Exception("Đề xuất phải có ít nhất 1 chi tiết cấu hình xe.");
+                throw new ArgumentException("Đề xuất phải có ít nhất 1 chi tiết cấu hình xe.");
 
             if (string.IsNullOrWhiteSpace(dto.Description))
-                throw new Exception("Mô tả/lý do đề xuất không được để trống.");
+                throw new ArgumentException("Mô tả/lý do đề xuất không được để trống.");
 
-            // KIỂM TRA BẢO MẬT VÀ TÍNH ĐỒNG NHẤT CỦA TÀI KHOẢN
+            if (!dto.CompletionDeadline.HasValue)
+                throw new ArgumentException("Vui lòng chọn Hạn hoàn thành cho đề xuất.");
+
+            if (dto.CompletionDeadline.Value.Date < DateTime.Now.Date)
+                throw new ArgumentException("Hạn hoàn thành không được là một ngày trong quá khứ.");
+
             var proposer = await _context.Users.FindAsync(proposerId);
             if (proposer == null)
-                throw new Exception("Tài khoản người yêu cầu không tồn tại trong hệ thống.");
+                throw new ArgumentException("Tài khoản người yêu cầu không tồn tại trong hệ thống.");
             if (proposer.BranchId.HasValue && proposer.BranchId.Value != branchId)
-                throw new Exception("Lỗi bảo mật: Dữ liệu chi nhánh không khớp với thông tin tài khoản của bạn.");
+                throw new ArgumentException("Lỗi bảo mật: Dữ liệu chi nhánh không khớp với thông tin tài khoản của bạn.");
 
             var branchExists = await _context.Branches.AnyAsync(b => b.Id == branchId);
             if (!branchExists)
-                throw new Exception($"Chi nhánh của bạn (ID: {branchId}) không tồn tại trong hệ thống.");
+                throw new ArgumentException($"Chi nhánh của bạn (ID: {branchId}) không tồn tại trong hệ thống.");
 
             var proposal = new PurchaseProposal();
-            proposal.InitCreate(dto.Description, proposerId);
+            proposal.InitCreate(dto.Description, proposerId, dto.CompletionDeadline);
 
             if (dto.Details != null)
             {
                 foreach (var detail in dto.Details)
-                {   
-                    if (detail.Quantity <= 0) throw new Exception("Số lượng xe phải lớn hơn 0.");
-                    if (detail.UnitPrice <= 0) throw new Exception("Đơn giá xe phải lớn hơn 0.");
-                    if (detail.UnitPrice > 9999999999999M) throw new Exception("Đơn giá xe vượt mức tối đa cho phép của hệ thống.");
-                    if (string.IsNullOrWhiteSpace(detail.Manufacturer)) throw new Exception("Nhãn hiệu xe không được để trống.");
-                    if (detail.Seats.HasValue && detail.Seats.Value <= 0) throw new Exception("Số chỗ ngồi không hợp lệ.");
+                {
+                    if (detail.Quantity <= 0) throw new ArgumentException("Số lượng xe phải lớn hơn 0.");
+                    if (detail.UnitPrice <= 0) throw new ArgumentException("Đơn giá xe phải lớn hơn 0.");
+                    if (string.IsNullOrWhiteSpace(detail.Manufacturer)) throw new ArgumentException("Nhãn hiệu xe không được để trống.");
+
+                    // Legal Validation (Nghị định 158/2024)
+                    if ((detail.Seats.HasValue && detail.Seats.Value >= 8)) // Điều kiện xe kinh doanh/chở người
+                    {
+                        if (detail.HasCamera158 != true || detail.HasGsht != true)
+                        {
+                            throw new ArgumentException("Theo Nghị định 158/2024, phương tiện kinh doanh/chở người trên 8 chỗ bắt buộc phải lắp đặt Camera và thiết bị GSHT.");
+                        }
+                    }
 
                     var bulkDetail = new BulkPurchaseDetail();
                     bulkDetail.InitCreate(
-                        branchId, // Lấy chi nhánh trực tiếp từ token truyền xuống, KHÔNG lấy từ detail DTO nữa
+                        branchId,
                         detail.Quantity,
                         detail.UnitPrice,
                         detail.Notes ?? detail.Description);
 
+                    // Map TCO & Legal fields
                     bulkDetail.Seats = detail.Seats;
                     bulkDetail.Manufacturer = detail.Manufacturer;
+                    bulkDetail.Version = detail.Version;
+                    bulkDetail.AcquisitionMethod = detail.AcquisitionMethod;
+                    bulkDetail.RegistrationTax = detail.RegistrationTax;
+                    bulkDetail.RoadMaintenanceFee = detail.RoadMaintenanceFee;
+                    bulkDetail.LicensePlateFee = detail.LicensePlateFee;
+                    bulkDetail.InsuranceFee = detail.InsuranceFee;
+                    bulkDetail.HasCamera158 = detail.HasCamera158;
+                    bulkDetail.HasGsht = detail.HasGsht;
 
                     proposal.AddDetail(bulkDetail);
                 }
             }
-
-
+            
             await _repository.AddAsync(proposal);
             await _repository.SaveChangesAsync();
 
-                return proposal;
+            return proposal;
+        }
+
+        public async Task<object> UpdateAsync(int proposalId, UpdatePurchaseProposalDto dto, int proposerId, int branchId)
+        {
+            var proposal = await _context.PurchaseProposals
+                .Include(p => p.BulkPurchaseDetails)
+                .FirstOrDefaultAsync(p => p.Id == proposalId);
+
+            if (proposal == null) throw new ArgumentException("Không tìm thấy đề xuất.");
+            if (proposal.ProposerId != proposerId) throw new ArgumentException("Bạn không có quyền sửa đề xuất này.");
+            if (proposal.Status != "Pending") throw new ArgumentException("Chỉ có thể sửa đề xuất khi đang ở trạng thái chờ duyệt.");
+
+            if (dto.Details == null || !dto.Details.Any())
+                throw new ArgumentException("Đề xuất phải có ít nhất 1 chi tiết cấu hình xe.");
+            if (string.IsNullOrWhiteSpace(dto.Description))
+                throw new ArgumentException("Mô tả/lý do đề xuất không được để trống.");
+
+            var branchExists = await _context.Branches.AnyAsync(b => b.Id == branchId);
+            if (!branchExists) throw new ArgumentException($"Chi nhánh không tồn tại.");
+
+            proposal.Description = dto.Description;
+            proposal.CompletionDeadline = dto.CompletionDeadline;
+            proposal.UpdatedAt = DateTime.Now;
+
+            _context.BulkPurchaseDetails.RemoveRange(proposal.BulkPurchaseDetails);
+            
+            foreach (var detail in dto.Details)
+            {
+                if (detail.Quantity <= 0) throw new ArgumentException("Số lượng xe phải lớn hơn 0.");
+                if (detail.UnitPrice <= 0) throw new ArgumentException("Đơn giá xe phải lớn hơn 0.");
+                if (string.IsNullOrWhiteSpace(detail.Manufacturer)) throw new ArgumentException("Nhãn hiệu xe không được để trống.");
+
+                if ((detail.Seats.HasValue && detail.Seats.Value >= 8))
+                {
+                    if (detail.HasCamera158 != true || detail.HasGsht != true)
+                    {
+                        throw new ArgumentException("Theo Nghị định 158/2024, phương tiện kinh doanh/chở người trên 8 chỗ bắt buộc phải lắp đặt Camera và thiết bị GSHT.");
+                    }
+                }
+
+                var bulkDetail = new BulkPurchaseDetail();
+                bulkDetail.InitCreate(branchId, detail.Quantity, detail.UnitPrice, detail.Notes ?? detail.Description);
+                bulkDetail.Seats = detail.Seats;
+                bulkDetail.Manufacturer = detail.Manufacturer;
+                bulkDetail.AcquisitionMethod = detail.AcquisitionMethod;
+                bulkDetail.Version = detail.Version;
+                bulkDetail.RegistrationTax = detail.RegistrationTax;
+                bulkDetail.RoadMaintenanceFee = detail.RoadMaintenanceFee;
+                bulkDetail.LicensePlateFee = detail.LicensePlateFee;
+                bulkDetail.InsuranceFee = detail.InsuranceFee;
+                bulkDetail.HasCamera158 = detail.HasCamera158;
+                bulkDetail.HasGsht = detail.HasGsht;
+
+                bulkDetail.PurchaseProposalId = proposal.Id;
+                _context.BulkPurchaseDetails.Add(bulkDetail);
             }
+
+            proposal.ProposedCost = dto.Details.Sum(d => d.Quantity * (d.UnitPrice + (d.RegistrationTax ?? 0) + (d.RoadMaintenanceFee ?? 0) + (d.LicensePlateFee ?? 0) + (d.InsuranceFee ?? 0)));
+
+            await _context.SaveChangesAsync();
+            return proposal;
+        }
 
             public async Task ApproveByManagerAsync(int proposalId, int managerId)
             {
@@ -169,7 +262,7 @@ using Microsoft.EntityFrameworkCore;
         // ==============================
         // LUỒNG TỰ ĐỘNG TẠO XE - KẾ TOÁN XÁC NHẬN
         // ==============================
-        public async Task ConfirmPaymentAsync(int proposalId, int accountantId)
+        public async Task ConfirmPaymentAsync(int proposalId, int accountantId, ActualCostConfirmationDto dto)
         {
             var proposal = await _context.PurchaseProposals
                 .Include(p => p.BulkPurchaseDetails)
@@ -178,49 +271,135 @@ using Microsoft.EntityFrameworkCore;
             if (proposal == null) throw new Exception("Không tìm thấy đề xuất");
 
             var receptionRecords = await _context.VehicleReceptionRecords
-                .Where(r => r.PurchaseProposalId == proposalId && r.Status == VehicleReceptionRecord.ReceivedPendingPaymentStatus)
+                .Where(r => r.PurchaseProposalId == proposalId && 
+                       (r.Status == VehicleReceptionRecord.ReceivedPendingPaymentStatus || r.Status == VehicleReceptionRecord.PendingStatus))
                 .ToListAsync();
                 
             if (!receptionRecords.Any())
                 throw new Exception("Không tìm thấy bản ghi đối chiếu nào đang chờ thanh toán cho đề xuất này.");
 
-            // 1. KIỂM TRA TRÙNG LẶP TRƯỚC KHI THỰC HIỆN
-            foreach (var record in receptionRecords)
-            {
-                if (string.IsNullOrWhiteSpace(record.LicensePlate))
-                    throw new Exception($"Bản ghi đối chiếu #{record.Id} bị thiếu biển số xe.");
+            // 2. CẬP NHẬT TRẠNG THÁI VÀ CHI PHÍ (CƠ CHẾ MỚI: KIỂM TRA HOÀN TẤT TOÀN BỘ CHIẾC XE)
+            int totalProposed = proposal.BulkPurchaseDetails.Sum(d => d.ProposedQuantity ?? 0);
+            int totalReceivedAndPaid = await _context.VehicleReceptionRecords
+                .CountAsync(r => r.PurchaseProposalId == proposalId && r.Status == VehicleReceptionRecord.CompletedStatus) 
+                + receptionRecords.Count; // Cộng thêm những bản ghi sắp được hoàn thành ở bước sau
 
-                // KIỂM TRA CHẶT CHẼ TRƯỚC KHI INSERT VÀO DB (UNIQUE CONSTRAINT)
-                bool isExist = await _context.Vehicles.AnyAsync(v => v.LicensePlate == record.LicensePlate);
-                if (isExist)
+            if (totalReceivedAndPaid >= totalProposed)
+            {
+                proposal.MarkAsCompleted();
+            }
+            else
+            {
+                // Nếu chưa đủ xe, trả về trạng thái Approved để Operator có thể tiếp nhận tiếp các xe còn lại
+                proposal.ApproveByChiefAccountant(accountantId);
+            }
+
+            proposal.ApproveByChiefAccountant(accountantId);
+            proposal.ActualCost = (proposal.ActualCost ?? 0) + dto.ActualCost;
+
+            // CẬP NHẬT CHI PHÍ CHI TIẾT NẾU CÓ
+            if (dto.DetailUpdates != null && dto.DetailUpdates.Any())
+            {
+                foreach (var update in dto.DetailUpdates)
                 {
-                    throw new Exception($"Lỗi: Biển số {record.LicensePlate} đã tồn tại trong kho. Vui lòng hoàn tác đối chiếu!");
+                    var detail = proposal.BulkPurchaseDetails.FirstOrDefault(d => d.Id == update.DetailId);
+                    if (detail != null)
+                    {
+                        // Lưu lại giá trị sau cùng được kế toán duyệt
+                        detail.UnitPrice = update.UnitPrice;
+                        detail.RegistrationTax = update.RegistrationTax;
+                        detail.RoadMaintenanceFee = update.RoadMaintenanceFee;
+                        detail.LicensePlateFee = update.LicensePlateFee;
+                        detail.InsuranceFee = update.InsuranceFee;
+                        detail.ReceivedDate = DateTime.Now;
+                        
+                        // Nếu đã nhận đủ số lượng của dòng xe này thì mới mark Detail là Completed
+                        int receivedForThisDetail = await _context.VehicleReceptionRecords
+                            .CountAsync(r => r.PurchaseProposalId == proposalId && r.BranchId == detail.BranchId && r.Version == detail.Version && r.Status == VehicleReceptionRecord.CompletedStatus)
+                            + receptionRecords.Count(r => r.BranchId == detail.BranchId && r.Version == detail.Version);
+
+                        if (receivedForThisDetail >= (detail.ProposedQuantity ?? 0))
+                        {
+                            detail.Status = "Completed";
+                        }
+                    }
                 }
             }
 
-            // 2. NẾU MỌI THỨ HỢP LỆ, TIẾN HÀNH DUYỆT THANH TOÁN
-            proposal.MarkAsCompleted();
-            proposal.ApproveByChiefAccountant(accountantId);
+            if (!string.IsNullOrWhiteSpace(dto.AccountantNote))
+            {
+                proposal.Description += $"\n[Ghi chú Kế toán Thực chi]: {dto.AccountantNote}";
+            }
 
             foreach (var record in receptionRecords)
             {
-                var detail = proposal.BulkPurchaseDetails.FirstOrDefault(d => d.BranchId == record.BranchId);
-
-                var newVehicle = new Vehicle
-                {
-                    LicensePlate = record.LicensePlate,
-                    CurrentBranchId = record.BranchId,
-                    Status = "Active",
-                    PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
-                    OriginalCost = detail?.UnitPrice ?? 0,
-                    CurrentValue = detail?.UnitPrice ?? 0,
-                    Mileage = 0,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-                _context.Vehicles.Add(newVehicle);
-                
+                // Chỉ cần đánh dấu bản ghi đối chiếu là đã hoàn thành
                 record.Complete();
+
+                // ĐỒNG BỘ DỮ LIỆU SANG KHO TÀI SẢN (Cập nhật nguyên giá thực tế)
+                var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.LicensePlate == record.LicensePlate);
+                
+                // Tìm detail tương ứng để lấy cấu hình xe
+                var detail = proposal.BulkPurchaseDetails.FirstOrDefault(d => 
+                    d.BranchId == record.BranchId && d.Version == record.Version);
+
+                if (vehicle == null && detail != null)
+                {
+                    // TRƯỜNG HỢP CỰC KỲ QUAN TRỌNG: Nếu xe chưa được tạo lúc đối chiếu (do lỗi hoặc dữ liệu cũ), 
+                    // thì phải tạo ngay lúc thanh toán để đảm bảo tài sản không bị mất.
+                    
+                    // Tìm hoặc tạo model
+                    var model = await _context.VehicleModels
+                        .FirstOrDefaultAsync(m => m.Manufacturer == detail.Manufacturer && m.ModelName == record.Version);
+                    if (model == null)
+                    {
+                        model = new VehicleModel { 
+                            Manufacturer = detail.Manufacturer ?? "N/A", 
+                            ModelName = record.Version ?? "N/A", 
+                            CreatedAt = DateTime.Now, 
+                            UpdatedAt = DateTime.Now 
+                        };
+                        _context.VehicleModels.Add(model);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    vehicle = new Vehicle
+                    {
+                        LicensePlate = record.LicensePlate,
+                        Vin = record.Vin,
+                        ChassisNumber = record.ChassisNumber,
+                        EngineNumber = record.EngineNumber,
+                        TelematicsImei = record.TelematicsImei,
+                        CurrentBranchId = record.BranchId,
+                        ModelId = model.Id,
+                        Status = "Active",
+                        PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
+                        YearManufacture = DateTime.Now.Year,
+                        CreatedAt = DateTime.Now
+                    };
+                    _context.Vehicles.Add(vehicle);
+                }
+
+                if (vehicle != null && detail != null)
+                {
+                    // Cập nhật nguyên giá thực tế dựa trên số liệu Kế toán vừa chốt
+                    decimal totalCost = (detail.UnitPrice ?? 0) + 
+                                       (detail.RegistrationTax ?? 0) + 
+                                       (detail.LicensePlateFee ?? 0) + 
+                                       (detail.RoadMaintenanceFee ?? 0) + 
+                                       (detail.InsuranceFee ?? 0);
+                    
+                    vehicle.OriginalCost = totalCost;
+                    vehicle.CurrentValue = totalCost;
+                    
+                    // Đồng bộ lại các trường thông tin khác
+                    vehicle.RegistrationExpirationDate = record.RegistrationExpirationDate;
+                    vehicle.InsuranceExpirationDate = record.InsuranceExpirationDate;
+                    vehicle.BadgeExpirationDate = record.BadgeExpirationDate;
+                    vehicle.FuelNorm = record.FuelNorm;
+                    vehicle.Status = "Active";
+                    vehicle.UpdatedAt = DateTime.Now;
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -261,6 +440,7 @@ using Microsoft.EntityFrameworkCore;
                     Status = p.Status ?? "Approved",
                     ProposedCost = p.ProposedCost,
                     CreatedAt = p.CreatedAt,
+                    CompletionDeadline = p.CompletionDeadline,
                     
                     BranchNote = p.BulkPurchaseDetails
                                   .FirstOrDefault(d => d.BranchId == branchId)?.BranchNotes
@@ -291,65 +471,84 @@ using Microsoft.EntityFrameworkCore;
         {
             var proposals = await _repository.GetAllAsync();
 
-            var approved = proposals
-                .Where(p => (p.Status == "Approved" || p.Status == VehicleReceptionRecord.ReceivedPendingPaymentStatus) && p.DeletedAt == null)
-                .ToList();
+            var filtered = proposals.Where(p => 
+                p.DeletedAt == null && (
+                p.Status == PurchaseProposal.ManagerApprovedStatus ||
+                p.Status == PurchaseProposal.ApprovedStatus ||
+                p.Status == "Received_Pending_Payment" ||
+                p.Status == "Received_Pending_Approval" ||
+                p.Status == "Completed"
+            )).ToList();
 
-            // Nếu có branchId, lọc chỉ đề xuất có chi nhánh này
             if (branchId.HasValue && branchId.Value > 0)
             {
-                approved = approved
-                    .Where(p => p.BulkPurchaseDetails.Any(d => d.BranchId == branchId.Value))
-                    .ToList();
+                filtered = filtered.Where(p => p.BulkPurchaseDetails.Any(d => d.BranchId == branchId.Value)).ToList();
             }
 
-            // Map sang PurchasePlanDto
-            var plans = approved.Select(p => new PurchasePlanDto
+            return filtered.Select(p => new PurchasePlanDto
             {
                 ProposalId = p.Id,
                 Description = p.Description,
                 Status = p.Status,
                 CreatedDate = p.CreatedDate,
                 ApprovedDate = p.ApprovedDate,
+                CompletionDeadline = p.CompletionDeadline,
                 ProposedCost = p.ProposedCost,
                 ManagerName = p.Manager?.Name,
-                Priority = CalculatePriority(p), // Tính priority dựa trên ngày + cost
+                Priority = CalculatePriority(p),
 
-                // Chi tiết theo chi nhánh
-                BranchDetails = (branchId.HasValue && branchId.Value > 0)
-                    ? p.BulkPurchaseDetails
-                        .Where(d => d.BranchId == branchId.Value)
-                        .Select(d => new BranchPurchaseDetailDto
-                        {
-                            BranchId = d.BranchId ?? 0,
-                            BranchName = d.Branch?.Name,
-                            ProposedQuantity = d.ProposedQuantity ?? 0,
-                            UnitPrice = d.UnitPrice ?? 0,
-                            Seats = d.Seats,
-                            Manufacturer = d.Manufacturer,
-                            BranchNotes = d.BranchNotes,
-                            RequestedDate = p.CreatedDate // Ngày yêu cầu
-                        })
-                        .ToList()
-                    : p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
+                Receptions = p.VehicleReceptionRecords?
+                    .Where(r => r.Status != VehicleReceptionRecord.RejectedStatus)
+                    .Select(r => new VehicleReceptionRecordDto
                     {
-                        BranchId = d.BranchId ?? 0,
-                        BranchName = d.Branch?.Name,
-                        ProposedQuantity = d.ProposedQuantity ?? 0,
-                        UnitPrice = d.UnitPrice ?? 0,
-                        Seats = d.Seats,
-                        Manufacturer = d.Manufacturer,
-                        BranchNotes = d.BranchNotes,
-                        RequestedDate = p.CreatedDate
-                    })
-                    .ToList()
-            })
-            .OrderBy(p => p.Priority) // 1. Ưu tiên cao nhất
-            .ThenBy(p => p.CreatedDate) // 2. Theo ngày tạo (cũ nhất ưu tiên trước)
-            .ThenByDescending(p => p.ProposedCost) // 3. Theo giá trị (cao xếp trước)
-            .ToList();
+                        Id = r.Id,
+                        ProposalId = r.PurchaseProposalId,
+                        BranchId = r.BranchId,
+                        BranchName = r.Branch?.Name,
+                        LicensePlate = r.LicensePlate,
+                        Vin = r.Vin,
+                        TelematicsImei = r.TelematicsImei,
+                        Version = r.Version,
+                        ChassisNumber = r.ChassisNumber,
+                        EngineNumber = r.EngineNumber,
+                        ReceivedDate = r.ReceivedDate,
+                        RegistrationExpirationDate = r.RegistrationExpirationDate,
+                        InsuranceExpirationDate = r.InsuranceExpirationDate,
+                        BadgeType = r.BadgeType,
+                        BadgeExpirationDate = r.BadgeExpirationDate,
+                        FuelNorm = r.FuelNorm,
+                        ReceiptImageUrl = r.ReceiptImageUrl,
+                        Status = r.Status,
+                        Notes = r.Notes
+                    }).ToList() ?? new List<VehicleReceptionRecordDto>(),
 
-            return plans;
+                BranchDetails = p.BulkPurchaseDetails.Select(d => new BranchPurchaseDetailDto
+                {
+                    Id = d.Id,
+                    ProposerBranchName = p.Proposer?.Branch?.Name,
+                    BranchId = d.BranchId ?? 0,
+                    BranchName = d.Branch?.Name,
+                    ProposedQuantity = d.ProposedQuantity ?? 0,
+                    UnitPrice = d.UnitPrice ?? 0,
+                    Seats = d.Seats,
+                    Manufacturer = d.Manufacturer,
+                    Version = d.Version,
+                    BranchNotes = d.BranchNotes,
+                    RequestedDate = p.CreatedDate,
+                    CompletionDeadline = p.CompletionDeadline,
+                    ReceivedQuantity = p.VehicleReceptionRecords?.Count(r => r.BranchId == d.BranchId && r.Status != VehicleReceptionRecord.RejectedStatus) ?? 0,
+                    RegistrationTax = d.RegistrationTax,
+                    RoadMaintenanceFee = d.RoadMaintenanceFee,
+                    LicensePlateFee = d.LicensePlateFee,
+                    InsuranceFee = d.InsuranceFee,
+                    HasCamera158 = d.HasCamera158 ?? false,
+                    HasGsht = d.HasGsht ?? false,
+                    AcquisitionMethod = d.AcquisitionMethod
+                }).ToList()
+            })
+            .OrderBy(p => p.Priority)
+            .ThenBy(p => p.CreatedDate)
+            .ToList();
         }
 
         /// <summary>
@@ -376,6 +575,87 @@ using Microsoft.EntityFrameworkCore;
             // Còn lại: Priority 3 (thấp)
             return 3;
         }
+        public async Task<int> SyncMissingVehiclesAsync()
+        {
+            // Lấy tất cả bản ghi đối chiếu đã hoàn thành (đã thanh toán) nhưng có thể chưa có bản ghi xe
+            var completedRecords = await _context.VehicleReceptionRecords
+                .Include(r => r.PurchaseProposal)
+                .ThenInclude(p => p.BulkPurchaseDetails)
+                .Where(r => r.Status == VehicleReceptionRecord.CompletedStatus)
+                .ToListAsync();
 
+            int syncCount = 0;
+            foreach (var record in completedRecords)
+            {
+                // Kiểm tra xem biển số đã tồn tại trong kho xe chưa
+                var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.LicensePlate == record.LicensePlate);
+                
+                var proposal = record.PurchaseProposal;
+                var detail = proposal?.BulkPurchaseDetails.FirstOrDefault(d => 
+                    d.BranchId == record.BranchId && d.Version == record.Version);
+
+                bool isNew = false;
+                if (vehicle == null && detail != null)
+                {
+                    // TẠO MỚI NẾU THIẾU
+                    var model = await _context.VehicleModels
+                        .FirstOrDefaultAsync(m => m.Manufacturer == detail.Manufacturer && m.ModelName == record.Version);
+                    
+                    if (model == null)
+                    {
+                        model = new VehicleModel { 
+                            Manufacturer = detail.Manufacturer ?? "N/A", 
+                            ModelName = record.Version ?? "N/A", 
+                            CreatedAt = DateTime.Now, 
+                            UpdatedAt = DateTime.Now 
+                        };
+                        _context.VehicleModels.Add(model);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    vehicle = new Vehicle
+                    {
+                        LicensePlate = record.LicensePlate,
+                        Vin = record.Vin,
+                        ChassisNumber = record.ChassisNumber,
+                        EngineNumber = record.EngineNumber,
+                        TelematicsImei = record.TelematicsImei,
+                        CurrentBranchId = record.BranchId,
+                        ModelId = model.Id,
+                        Status = "Active",
+                        PurchaseDate = record.ReceivedDate,
+                        YearManufacture = record.ReceivedDate?.Year ?? DateTime.Now.Year,
+                        CreatedAt = DateTime.Now
+                    };
+                    _context.Vehicles.Add(vehicle);
+                    isNew = true;
+                }
+
+                if (vehicle != null && detail != null)
+                {
+                    // ĐỒNG BỘ LẠI GIÁ TRỊ (Kể cả xe đã có nhưng có thể sai lệch giá)
+                    decimal totalCost = (detail.UnitPrice ?? 0) + 
+                                       (detail.RegistrationTax ?? 0) + 
+                                       (detail.LicensePlateFee ?? 0) + 
+                                       (detail.RoadMaintenanceFee ?? 0) + 
+                                       (detail.InsuranceFee ?? 0);
+                    
+                    if (vehicle.OriginalCost != totalCost || isNew)
+                    {
+                        vehicle.OriginalCost = totalCost;
+                        vehicle.CurrentValue = totalCost;
+                        vehicle.RegistrationExpirationDate = record.RegistrationExpirationDate;
+                        vehicle.InsuranceExpirationDate = record.InsuranceExpirationDate;
+                        vehicle.BadgeExpirationDate = record.BadgeExpirationDate;
+                        vehicle.FuelNorm = record.FuelNorm;
+                        vehicle.UpdatedAt = DateTime.Now;
+                        syncCount++;
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return syncCount;
+        }
     }
-    }
+}
