@@ -1,0 +1,12 @@
+[
+  { "id": 1, "vehicleId": 1, "title": "Đề xuất thuê xe Vios tự lái", "amount": 800000, "status": "Pending", "createdAt": "2023-10-01T08:30:00Z" },
+  { "id": 2, "vehicleId": 2, "title": "Thuê Honda City đi tỉnh", "amount": 1200000, "status": "Approved", "createdAt": "2023-10-02T09:15:00Z" },
+  { "id": 3, "vehicleId": 3, "title": "Hợp đồng thuê CX-5 theo tháng", "amount": 15000000, "status": "Pending", "createdAt": "2023-10-03T10:00:00Z" },
+  { "id": 4, "vehicleId": 4, "title": "Báo giá sửa chữa Ford Ranger", "amount": 3500000, "status": "Approved", "createdAt": "2023-10-04T14:20:00Z" },
+  { "id": 5, "vehicleId": 5, "title": "Thuê xe Hyundai Accent cuối tuần", "amount": 1600000, "status": "Rejected", "createdAt": "2023-10-05T16:45:00Z" },
+  { "id": 6, "vehicleId": 6, "title": "Đề xuất thuê Kia Seltos dài hạn", "amount": 12000000, "status": "Pending", "createdAt": "2023-10-06T08:00:00Z" },
+  { "id": 7, "vehicleId": 7, "title": "Trải nghiệm VinFast VF8 1 ngày", "amount": 1500000, "status": "Approved", "createdAt": "2023-10-07T11:30:00Z" },
+  { "id": 8, "vehicleId": 8, "title": "Thuê Xpander chạy dịch vụ", "amount": 10000000, "status": "Pending", "createdAt": "2023-10-08T13:10:00Z" },
+  { "id": 9, "vehicleId": 9, "title": "Bảo dưỡng định kỳ BMW 320i", "amount": 8500000, "status": "Pending", "createdAt": "2023-10-09T09:45:00Z" },
+  { "id": 10, "vehicleId": 10, "title": "Thuê xe cưới Mercedes C300", "amount": 5000000, "status": "Approved", "createdAt": "2023-10-10T15:00:00Z" }
+]

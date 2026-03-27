@@ -21,6 +21,14 @@ public partial class VehicleModel
 
     public decimal? DefaultPrice { get; set; }
 
+    public string? EnginePower { get; set; }
+
+    public string? EmissionStandard { get; set; }
+
+    public decimal? PayloadCapacity { get; set; }
+
+    public string? FuelType { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

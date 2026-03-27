@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Models.DTO.PurchaseProposal;
 
@@ -10,6 +10,7 @@ public class PurchaseProposalDto
     public decimal? ProposedCost { get; set; }
     public string? ProposerName { get; set; } 
     public DateTime? CreatedAt { get; set; }
+    public DateTime? CompletionDeadline { get; set; }
     public string? BranchNote { get; set; }
 }
 public class PurchaseProposalListDto
@@ -18,6 +19,7 @@ public class PurchaseProposalListDto
     public string? Description { get; set; }
     public string? Status { get; set; }
     public DateOnly? CreatedDate { get; set; }
+    public DateTime? CompletionDeadline { get; set; }
     public decimal? ProposedCost { get; set; }
 
     public string? ManagerName { get; set; }

@@ -1,4 +1,4 @@
-﻿using API.Middlewares;
+using API.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using Models.Common;
 using Models.Models;
@@ -37,12 +37,8 @@ namespace API.Controllers
         // ===== ROLES LIST FROM JWT =====
         protected List<string>? GetUserRoles()
         {
-            // assume roles claim stored as comma-separated string
-            var rolesClaim = User.FindFirst("roles")?.Value;
-            if (string.IsNullOrWhiteSpace(rolesClaim))
-                return null;
-
-            return rolesClaim.Split(',').Select(r => r.Trim()).ToList();
+            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            return roles.Count > 0 ? roles : null;
         }
         // ===== STANDARD RESPONSE =====
         protected IActionResult HandleResult<T>(T result, string? message = null)

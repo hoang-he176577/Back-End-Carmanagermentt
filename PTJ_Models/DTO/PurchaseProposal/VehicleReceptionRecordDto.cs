@@ -22,14 +22,25 @@ public class VehicleReceptionRecordDto
     public DateOnly? ReceivedDate { get; set; }
 
     public string? LicensePlate { get; set; }
+    public string? Vin { get; set; }
+    public string? TelematicsImei { get; set; }
+
+    public string? Version { get; set; }
 
     public string? ChassisNumber { get; set; }
 
     public string? EngineNumber { get; set; }
 
     public string? ReceiptImageUrl { get; set; }
+    public DateOnly? RegistrationExpirationDate { get; set; }
+    public DateOnly? InsuranceExpirationDate { get; set; }
+    public string? BadgeType { get; set; }
+    public DateOnly? BadgeExpirationDate { get; set; }
+    public decimal? FuelNorm { get; set; }
 
     public string? Notes { get; set; }
+    public int? YearManufacture { get; set; }
+    public decimal? Mileage { get; set; }
 
     public string? Status { get; set; }
 

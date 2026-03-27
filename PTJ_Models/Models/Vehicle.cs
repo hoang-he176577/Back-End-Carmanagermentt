@@ -35,6 +35,24 @@ public partial class Vehicle
 
     public string? ImageUrl { get; set; }
 
+    public string? Vin { get; set; }
+
+    public string? ChassisNumber { get; set; }
+
+    public string? EngineNumber { get; set; }
+
+    public string? TelematicsImei { get; set; }
+
+    public DateOnly? RegistrationExpirationDate { get; set; }
+
+    public DateOnly? InsuranceExpirationDate { get; set; }
+
+    public string? BadgeType { get; set; }
+
+    public DateOnly? BadgeExpirationDate { get; set; }
+
+    public decimal? FuelNorm { get; set; }
+
     public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
 
     public virtual ICollection<AssetChangeLog> AssetChangeLogs { get; set; } = new List<AssetChangeLog>();

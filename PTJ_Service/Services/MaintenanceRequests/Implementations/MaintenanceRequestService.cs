@@ -8,6 +8,8 @@ namespace Service.Services.MaintenanceRequests.Implementations;
 
 public sealed class MaintenanceRequestService : IMaintenanceRequestService
 {
+    private const string VehicleActiveStatus = "Active";
+
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "Periodic",
@@ -21,6 +23,17 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         "Rejected",
         "InProgress",
         "Completed"
+    };
+
+    private static readonly HashSet<string> AllowedVehicleStatusesForCreate = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Maintenance",
+        "InMaintenance"
+    };
+
+    private static readonly HashSet<string> AllowedStatusesForStart = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Approved"
     };
 
     private readonly IMaintenanceRequestRepository _repository;
@@ -84,6 +97,11 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         if (string.Equals(vehicleStatus, "Disposed", StringComparison.OrdinalIgnoreCase))
         {
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "Xe đã được thanh lý, không thể tạo yêu cầu bảo trì.");
+        }
+
+        if (string.IsNullOrWhiteSpace(vehicleStatus) || !AllowedVehicleStatusesForCreate.Contains(vehicleStatus.Trim()))
+        {
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "Vehicle must be in Maintenance status before creating a maintenance request.");
         }
 
         var type = request.MaintenanceType?.Trim();
@@ -195,7 +213,30 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
                 return ServiceResult<MaintenanceRequestDto>.Fail(403, "Only BranchAssetAccountant can approve or reject.");
             }
 
+            if (status.Equals("InProgress", StringComparison.OrdinalIgnoreCase)
+                && !AllowedStatusesForStart.Contains(entity.Status ?? string.Empty))
+            {
+                return ServiceResult<MaintenanceRequestDto>.Fail(409, "Only approved maintenance requests can be started.");
+            }
+
+            if (status.Equals("Completed", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(entity.Status, "InProgress", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<MaintenanceRequestDto>.Fail(409, "Only in-progress maintenance requests can be completed.");
+            }
+
             entity.Status = NormalizeStatus(status);
+
+            if (status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+            {
+                entity.CompletionDate ??= DateOnly.FromDateTime(DateTime.UtcNow);
+
+                if (entity.Vehicle != null)
+                {
+                    entity.Vehicle.Status = VehicleActiveStatus;
+                    entity.Vehicle.UpdatedAt = DateTime.UtcNow;
+                }
+            }
         }
 
         if (request.AccountantId.HasValue)

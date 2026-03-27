@@ -118,6 +118,13 @@ public sealed partial class AccessoryService
         "Cancelled"
     };
 
+    private static readonly HashSet<string> AllowedStockConditions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "NEW",
+        "USED",
+        "DAMAGED"
+    };
+
     private readonly CarManagerContext _context;
 
     public AccessoryService(CarManagerContext context)
@@ -221,6 +228,9 @@ public sealed partial class AccessoryService
 
     private static string NormalizeGoodsReceiptStatus(string status)
         => AllowedGoodsReceiptStatuses.First(x => x.Equals(status.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    private static string NormalizeStockCondition(string stockCondition)
+        => AllowedStockConditions.First(x => x.Equals(stockCondition.Trim(), StringComparison.OrdinalIgnoreCase));
 
     private static string NormalizeRole(string role)
     {

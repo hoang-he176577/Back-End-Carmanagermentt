@@ -11,15 +11,15 @@ public partial class PurchaseProposal
     public const string RejectedStatus = "Rejected";
     public const string CompletedStatus = "Completed";
 
-    public void InitCreate(string description, int proposerId)
+    public void InitCreate(string description, int proposerId, DateTime? completionDeadline)
     {
         Description = description?.Trim();
         ProposerId = proposerId;
+        CompletionDeadline = completionDeadline;
         Status = PendingStatus;
         CreatedDate = DateOnly.FromDateTime(DateTime.Now);
         CreatedAt = DateTime.Now;
         UpdatedAt = DateTime.Now;
-        DeletedAt = null;
         ProposedCost = 0;
     }
 
@@ -117,6 +117,14 @@ public partial class PurchaseProposal
 
     private void RecalculateProposedCost()
     {
-        ProposedCost = BulkPurchaseDetails.Sum(x => (x.ProposedQuantity ?? 0) * (x.UnitPrice ?? 0));
+        ProposedCost = BulkPurchaseDetails.Sum(detail =>
+        {
+            var unitCost = (detail.UnitPrice ?? 0) +
+                           (detail.RegistrationTax ?? 0) +
+                           (detail.RoadMaintenanceFee ?? 0) +
+                           (detail.LicensePlateFee ?? 0) +
+                           (detail.InsuranceFee ?? 0);
+            return (detail.ProposedQuantity ?? 0) * unitCost;
+        });
     }
 }
