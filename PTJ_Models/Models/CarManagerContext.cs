@@ -1378,6 +1378,8 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.BadgeType).HasMaxLength(50).HasColumnName("badge_type");
             entity.Property(e => e.BadgeExpirationDate).HasColumnType("date").HasColumnName("badge_expiration_date");
             entity.Property(e => e.FuelNorm).HasColumnType("decimal(10, 2)").HasColumnName("fuel_norm");
+            entity.Property(e => e.YearManufacture).HasColumnName("year_manufacture");
+            entity.Property(e => e.Mileage).HasColumnType("decimal(18, 2)").HasColumnName("mileage");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.VehicleReceptionRecords)
                 .HasForeignKey(d => d.BranchId)

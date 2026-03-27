@@ -1,73 +1,84 @@
 using System;
 
-namespace Models.Models;
-
-public partial class VehicleReceptionRecord
+namespace Models.Models
 {
-    public const string PendingStatus = "Pending";
-    public const string CompletedStatus = "Completed";
-    public const string RejectedStatus = "Rejected";
-    public const string ReceivedPendingPaymentStatus = "Received_Pending_Payment";
-
-    public void InitCreate(int purchaseProposalId, int branchId, int operatorId, DateOnly requestedDate)
+    public partial class VehicleReceptionRecord
     {
-        PurchaseProposalId = purchaseProposalId;
-        BranchId = branchId;
-        OperatorId = operatorId;
-        RequestedDate = requestedDate;
-        Status = PendingStatus;
-        CreatedAt = DateTime.Now;
-        UpdatedAt = DateTime.Now;
-        DeletedAt = null;
-    }
+        public const string PendingStatus = "Pending";
+        public const string CompletedStatus = "Completed";
+        public const string RejectedStatus = "Rejected";
+        public const string ReceivedPendingPaymentStatus = "Received_Pending_Payment";
 
-        decimal? fuelNorm,
-        string? receiptImageUrl, 
-        string? notes,
-        int? yearManufacture,
-        decimal? mileage)
-    {
-        LicensePlate = licensePlate?.Trim();
-        Vin = vin?.Trim();
-        ChassisNumber = chassisNumber?.Trim();
-        EngineNumber = engineNumber?.Trim();
-        TelematicsImei = telematicsImei?.Trim();
-        RegistrationExpirationDate = registrationExpirationDate;
-        InsuranceExpirationDate = insuranceExpirationDate;
-        BadgeType = badgeType?.Trim();
-        BadgeExpirationDate = badgeExpirationDate;
-        FuelNorm = fuelNorm;
-        ReceiptImageUrl = receiptImageUrl?.Trim();
-        Notes = notes?.Trim();
-        YearManufacture = yearManufacture;
-        Mileage = mileage;
-        UpdatedAt = DateTime.Now;
-    }
-
-    public void Complete()
-    {
-        Status = CompletedStatus;
-        ReceivedDate ??= DateOnly.FromDateTime(DateTime.Now);
-        UpdatedAt = DateTime.Now;
-    }
-
-    public void Reject(string? reason)
-    {
-        Status = RejectedStatus;
-        Reason = reason?.Trim();
-        UpdatedAt = DateTime.Now;
-    }
-
-    public int GetDaysDelay()
-    {
-        if (!RequestedDate.HasValue)
+        public void InitCreate(int purchaseProposalId, int branchId, int operatorId, DateOnly requestedDate)
         {
-            return 0;
+            PurchaseProposalId = purchaseProposalId;
+            BranchId = branchId;
+            OperatorId = operatorId;
+            RequestedDate = requestedDate;
+            Status = PendingStatus;
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
+            DeletedAt = null;
         }
 
-        var comparisonDate = ReceivedDate ?? DateOnly.FromDateTime(DateTime.Now);
-        return comparisonDate.DayNumber - RequestedDate.Value.DayNumber;
-    }
+        public void UpdateReceptionDetails(
+            string? licensePlate, 
+            string? vin,
+            string? chassisNumber, 
+            string? engineNumber, 
+            string? telematicsImei,
+            DateOnly? registrationExpirationDate,
+            DateOnly? insuranceExpirationDate,
+            string? badgeType,
+            DateOnly? badgeExpirationDate,
+            decimal? fuelNorm,
+            string? receiptImageUrl, 
+            string? notes,
+            int? yearManufacture,
+            decimal? mileage)
+        {
+            LicensePlate = licensePlate?.Trim();
+            Vin = vin?.Trim();
+            ChassisNumber = chassisNumber?.Trim();
+            EngineNumber = engineNumber?.Trim();
+            TelematicsImei = telematicsImei?.Trim();
+            RegistrationExpirationDate = registrationExpirationDate;
+            InsuranceExpirationDate = insuranceExpirationDate;
+            BadgeType = badgeType?.Trim();
+            BadgeExpirationDate = badgeExpirationDate;
+            FuelNorm = fuelNorm;
+            ReceiptImageUrl = receiptImageUrl?.Trim();
+            Notes = notes?.Trim();
+            YearManufacture = yearManufacture;
+            Mileage = mileage;
+            UpdatedAt = DateTime.Now;
+        }
 
-    public bool IsLate() => GetDaysDelay() > 0;
+        public void Complete()
+        {
+            Status = CompletedStatus;
+            ReceivedDate ??= DateOnly.FromDateTime(DateTime.Now);
+            UpdatedAt = DateTime.Now;
+        }
+
+        public void Reject(string? reason)
+        {
+            Status = RejectedStatus;
+            Reason = reason?.Trim();
+            UpdatedAt = DateTime.Now;
+        }
+
+        public int GetDaysDelay()
+        {
+            if (!RequestedDate.HasValue)
+            {
+                return 0;
+            }
+
+            var comparisonDate = ReceivedDate ?? DateOnly.FromDateTime(DateTime.Now);
+            return comparisonDate.DayNumber - RequestedDate.Value.DayNumber;
+        }
+
+        public bool IsLate() => GetDaysDelay() > 0;
+    }
 }

@@ -278,7 +278,7 @@ using Microsoft.EntityFrameworkCore;
             if (!receptionRecords.Any())
                 throw new Exception("Không tìm thấy bản ghi đối chiếu nào đang chờ thanh toán cho đề xuất này.");
 
-            // 2. CẬP NHẬT TRẠNG THÁI VÀ CHI PHÍ (CƠ CHẾ MỚI: KIỂM TRA HOÀN TẤT TOÀN BỘ CHIẾC XE)
+            // 2. CẬP NHẬT TRẠNG THÁI VÀ CHI PHÍ (CƠ CHẾ MỚI: KIỂM TRA HOÀT TẤT TOÀN BỘ CHIẾC XE)
             int totalProposed = proposal.BulkPurchaseDetails.Sum(d => d.ProposedQuantity ?? 0);
             int totalReceivedAndPaid = await _context.VehicleReceptionRecords
                 .CountAsync(r => r.PurchaseProposalId == proposalId && r.Status == VehicleReceptionRecord.CompletedStatus) 
@@ -374,7 +374,8 @@ using Microsoft.EntityFrameworkCore;
                         ModelId = model.Id,
                         Status = "Active",
                         PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
-                        YearManufacture = DateTime.Now.Year,
+                        YearManufacture = record.YearManufacture ?? DateTime.Now.Year,
+                        Mileage = record.Mileage ?? 0,
                         CreatedAt = DateTime.Now
                     };
                     _context.Vehicles.Add(vehicle);
@@ -397,6 +398,8 @@ using Microsoft.EntityFrameworkCore;
                     vehicle.InsuranceExpirationDate = record.InsuranceExpirationDate;
                     vehicle.BadgeExpirationDate = record.BadgeExpirationDate;
                     vehicle.FuelNorm = record.FuelNorm;
+                    vehicle.YearManufacture = record.YearManufacture;
+                    vehicle.Mileage = record.Mileage;
                     vehicle.Status = "Active";
                     vehicle.UpdatedAt = DateTime.Now;
                 }
@@ -422,7 +425,7 @@ using Microsoft.EntityFrameworkCore;
         public async Task<List<PurchaseProposal>> GetPendingForManagerAsync()
         {
             var all = await _repository.GetAllAsync();
-            // Lọc những cái có Status là Pending và chưa bị xóa
+            // Lọc nhữn cái có Status là Pending và chưa bị xóa
             return all.Where(x => x.Status == "Pending" && x.DeletedAt == null).ToList();
         }
         public async Task<List<PurchaseProposalDto>> GetApprovedByBranchAsync(int branchId)
@@ -586,7 +589,7 @@ using Microsoft.EntityFrameworkCore;
 
             int syncCount = 0;
             foreach (var record in completedRecords)
-            {
+                {
                 // Kiểm tra xem biển số đã tồn tại trong kho xe chưa
                 var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.LicensePlate == record.LicensePlate);
                 
@@ -624,7 +627,8 @@ using Microsoft.EntityFrameworkCore;
                         ModelId = model.Id,
                         Status = "Active",
                         PurchaseDate = record.ReceivedDate,
-                        YearManufacture = record.ReceivedDate?.Year ?? DateTime.Now.Year,
+                        YearManufacture = record.YearManufacture ?? DateTime.Now.Year,
+                        Mileage = record.Mileage ?? 0,
                         CreatedAt = DateTime.Now
                     };
                     _context.Vehicles.Add(vehicle);

@@ -68,3 +68,28 @@ BEGIN
     END
 END
 GO
+
+-- [PHASE 2 - UPDATE] Bổ sung Năm sản xuất và Số KM vào Đối chiếu và Kho tài sản
+IF COL_LENGTH('dbo.vehicle_reception_record', 'year_manufacture') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle_reception_record] ADD [year_manufacture] INT NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.vehicle_reception_record', 'mileage') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle_reception_record] ADD [mileage] DECIMAL(18,2) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.vehicle', 'year_manufacture') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle] ADD [year_manufacture] INT NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.vehicle', 'mileage') IS NULL
+BEGIN
+    ALTER TABLE [dbo].[vehicle] ADD [mileage] DECIMAL(18,2) NULL;
+END
+GO

@@ -3,6 +3,7 @@ using Models.DTO.PurchaseProposal;
 using Models.Models;
 using Models.Exceptions;
 using Service.Services.Interfaces;
+using Data.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -200,7 +201,6 @@ namespace Service.Services.Implementations
                 PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
                 OriginalCost = vehicleDetail?.UnitPrice ?? 0,
                 CurrentValue = vehicleDetail?.UnitPrice ?? 0,
-                Mileage = 0,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
 
