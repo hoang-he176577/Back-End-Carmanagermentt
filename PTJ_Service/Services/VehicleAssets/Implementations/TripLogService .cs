@@ -59,7 +59,17 @@ namespace Service.Services.VehicleAssets.Implementations
             if (runningTrip != null)
                 throw BusinessErrors.BadRequest($"Vehicle already has an active trip (Trip #{runningTrip.Id}).");
 
-            // 5. Check late departure justification
+            // 5. Block early departure — cannot start before the planned date
+            if (transferPlan.PlannedDepartureDate.HasValue
+                && now.Date < transferPlan.PlannedDepartureDate.Value.Date)
+            {
+                throw BusinessErrors.BadRequest(
+                    $"Cannot start trip before the planned departure date " +
+                    $"({transferPlan.PlannedDepartureDate.Value:dd/MM/yyyy}). " +
+                    $"Please wait until the planned date.");
+            }
+
+            // 5a. Check late departure justification
             if (transferPlan.PlannedDepartureDate.HasValue && now > transferPlan.PlannedDepartureDate.Value)
             {
                 if (string.IsNullOrWhiteSpace(dto.Note))
