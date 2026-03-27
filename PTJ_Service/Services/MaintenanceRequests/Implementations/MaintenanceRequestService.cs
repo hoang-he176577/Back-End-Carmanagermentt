@@ -110,7 +110,17 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "MaintenanceType must be 'Periodic' or 'Breakdown'.");
         }
 
-        if (request.EstimatedCost.HasValue && request.EstimatedCost.Value < 0)
+        if (!request.RequestDate.HasValue)
+        {
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "RequestDate is required.");
+        }
+
+        if (!request.EstimatedCost.HasValue)
+        {
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "EstimatedCost is required.");
+        }
+
+        if (request.EstimatedCost.Value < 0)
         {
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "EstimatedCost must be >= 0.");
         }
@@ -120,7 +130,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         {
             VehicleId = request.VehicleId.Value,
             OperatorId = actorUserId,
-            RequestDate = request.RequestDate ?? DateOnly.FromDateTime(now),
+            RequestDate = request.RequestDate.Value,
             Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
             EstimatedCost = request.EstimatedCost,
             MaintenanceType = NormalizeType(type),

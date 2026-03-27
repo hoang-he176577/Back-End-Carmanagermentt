@@ -68,7 +68,6 @@ public sealed partial class AccessoryService
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
                         .Sum(bs => (int?)bs.QuantityInStock) ?? 0
                     : x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
-                UnitPrice = x.UnitPrice,
                 MinimumStock = scopedBranchId.HasValue
                     ? x.BranchAccessoryStocks
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
@@ -108,7 +107,6 @@ public sealed partial class AccessoryService
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
                         .Sum(bs => (int?)bs.QuantityInStock) ?? 0
                     : x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
-                UnitPrice = x.UnitPrice,
                 MinimumStock = scopedBranchId.HasValue
                     ? x.BranchAccessoryStocks
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
@@ -156,21 +154,32 @@ public sealed partial class AccessoryService
             return ServiceResult<AccessoryDto>.Fail(400, "Type must be Reusable, Consumable, or Fixed.");
         }
 
+        if (!request.MinimumStock.HasValue || request.MinimumStock.Value < 0)
+        {
+            return ServiceResult<AccessoryDto>.Fail(400, "MinimumStock is required and must be >= 0.");
+        }
+
         var normalizedCode = request.Code.Trim();
-        var exists = await _context.Accessories.AnyAsync(x => x.Code == normalizedCode && x.DeletedAt == null);
-        if (exists)
+        var normalizedName = request.Name.Trim();
+        var codeExists = await _context.Accessories.AnyAsync(x => x.Code == normalizedCode && x.DeletedAt == null);
+        if (codeExists)
         {
             return ServiceResult<AccessoryDto>.Fail(409, "Accessory code already exists.");
+        }
+
+        var nameExists = await _context.Accessories.AnyAsync(x => x.Name == normalizedName && x.DeletedAt == null);
+        if (nameExists)
+        {
+            return ServiceResult<AccessoryDto>.Fail(409, "Accessory name already exists.");
         }
 
         var now = DateTime.UtcNow;
         var entity = new Accessory
         {
             Code = normalizedCode,
-            Name = request.Name.Trim(),
+            Name = normalizedName,
             Type = NormalizeAccessoryType(request.Type),
             QuantityInStock = 0,
-            UnitPrice = request.UnitPrice,
             MinimumStock = request.MinimumStock,
             IsActive = request.IsActive,
             ImageUrl = request.ImageUrl?.Trim(),
@@ -220,7 +229,14 @@ public sealed partial class AccessoryService
 
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
-            entity.Name = request.Name.Trim();
+            var normalizedName = request.Name.Trim();
+            var nameExists = await _context.Accessories.AnyAsync(x => x.Id != id && x.Name == normalizedName && x.DeletedAt == null);
+            if (nameExists)
+            {
+                return ServiceResult<AccessoryDto>.Fail(409, "Accessory name already exists.");
+            }
+
+            entity.Name = normalizedName;
         }
 
         if (!string.IsNullOrWhiteSpace(request.Type))
@@ -233,25 +249,17 @@ public sealed partial class AccessoryService
             entity.Type = NormalizeAccessoryType(request.Type);
         }
 
-        if (request.UnitPrice.HasValue && request.UnitPrice.Value < 0)
+        if (!request.MinimumStock.HasValue)
         {
-            return ServiceResult<AccessoryDto>.Fail(400, "UnitPrice must be >= 0.");
+            return ServiceResult<AccessoryDto>.Fail(400, "MinimumStock is required.");
         }
 
-        if (request.MinimumStock.HasValue && request.MinimumStock.Value < 0)
+        if (request.MinimumStock.Value < 0)
         {
             return ServiceResult<AccessoryDto>.Fail(400, "MinimumStock must be >= 0.");
         }
 
-        if (request.UnitPrice.HasValue)
-        {
-            entity.UnitPrice = request.UnitPrice.Value;
-        }
-
-        if (request.MinimumStock.HasValue)
-        {
-            entity.MinimumStock = request.MinimumStock.Value;
-        }
+        entity.MinimumStock = request.MinimumStock.Value;
 
         if (request.IsActive.HasValue)
         {

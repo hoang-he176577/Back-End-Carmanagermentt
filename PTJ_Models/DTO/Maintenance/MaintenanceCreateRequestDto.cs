@@ -7,10 +7,12 @@ public sealed class MaintenanceCreateRequestDto
     [Required]
     public int? VehicleId { get; set; }
 
+    [Required]
     public DateOnly? RequestDate { get; set; }
 
     public string? Description { get; set; }
 
+    [Required]
     [Range(0, double.MaxValue)]
     public decimal? EstimatedCost { get; set; }
 

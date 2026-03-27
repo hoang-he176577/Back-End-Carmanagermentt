@@ -9,7 +9,6 @@ public class AccessoryDto
     public string? Name { get; set; }
     public string Type { get; set; } = string.Empty;
     public int QuantityInStock { get; set; }
-    public decimal? UnitPrice { get; set; }
     public int? MinimumStock { get; set; }
     public bool IsActive { get; set; }
     public string? ImageUrl { get; set; }
@@ -34,9 +33,7 @@ public class AccessoryCreateRequestDto
     [Range(0, int.MaxValue)]
     public int QuantityInStock { get; set; }
 
-    [Range(0, double.MaxValue)]
-    public decimal? UnitPrice { get; set; }
-
+    [Required]
     [Range(0, int.MaxValue)]
     public int? MinimumStock { get; set; }
 
@@ -59,9 +56,6 @@ public class AccessoryUpdateRequestDto
 
     [Range(0, int.MaxValue)]
     public int? QuantityInStock { get; set; }
-
-    [Range(0, double.MaxValue)]
-    public decimal? UnitPrice { get; set; }
 
     [Range(0, int.MaxValue)]
     public int? MinimumStock { get; set; }
@@ -130,6 +124,7 @@ public class AccessoryPurchaseRequestDetailRequestDto
     [Range(0, int.MaxValue)]
     public int? ApprovedQuantity { get; set; }
 
+    [Required]
     [Range(0, double.MaxValue)]
     public decimal? EstimatedUnitPrice { get; set; }
 

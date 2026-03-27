@@ -240,6 +240,7 @@ public sealed partial class AccessoryService
 
             foreach (var detail in receipt.AccessoryGoodsReceiptDetails)
             {
+                var accessory = await _context.Accessories.FirstOrDefaultAsync(x => x.Id == detail.AccessoryId);
                 var stock = await _context.BranchAccessoryStocks
                     .FirstOrDefaultAsync(x =>
                         x.BranchId == receipt.BranchId &&
@@ -263,6 +264,11 @@ public sealed partial class AccessoryService
 
                 stock.QuantityInStock += detail.ReceivedQuantity;
                 stock.UpdatedAt = now;
+                if (accessory != null)
+                {
+                    accessory.UnitPrice = detail.ActualUnitPrice;
+                    accessory.UpdatedAt = now;
+                }
 
                 _context.AccessoryTransactions.Add(new AccessoryTransaction
                 {

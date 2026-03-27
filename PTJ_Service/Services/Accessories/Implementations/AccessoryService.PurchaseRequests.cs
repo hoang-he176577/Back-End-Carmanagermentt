@@ -335,6 +335,11 @@ public sealed partial class AccessoryService
             return ServiceResult<AccessoryPurchaseRequestDto>.Fail(403, "You can only reject purchase requests in your branch.");
         }
 
+        if (string.IsNullOrWhiteSpace(request.Notes))
+        {
+            return ServiceResult<AccessoryPurchaseRequestDto>.Fail(400, "Reject reason is required.");
+        }
+
         entity.Status = "Rejected";
         entity.ApprovedById = actorUserId;
         entity.ApprovedDate = DateTime.UtcNow;

@@ -19,6 +19,16 @@ public sealed partial class AccessoryService
             return ServiceResult<bool>.Fail(400, "Requested quantity must be greater than 0.");
         }
 
+        if (details.Any(x => !x.EstimatedUnitPrice.HasValue))
+        {
+            return ServiceResult<bool>.Fail(400, "Estimated unit price is required for all detail lines.");
+        }
+
+        if (details.Any(x => x.EstimatedUnitPrice.Value < 0))
+        {
+            return ServiceResult<bool>.Fail(400, "Estimated unit price must be greater than or equal to 0.");
+        }
+
         if (details.GroupBy(x => x.AccessoryId).Any(x => x.Count() > 1))
         {
             return ServiceResult<bool>.Fail(400, "Accessory lines must be unique within the request.");
