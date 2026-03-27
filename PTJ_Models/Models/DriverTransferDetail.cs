@@ -18,11 +18,11 @@ public partial class DriverTransferDetail
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual User ConfirmedByUser { get; set; } = null!;
+    public virtual User? ConfirmedByUser { get; set; }
 
-    public virtual Driver Driver { get; set; } = null!;
+    public virtual Driver? Driver { get; set; }
 
-    public virtual Branch FromBranch { get; set; } = null!;
+    public virtual Branch? FromBranch { get; set; }
 
-    public virtual DriverTransferRequest TransferRequest { get; set; } = null!;
+    public virtual DriverTransferRequest? TransferRequest { get; set; }
 }

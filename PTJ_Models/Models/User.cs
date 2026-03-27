@@ -43,13 +43,13 @@ public partial class User
 
     public virtual ICollection<DepreciationLog> DepreciationLogs { get; set; } = new List<DepreciationLog>();
 
+    public virtual ICollection<DriverTransferDetail> DriverTransferDetails { get; set; } = new List<DriverTransferDetail>();
+
+    public virtual ICollection<DriverTransferRequest> DriverTransferRequests { get; set; } = new List<DriverTransferRequest>();
+
     public virtual ICollection<DisposalProposal> DisposalProposalManagers { get; set; } = new List<DisposalProposal>();
 
     public virtual ICollection<DisposalProposal> DisposalProposalProposers { get; set; } = new List<DisposalProposal>();
-
-    public virtual ICollection<DriverTransferDetail> DriverTransferDetailConfirmedByUsers { get; set; } = new List<DriverTransferDetail>();
-
-    public virtual ICollection<DriverTransferRequest> DriverTransferRequestCreatedByUsers { get; set; } = new List<DriverTransferRequest>();
 
     public virtual ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
 

@@ -1,3 +1,5 @@
+using System;
+
 namespace Models.Models;
 
 public partial class VehicleReceptionRecord

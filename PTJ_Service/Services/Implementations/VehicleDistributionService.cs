@@ -69,34 +69,15 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
         if (request.FromBranchId == request.ToBranchId)
             return ServiceResult<TransferPlanDto>.Fail(400, "FromBranchId and ToBranchId must be different.");
 
-        if (request.PlannedDepartureDate is null)
-            return ServiceResult<TransferPlanDto>.Fail(400, "PlannedDepartureDate is required.");
+        if (request.PlanDate is null)
+            return ServiceResult<TransferPlanDto>.Fail(400, "PlanDate is required.");
 
-        if (request.PlannedArrivalDate is null)
-            return ServiceResult<TransferPlanDto>.Fail(400, "PlannedArrivalDate is required.");
-
-        if (request.PlannedDepartureDate < DateTime.Now)
-            return ServiceResult<TransferPlanDto>.Fail(400, "PlannedDepartureDate cannot be in the past.");
-
-        if (request.PlannedArrivalDate <= request.PlannedDepartureDate)
-            return ServiceResult<TransferPlanDto>.Fail(400, "PlannedArrivalDate must be after PlannedDepartureDate.");
+        if (request.PlanDate < DateOnly.FromDateTime(DateTime.Now))
+            return ServiceResult<TransferPlanDto>.Fail(400, "PlanDate cannot be in the past.");
 
         // Validate existence
         if (!await _repository.VehicleExistsAsync(request.VehicleId.Value))
             return ServiceResult<TransferPlanDto>.Fail(400, "Vehicle not found.");
-
-        // Validate vehicle status — block Disposed, Moving, InTransfer
-        var vehicleStatus = await _repository.GetVehicleStatusAsync(request.VehicleId.Value);
-        if (!string.IsNullOrEmpty(vehicleStatus))
-        {
-            var blocked = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "Disposed", "Moving", "InTransfer"
-            };
-            if (blocked.Contains(vehicleStatus))
-                return ServiceResult<TransferPlanDto>.Fail(400,
-                    $"Cannot create transfer for vehicle with status '{vehicleStatus}'.");
-        }
 
         if (!await _repository.BranchExistsAsync(request.FromBranchId.Value))
             return ServiceResult<TransferPlanDto>.Fail(400, "FromBranch not found.");
@@ -114,8 +95,7 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
             FromBranchId = request.FromBranchId,
             ToBranchId = request.ToBranchId,
             ManagerId = managerId,
-            PlannedDepartureDate = request.PlannedDepartureDate,
-            PlannedArrivalDate = request.PlannedArrivalDate,
+            PlanDate = request.PlanDate,
             Status = "Pending"
         };
 
@@ -183,13 +163,6 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
                 {
                     await _repository.UpdateVehicleBranchAsync(
                         plan.VehicleId.Value, plan.ToBranchId.Value);
-
-                    // Move driver to destination branch along with vehicle
-                    var driverId = await _repository.GetVehicleTransferDriverIdAsync(plan.VehicleId.Value);
-                    if (driverId.HasValue)
-                    {
-                        await _repository.UpdateDriverBranchAsync(driverId.Value, plan.ToBranchId.Value);
-                    }
                 }
                 await _repository.UpdateVehicleStatusAsync(plan.VehicleId.Value, "Active");
             }

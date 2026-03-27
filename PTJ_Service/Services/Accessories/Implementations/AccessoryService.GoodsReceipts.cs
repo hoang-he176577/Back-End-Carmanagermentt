@@ -156,8 +156,7 @@ public sealed partial class AccessoryService
             {
                 AccessoryId = detail.AccessoryId,
                 ReceivedQuantity = detail.ReceivedQuantity,
-                ActualUnitPrice = detail.ActualUnitPrice,
-                StockCondition = NormalizeStockCondition(detail.StockCondition)
+                ActualUnitPrice = detail.ActualUnitPrice
             }).ToList()
         };
 
@@ -229,8 +228,7 @@ public sealed partial class AccessoryService
                 ReceiptId = receipt.Id,
                 AccessoryId = detail.AccessoryId,
                 ReceivedQuantity = detail.ReceivedQuantity,
-                ActualUnitPrice = detail.ActualUnitPrice,
-                StockCondition = NormalizeStockCondition(detail.StockCondition)
+                ActualUnitPrice = detail.ActualUnitPrice
             }).ToList();
             receipt.Status = "Completed";
             receipt.Notes = request.Notes?.Trim() ?? receipt.Notes;
@@ -241,10 +239,7 @@ public sealed partial class AccessoryService
             foreach (var detail in receipt.AccessoryGoodsReceiptDetails)
             {
                 var stock = await _context.BranchAccessoryStocks
-                    .FirstOrDefaultAsync(x =>
-                        x.BranchId == receipt.BranchId &&
-                        x.AccessoryId == detail.AccessoryId &&
-                        x.StockCondition == detail.StockCondition);
+                    .FirstOrDefaultAsync(x => x.BranchId == receipt.BranchId && x.AccessoryId == detail.AccessoryId);
 
                 if (stock == null)
                 {
@@ -252,7 +247,6 @@ public sealed partial class AccessoryService
                     {
                         BranchId = receipt.BranchId,
                         AccessoryId = detail.AccessoryId,
-                        StockCondition = detail.StockCondition,
                         QuantityInStock = 0,
                         MinimumStock = null,
                         CreatedAt = now,
@@ -273,7 +267,6 @@ public sealed partial class AccessoryService
                     ReferenceId = receipt.Id,
                     Quantity = detail.ReceivedQuantity,
                     UnitPrice = detail.ActualUnitPrice,
-                    StockCondition = detail.StockCondition,
                     Notes = receipt.Notes,
                     PerformedBy = actorUserId,
                     TransactionDate = now

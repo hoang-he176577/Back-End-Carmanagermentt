@@ -1,4 +1,9 @@
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Models.DTO.Vehicles
 {
@@ -7,8 +12,5 @@ namespace Models.DTO.Vehicles
         public int EndedBy { get; set; }
 
         public decimal EndMileage { get; set; }
-
-        /// <summary>Required if arrival is late vs planned date.</summary>
-        public string? Note { get; set; }
     }
 }

@@ -23,17 +23,15 @@ public partial class TripLog
 
     public string? Destination { get; set; }
 
+    public string? Purpose { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public int StartedBy { get; set; }
 
     public int? EndedBy { get; set; }
 
-    public int TransferPlanId { get; set; }
-
     public virtual Driver Driver { get; set; } = null!;
-
-    public virtual TransferPlan TransferPlan { get; set; } = null!;
 
     public virtual Vehicle Vehicle { get; set; } = null!;
 }

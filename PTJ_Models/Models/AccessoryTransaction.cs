@@ -31,8 +31,6 @@ public partial class AccessoryTransaction
 
     public int? ReferenceId { get; set; }
 
-    public string? StockCondition { get; set; }
-
     public virtual Accessory Accessory { get; set; } = null!;
 
     public virtual Branch? Branch { get; set; }

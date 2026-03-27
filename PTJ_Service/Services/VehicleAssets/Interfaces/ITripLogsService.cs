@@ -1,6 +1,6 @@
-using Models.DTO.PurchaseProposal;
+﻿using Models.DTO.PurchaseProposal;
 using Models.DTO.Vehicles;
-using Models.DTO.VehicleDistribution;
+
 
 namespace Service.Services.VehicleAssets.Interfaces
 {
@@ -17,8 +17,5 @@ namespace Service.Services.VehicleAssets.Interfaces
         Task<List<ManageVehicleTripDto>> GetManageVehiclesAsync(int branchId, string? tab);
         Task<List<ListVehicleDrop>> GetVehicleDropAsync();
         Task<UserBasicDto> GetDriverByVehicleIdAsync(int vehicleId);
-
-        Task<List<PendingTransferDto>> GetPendingTransfersAsync(int branchId);
-        Task<List<PendingTransferDto>> GetInTransitTransfersAsync(int branchId);
     }
 }

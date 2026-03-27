@@ -25,9 +25,9 @@ public partial class DriverTransferRequest
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual User CreatedByUser { get; set; } = null!;
+    public virtual User? CreatedByUser { get; set; }
 
-    public virtual Branch RequestingBranch { get; set; } = null!;
+    public virtual Branch? RequestingBranch { get; set; }
 
     public virtual ICollection<DriverTransferDetail> TransferDetails { get; set; } = new List<DriverTransferDetail>();
 }
