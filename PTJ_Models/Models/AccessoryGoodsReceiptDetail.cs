@@ -15,6 +15,8 @@ public partial class AccessoryGoodsReceiptDetail
 
     public decimal? ActualUnitPrice { get; set; }
 
+    public string StockCondition { get; set; } = null!;
+
     public virtual Accessory Accessory { get; set; } = null!;
 
     public virtual AccessoryGoodsReceipt Receipt { get; set; } = null!;

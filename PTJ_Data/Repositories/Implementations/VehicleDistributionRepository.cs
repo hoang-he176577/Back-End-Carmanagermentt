@@ -25,13 +25,16 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         ToBranchName = t.ToBranch != null ? t.ToBranch.Name : null,
         ManagerId = t.ManagerId,
         ManagerName = t.Manager != null ? t.Manager.Name : null,
-        PlanDate = t.PlanDate,
+        PlannedDepartureDate = t.PlannedDepartureDate,
+        PlannedArrivalDate = t.PlannedArrivalDate,
         ExecutedDate = t.ExecutedDate,
         Status = t.Status,
         CheckoutDate = t.CheckoutDate,
         CheckoutByName = t.CheckoutByUser != null ? t.CheckoutByUser.Name : null,
+        CheckoutNote = t.CheckoutNote,
         CheckinDate = t.CheckinDate,
         CheckinByName = t.CheckinByUser != null ? t.CheckinByUser.Name : null,
+        CheckinNote = t.CheckinNote,
         CreatedAt = t.CreatedAt
     };
 
@@ -139,6 +142,14 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
             .AnyAsync(v => v.Id == vehicleId && v.DeletedAt == null);
     }
 
+    public async Task<string?> GetVehicleStatusAsync(int vehicleId)
+    {
+        return await _context.Vehicles.AsNoTracking()
+            .Where(v => v.Id == vehicleId && v.DeletedAt == null)
+            .Select(v => v.Status)
+            .FirstOrDefaultAsync();
+    }
+
     public Task<bool> BranchExistsAsync(int branchId)
     {
         return _context.Branches.AsNoTracking()
@@ -191,6 +202,27 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
         return await _context.Users.AsNoTracking()
             .Where(u => u.Id == userId)
             .Select(u => u.BranchId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task UpdateDriverBranchAsync(int driverId, int newBranchId)
+    {
+        var driver = await _context.Drivers.FindAsync(driverId);
+        if (driver != null)
+        {
+            driver.BranchId = newBranchId;
+            driver.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<int?> GetVehicleTransferDriverIdAsync(int vehicleId)
+    {
+        // Driver was unassigned from vehicle at Checkout, so look up from latest TripLog
+        return await _context.TripLogs
+            .Where(t => t.VehicleId == vehicleId && t.EndTime == null)
+            .OrderByDescending(t => t.StartTime)
+            .Select(t => (int?)t.DriverId)
             .FirstOrDefaultAsync();
     }
 }

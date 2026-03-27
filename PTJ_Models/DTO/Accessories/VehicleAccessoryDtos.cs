@@ -38,6 +38,10 @@ public class IssueVehicleAccessoryRequestDto
     [Range(1, int.MaxValue)]
     public int AccessoryId { get; set; }
 
+    [Required]
+    [StringLength(20)]
+    public string StockCondition { get; set; } = "NEW";
+
     [Range(1, int.MaxValue)]
     public int Quantity { get; set; }
 
@@ -50,6 +54,7 @@ public class IssueVehicleAccessoryResponseDto
 {
     public VehicleAccessoryDto VehicleAccessory { get; set; } = new();
     public int RemainingStock { get; set; }
+    public string StockCondition { get; set; } = string.Empty;
 }
 
 public class ReturnVehicleAccessoryRequestDto
@@ -57,6 +62,9 @@ public class ReturnVehicleAccessoryRequestDto
     [Required]
     [StringLength(20)]
     public string ActionType { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue)]
+    public int? Quantity { get; set; }
 
     public DateOnly? RemoveDate { get; set; }
     public string? Notes { get; set; }

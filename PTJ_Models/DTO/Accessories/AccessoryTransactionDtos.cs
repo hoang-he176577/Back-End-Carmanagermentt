@@ -17,6 +17,7 @@ public class AccessoryTransactionDto
     public int Quantity { get; set; }
     public DateTime TransactionDate { get; set; }
     public decimal? UnitPrice { get; set; }
+    public string? StockCondition { get; set; }
     public string? Notes { get; set; }
     public int? PerformedBy { get; set; }
     public string? PerformedByName { get; set; }

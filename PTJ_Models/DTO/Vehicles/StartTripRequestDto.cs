@@ -1,22 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace Models.DTO.Vehicles
 {
     public class StartTripRequestDto
     {
-        public int VehicleId { get; set; }
+        public int TransferPlanId { get; set; }
 
-        public int DriverId { get; set; }
-
-        public DateTime? StartTime { get; set; }
-
-        public decimal StartMileage { get; set; }
-
-        public string? Origin { get; set; }
-
-        public string? Destination { get; set; }
-
-        public string? Purpose { get; set; }
         public int OperatorId { get; set; }
+
+        /// <summary>Required if departure is late vs planned date.</summary>
+        public string? Note { get; set; }
     }
 }

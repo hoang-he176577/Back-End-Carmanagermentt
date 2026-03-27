@@ -92,6 +92,7 @@ public class BranchAccessoryStockDto
     public string? AccessoryName { get; set; }
     public string? AccessoryType { get; set; }
     public string? ImageUrl { get; set; }
+    public string StockCondition { get; set; } = string.Empty;
     public int QuantityInStock { get; set; }
     public int? MinimumStock { get; set; }
     public bool IsBelowMinimum { get; set; }
@@ -106,6 +107,10 @@ public class BranchAccessoryStockUpsertRequestDto
 
     [Range(1, int.MaxValue)]
     public int AccessoryId { get; set; }
+
+    [Required]
+    [StringLength(20)]
+    public string StockCondition { get; set; } = "NEW";
 
     [Range(0, int.MaxValue)]
     public int QuantityInStock { get; set; }
@@ -214,6 +219,10 @@ public class AccessoryGoodsReceiptDetailRequestDto
 
     [Range(0, double.MaxValue)]
     public decimal? ActualUnitPrice { get; set; }
+
+    [Required]
+    [StringLength(20)]
+    public string StockCondition { get; set; } = "NEW";
 }
 
 public class AccessoryGoodsReceiptCreateRequestDto
@@ -245,6 +254,7 @@ public class AccessoryGoodsReceiptDetailDto
     public string? ImageUrl { get; set; }
     public int ReceivedQuantity { get; set; }
     public decimal? ActualUnitPrice { get; set; }
+    public string StockCondition { get; set; } = string.Empty;
 }
 
 public class AccessoryGoodsReceiptDto
