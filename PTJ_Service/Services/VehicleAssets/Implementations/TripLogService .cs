@@ -1,5 +1,4 @@
-using Data.Repositories.VehicleAssets.Interfaces;
-using Microsoft.EntityFrameworkCore;
+﻿using Data.Repositories.VehicleAssets.Interfaces;
 using Models.DTO.PurchaseProposal;
 using Models.DTO.Vehicles;
 using Models.DTO.VehicleDistribution;

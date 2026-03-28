@@ -108,6 +108,9 @@ namespace Service.Services.Auth.Implementations
             if (!valid)
                 throw BusinessErrors.BadRequest("Invalid email or password");
 
+            if (user.DeletedAt != null)
+                throw BusinessErrors.Unauthorized("Your account has been deactivated.");
+
             if (user.EmailVerified != true)
                 throw BusinessErrors.BadRequest("Email is not verified. Please verify your email before logging in.");
 

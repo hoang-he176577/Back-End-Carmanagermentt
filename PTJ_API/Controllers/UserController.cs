@@ -4,6 +4,7 @@ using Models.DTO.User;
 using Service.Exceptions;
 using Service.Services.Interfaces;
 using System.Security.Claims;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -54,6 +55,42 @@ namespace API.Controllers
         public async Task<IActionResult> UpdateAccountStatus([FromRoute] int id, [FromBody] UpdateAccountStatusDto request)
         {
             await _userService.UpdateAccountStatusAsync(id, request.IsActive);
+            return HandleSuccess(request.IsActive ? "Account activated" : "Account deactivated");
+        }
+
+        [HttpGet("manager/accounts")]
+        [Authorize(Roles = "Manager,Executive Management")]
+        public async Task<IActionResult> GetManagerAccounts([FromQuery] bool includeDeactivated = false, [FromQuery] int? branchId = null)
+        {
+            var roles = GetUserRoles() ?? new List<string>();
+            var canViewAll = roles.Any(r => string.Equals(r, "Executive Management", StringComparison.OrdinalIgnoreCase));
+            var effectiveBranchId = canViewAll ? branchId : GetBranchId();
+            var accounts = await _userService.GetManagerAccountsAsync(effectiveBranchId, includeDeactivated, canViewAll);
+            return HandleResult(accounts, "Accounts retrieved successfully");
+        }
+
+        [HttpPost("manager/accounts")]
+        [Authorize(Roles = "Manager,Executive Management")]
+        public async Task<IActionResult> CreateManagerAccount([FromBody] CreateAdminAccountDto request)
+        {
+            var roles = GetUserRoles() ?? new List<string>();
+            var canViewAll = roles.Any(r => string.Equals(r, "Executive Management", StringComparison.OrdinalIgnoreCase));
+            var branchId = canViewAll ? (int?)null : GetBranchId();
+            var account = await _userService.CreateManagerAccountAsync(request, branchId, canViewAll);
+            var message = string.IsNullOrWhiteSpace(account.Warning)
+                ? "Account created successfully"
+                : "Account created, but verification email was not sent.";
+            return HandleCreated(account, message);
+        }
+
+        [HttpPatch("manager/accounts/{id:int}/status")]
+        [Authorize(Roles = "Manager,Executive Management")]
+        public async Task<IActionResult> UpdateManagerAccountStatus([FromRoute] int id, [FromBody] UpdateAccountStatusDto request)
+        {
+            var roles = GetUserRoles() ?? new List<string>();
+            var canViewAll = roles.Any(r => string.Equals(r, "Executive Management", StringComparison.OrdinalIgnoreCase));
+            var branchId = canViewAll ? (int?)null : GetBranchId();
+            await _userService.UpdateAccountStatusForManagerAsync(id, request.IsActive, branchId, canViewAll);
             return HandleSuccess(request.IsActive ? "Account activated" : "Account deactivated");
         }
     }
