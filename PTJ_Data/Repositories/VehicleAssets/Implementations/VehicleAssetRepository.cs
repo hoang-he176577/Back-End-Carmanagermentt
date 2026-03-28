@@ -35,7 +35,6 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
         Vin = vehicle.Vin,
         ChassisNumber = vehicle.ChassisNumber,
         EngineNumber = vehicle.EngineNumber,
-        TelematicsImei = vehicle.TelematicsImei,
         RegistrationExpirationDate = vehicle.RegistrationExpirationDate,
         InsuranceExpirationDate = vehicle.InsuranceExpirationDate,
         BadgeType = vehicle.BadgeType,

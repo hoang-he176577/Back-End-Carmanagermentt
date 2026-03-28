@@ -25,7 +25,6 @@ public sealed class VehicleAssetDto
     public string? Vin { get; set; }
     public string? ChassisNumber { get; set; }
     public string? EngineNumber { get; set; }
-    public string? TelematicsImei { get; set; }
     public DateOnly? RegistrationExpirationDate { get; set; }
     public DateOnly? InsuranceExpirationDate { get; set; }
     public string? BadgeType { get; set; }
