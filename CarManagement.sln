@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36109.1 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "PTJ_API\API.csproj", "{B5AF8420-40A6-4DB3-B7C2-07857ECA0E8F}"
 EndProject
@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "PTJ_Data\Data.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "PTJ_Models\Models.csproj", "{14D9B7B0-B6BB-42A7-AE64-0667140A5831}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "CarManagements-frontend", "..\CarManagements-frontend\", "{FDBBB2A5-3B20-39B7-E22A-854FFAEED1BE}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "CarManagements-frontend", "..\CarManagements-frontend\", "{2735F47D-1AB9-AC32-21DD-F54741B571A3}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_57880"
@@ -54,10 +54,10 @@ Global
 		{14D9B7B0-B6BB-42A7-AE64-0667140A5831}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14D9B7B0-B6BB-42A7-AE64-0667140A5831}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14D9B7B0-B6BB-42A7-AE64-0667140A5831}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FDBBB2A5-3B20-39B7-E22A-854FFAEED1BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FDBBB2A5-3B20-39B7-E22A-854FFAEED1BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FDBBB2A5-3B20-39B7-E22A-854FFAEED1BE}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{FDBBB2A5-3B20-39B7-E22A-854FFAEED1BE}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{2735F47D-1AB9-AC32-21DD-F54741B571A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2735F47D-1AB9-AC32-21DD-F54741B571A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2735F47D-1AB9-AC32-21DD-F54741B571A3}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{2735F47D-1AB9-AC32-21DD-F54741B571A3}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
