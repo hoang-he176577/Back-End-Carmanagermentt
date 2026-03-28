@@ -34,6 +34,21 @@ namespace Service.Services.Implementations.Repository
             return await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
         }
 
+        public async Task<List<User>> GetUsersByBranchWithBranchAsync(int branchId, bool includeDeactivated)
+        {
+            var query = _context.Users
+                .Include(u => u.Branch)
+                .AsNoTracking()
+                .Where(u => u.BranchId == branchId);
+
+            if (!includeDeactivated)
+            {
+                query = query.Where(u => u.DeletedAt == null);
+            }
+
+            return await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
+        }
+
         public Task SaveChangesAsync()
         {
             return _context.SaveChangesAsync();

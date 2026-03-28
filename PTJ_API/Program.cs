@@ -39,6 +39,8 @@ using Service.Services.Implementations;
 using Service.Services.Implementations.Repository;
 using Service.Services.Interfaces;
 using Service.Services.Interfaces.Repository;
+using Service.Services.Reports.Interfaces;
+using Service.Services.Reports.Implementations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -84,7 +86,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var connectionString = builder.Configuration.GetConnectionString("CarManager");
-
+Console.WriteLine("DEBUG: " + builder.Configuration.GetConnectionString("CarManager"));
 builder.Services.AddDbContext<CarManagerContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("CarManager"),
@@ -121,6 +123,7 @@ builder.Services.AddScoped<ITripLogService, TripLogService>();
 
 builder.Services.AddScoped<IBranchService, BranchService>();
 
+builder.Services.AddScoped<ICostSummaryService, CostSummaryService>();
 
 
 

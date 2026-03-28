@@ -87,6 +87,10 @@ namespace Service.Services.Auth.Implementations
             {
                 throw BusinessErrors.Unauthorized("User not found.");
             }
+            if (user.DeletedAt != null)
+            {
+                throw BusinessErrors.Unauthorized("Your account has been deactivated.");
+            }
 
             var roles = await _authRepository.GetUserRolesAsync(userId);
             RevokeJti(oldJti, DateTime.UtcNow.AddDays(7));
