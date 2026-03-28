@@ -21,5 +21,18 @@ public sealed class VehicleAssetDto
     public string? CurrentDriverName { get; set; }
     public string? ImageUrl { get; set; }
 
+    // --- Vehicle detail fields ---
+    public string? Vin { get; set; }
+    public string? ChassisNumber { get; set; }
+    public string? EngineNumber { get; set; }
+    public string? TelematicsImei { get; set; }
+    public DateOnly? RegistrationExpirationDate { get; set; }
+    public DateOnly? InsuranceExpirationDate { get; set; }
+    public string? BadgeType { get; set; }
+    public DateOnly? BadgeExpirationDate { get; set; }
+    public decimal? FuelNorm { get; set; }
 
+    // --- From VehicleModel ---
+    public int? Seats { get; set; }
+    public string? EngineType { get; set; }
 }

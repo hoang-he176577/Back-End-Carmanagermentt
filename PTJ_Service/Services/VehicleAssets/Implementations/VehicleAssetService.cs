@@ -273,6 +273,27 @@ public sealed class VehicleAssetService : IVehicleAssetService
             vehicle.PurchaseDate = request.PurchaseDate.Value;
         }
 
+        // --- Document/badge fields ---
+        if (request.BadgeType != null)
+        {
+            vehicle.BadgeType = request.BadgeType.Trim();
+        }
+
+        if (request.BadgeExpirationDate.HasValue)
+        {
+            vehicle.BadgeExpirationDate = request.BadgeExpirationDate.Value;
+        }
+
+        if (request.RegistrationExpirationDate.HasValue)
+        {
+            vehicle.RegistrationExpirationDate = request.RegistrationExpirationDate.Value;
+        }
+
+        if (request.InsuranceExpirationDate.HasValue)
+        {
+            vehicle.InsuranceExpirationDate = request.InsuranceExpirationDate.Value;
+        }
+
         vehicle.UpdatedAt = DateTime.Now;
         await _repository.SaveChangesAsync();
 

@@ -29,7 +29,22 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
         CurrentBranchId = vehicle.CurrentBranchId,
         CurrentBranchName = vehicle.CurrentBranch != null ? vehicle.CurrentBranch.Name : null,
         CurrentDriverId = vehicle.CurrentDriverId,
-        CurrentDriverName = vehicle.CurrentDriver != null ? vehicle.CurrentDriver.Name : null
+        CurrentDriverName = vehicle.CurrentDriver != null ? vehicle.CurrentDriver.Name : null,
+
+        // Vehicle detail fields
+        Vin = vehicle.Vin,
+        ChassisNumber = vehicle.ChassisNumber,
+        EngineNumber = vehicle.EngineNumber,
+        TelematicsImei = vehicle.TelematicsImei,
+        RegistrationExpirationDate = vehicle.RegistrationExpirationDate,
+        InsuranceExpirationDate = vehicle.InsuranceExpirationDate,
+        BadgeType = vehicle.BadgeType,
+        BadgeExpirationDate = vehicle.BadgeExpirationDate,
+        FuelNorm = vehicle.FuelNorm,
+
+        // From VehicleModel
+        Seats = vehicle.Model != null ? vehicle.Model.Seats : null,
+        EngineType = vehicle.Model != null ? vehicle.Model.EngineType : null
     };
 
     public VehicleAssetRepository(CarManagerContext context)
