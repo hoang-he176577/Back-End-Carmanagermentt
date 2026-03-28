@@ -23,13 +23,14 @@ public sealed class MaintenanceRequestsController : ControllerBase
     public async Task<ActionResult<List<MaintenanceRequestDto>>> GetList(
         [FromQuery] string? status,
         [FromQuery] string? maintenanceType,
+        [FromQuery] int? vehicleId,
         [FromQuery] bool includeDeleted = false)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int.TryParse(userIdClaim, out var userId);
         var userRole = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
 
-        var result = await _service.GetListAsync(status, maintenanceType, includeDeleted, userId, userRole);
+        var result = await _service.GetListAsync(status, maintenanceType, includeDeleted, userId, userRole, vehicleId);
         if (!result.Success)
         {
             return StatusCode(result.StatusCode, new { message = result.Message });

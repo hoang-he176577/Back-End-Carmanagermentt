@@ -17,6 +17,7 @@ public sealed class MaintenanceRequestDto
     public DateOnly? ApprovedDate { get; set; }
     public decimal? ActualCost { get; set; }
     public DateOnly? CompletionDate { get; set; }
+    public string? CompletionNote { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

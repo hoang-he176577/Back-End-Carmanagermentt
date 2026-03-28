@@ -44,7 +44,7 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         _repository = repository;
     }
 
-    public async Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int userId, string userRole)
+    public async Task<ServiceResult<List<MaintenanceRequestDto>>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int userId, string userRole, int? vehicleId = null)
     {
         if (!string.IsNullOrWhiteSpace(status) && !AllowedStatuses.Contains(status.Trim()))
         {
@@ -65,7 +65,12 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             branchId = await _repository.GetUserBranchIdAsync(userId);
         }
 
-        var items = await _repository.GetListAsync(status, maintenanceType, includeDeleted, branchId);
+        if (vehicleId.HasValue && vehicleId.Value <= 0)
+        {
+            return ServiceResult<List<MaintenanceRequestDto>>.Fail(400, "Invalid vehicleId.");
+        }
+
+        var items = await _repository.GetListAsync(status, maintenanceType, includeDeleted, branchId, vehicleId);
         return ServiceResult<List<MaintenanceRequestDto>>.SuccessResult(items);
     }
 
@@ -114,6 +119,11 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
         if (!request.RequestDate.HasValue)
         {
             return ServiceResult<MaintenanceRequestDto>.Fail(400, "RequestDate is required.");
+        }
+
+        if (request.RequestDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return ServiceResult<MaintenanceRequestDto>.Fail(400, "RequestDate cannot be in the past.");
         }
 
         if (!request.EstimatedCost.HasValue)
@@ -280,9 +290,29 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             entity.ActualCost = request.ActualCost.Value;
         }
 
+        if (request.CompletionNote != null)
+        {
+            entity.CompletionNote = string.IsNullOrWhiteSpace(request.CompletionNote)
+                ? null
+                : request.CompletionNote.Trim();
+        }
+
         if (request.CompletionDate.HasValue)
         {
             entity.CompletionDate = request.CompletionDate.Value;
+        }
+
+        if (string.Equals(entity.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!entity.ActualCost.HasValue)
+            {
+                return ServiceResult<MaintenanceRequestDto>.Fail(400, "ActualCost is required when completing maintenance.");
+            }
+
+            if (string.IsNullOrWhiteSpace(entity.CompletionNote))
+            {
+                return ServiceResult<MaintenanceRequestDto>.Fail(400, "CompletionNote is required when completing maintenance.");
+            }
         }
 
         entity.UpdatedAt = DateTime.UtcNow;

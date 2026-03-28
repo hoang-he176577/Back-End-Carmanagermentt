@@ -24,4 +24,7 @@ public sealed class MaintenanceUpdateRequestDto
     public decimal? ActualCost { get; set; }
 
     public DateOnly? CompletionDate { get; set; }
+
+    [StringLength(1000)]
+    public string? CompletionNote { get; set; }
 }

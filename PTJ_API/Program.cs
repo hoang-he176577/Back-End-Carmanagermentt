@@ -238,6 +238,25 @@ builder.Services.AddScoped<IPostPurchaseService, PostPurchaseService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<CarManagerContext>();
+        await db.Database.ExecuteSqlRawAsync("""
+            IF COL_LENGTH('maintenance_request', 'completion_note') IS NULL
+            BEGIN
+                ALTER TABLE maintenance_request
+                ADD completion_note NVARCHAR(1000) NULL;
+            END
+            """);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Startup Schema Sync] Failed to ensure completion_note column: {ex.Message}");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

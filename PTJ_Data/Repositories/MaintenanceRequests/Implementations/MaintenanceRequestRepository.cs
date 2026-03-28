@@ -14,7 +14,7 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
         _context = context;
     }
 
-    public async Task<List<MaintenanceRequestDto>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int? branchId = null)
+    public async Task<List<MaintenanceRequestDto>> GetListAsync(string? status, string? maintenanceType, bool includeDeleted, int? branchId = null, int? vehicleId = null)
     {
         var query = _context.MaintenanceRequests.AsQueryable();
 
@@ -33,6 +33,11 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
         {
             var normalizedType = maintenanceType.Trim();
             query = query.Where(x => x.MaintenanceType == normalizedType);
+        }
+
+        if (vehicleId.HasValue)
+        {
+            query = query.Where(x => x.VehicleId == vehicleId.Value);
         }
 
         // Filter by branch: join with Vehicle to check CurrentBranchId
@@ -62,6 +67,7 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
                 ApprovedDate = x.ApprovedDate,
                 ActualCost = x.ActualCost,
                 CompletionDate = x.CompletionDate,
+                CompletionNote = x.CompletionNote,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
                 DeletedAt = x.DeletedAt
@@ -96,6 +102,7 @@ public sealed class MaintenanceRequestRepository : IMaintenanceRequestRepository
             ApprovedDate = x.ApprovedDate,
             ActualCost = x.ActualCost,
             CompletionDate = x.CompletionDate,
+            CompletionNote = x.CompletionNote,
             CreatedAt = x.CreatedAt,
             UpdatedAt = x.UpdatedAt,
             DeletedAt = x.DeletedAt

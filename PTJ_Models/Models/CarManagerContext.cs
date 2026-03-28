@@ -762,6 +762,9 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("approval_note");
             entity.Property(e => e.ApprovedDate).HasColumnName("approved_date");
             entity.Property(e => e.CompletionDate).HasColumnName("completion_date");
+            entity.Property(e => e.CompletionNote)
+                .HasMaxLength(1000)
+                .HasColumnName("completion_note");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
