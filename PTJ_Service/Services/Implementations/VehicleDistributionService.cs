@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Data.Repositories.Interfaces;
 using Models.DTO.VehicleDistribution;
 using Models.Models;
+using Service.Services.Auth.Interfaces;
 using Service.Services.Common;
 using Service.Services.Interfaces;
 
@@ -12,15 +13,17 @@ namespace Service.Services.Implementations;
 public sealed class VehicleDistributionService : IVehicleDistributionService
 {
     private readonly IVehicleDistributionRepository _repository;
+    private readonly IEmailSender _emailSender;
 
     private static readonly HashSet<string> AllowedStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
         "Checkout", "Checkin", "Cancelled"
     };
 
-    public VehicleDistributionService(IVehicleDistributionRepository repository)
+    public VehicleDistributionService(IVehicleDistributionRepository repository, IEmailSender emailSender)
     {
         _repository = repository;
+        _emailSender = emailSender;
     }
 
     // ───────────────── Queries ─────────────────
@@ -124,6 +127,16 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
 
         if (dto == null)
             return ServiceResult<TransferPlanDto>.Fail(500, "Failed to load created transfer plan.");
+
+        // Send email notification to operators (failures are logged but don't block response)
+        try
+        {
+            await SendTransferNotificationEmailsAsync(dto);
+        }
+        catch
+        {
+            // Email failure must not affect the API response
+        }
 
         return ServiceResult<TransferPlanDto>.SuccessResult(dto, 201);
     }
@@ -260,5 +273,123 @@ public sealed class VehicleDistributionService : IVehicleDistributionService
             default:
                 return $"Transfer plan is already '{currentStatus}' and cannot be updated.";
         }
+    }
+
+    // ───────────────── Email Notification ─────────────────
+
+    private async Task SendTransferNotificationEmailsAsync(TransferPlanDto dto)
+    {
+        var branchIds = new List<int>();
+        if (dto.FromBranchId.HasValue) branchIds.Add(dto.FromBranchId.Value);
+        if (dto.ToBranchId.HasValue) branchIds.Add(dto.ToBranchId.Value);
+        if (branchIds.Count == 0) return;
+
+        // Check if vehicle has a driver
+        var driverInfo = dto.VehicleId.HasValue
+            ? await _repository.GetVehicleDriverInfoAsync(dto.VehicleId.Value)
+            : (DriverId: (int?)null, DriverEmail: (string?)null, DriverName: (string?)null);
+        var hasDriver = driverInfo.DriverId.HasValue && !string.IsNullOrWhiteSpace(driverInfo.DriverEmail);
+
+        // 1. Send to operators (urgent banner if no driver)
+        var operatorEmails = await _repository.GetOperatorEmailsByBranchIdsAsync(branchIds.ToArray());
+        if (operatorEmails.Count > 0)
+        {
+            var subj = hasDriver
+                ? $"[CarManagement] Yêu cầu điều chuyển xe {dto.LicensePlate ?? "N/A"}"
+                : $"[CarManagement] ⚠️ KHẨN CẤP - Điều chuyển xe {dto.LicensePlate ?? "N/A"} - Cần gán tài xế!";
+            var body = BuildOperatorEmailBody(dto, !hasDriver);
+            foreach (var email in operatorEmails)
+            {
+                try { await _emailSender.SendEmailAsync(email, subj, body); } catch { }
+            }
+        }
+
+        // 2. Send to driver (if assigned)
+        if (hasDriver)
+        {
+            try
+            {
+                var subj = $"[CarManagement] Thông báo chuyến điều chuyển xe {dto.LicensePlate ?? "N/A"}";
+                var body = BuildDriverEmailBody(dto, driverInfo.DriverName);
+                await _emailSender.SendEmailAsync(driverInfo.DriverEmail!, subj, body);
+            }
+            catch { }
+        }
+    }
+
+    /// <summary>Send email to driver when they are newly assigned to a vehicle with a pending transfer.</summary>
+    public async Task SendDriverAssignedTransferEmailAsync(int vehicleId)
+    {
+        var plans = await _repository.GetTransferPlansAsync(null, null, "Pending");
+        var plan = plans.FirstOrDefault(p => p.VehicleId == vehicleId);
+        if (plan == null) return;
+
+        var driverInfo = await _repository.GetVehicleDriverInfoAsync(vehicleId);
+        if (string.IsNullOrWhiteSpace(driverInfo.DriverEmail)) return;
+
+        try
+        {
+            var subj = $"[CarManagement] Thông báo chuyến điều chuyển xe {plan.LicensePlate ?? "N/A"}";
+            var body = BuildDriverEmailBody(plan, driverInfo.DriverName);
+            await _emailSender.SendEmailAsync(driverInfo.DriverEmail!, subj, body);
+        }
+        catch { }
+    }
+
+    private static string BuildOperatorEmailBody(TransferPlanDto dto, bool showDriverUrgency)
+    {
+        var departure = dto.PlannedDepartureDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A";
+        var arrival = dto.PlannedArrivalDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A";
+        var urgency = showDriverUrgency
+            ? @"<div style=""background:#fff2f0;border:1px solid #ffccc7;border-radius:6px;padding:12px 16px;margin-bottom:16px;"">
+        <strong style=""color:#cf1322;"">⚠️ KHẨN CẤP: Xe chưa có tài xế!</strong>
+        <p style=""color:#cf1322;margin:4px 0 0;"">Vui lòng gán tài xế cho xe này ngay để đảm bảo chuyến điều chuyển đúng kế hoạch.</p>
+      </div>" : "";
+
+        return $@"<!DOCTYPE html><html><head><meta charset=""utf-8""></head>
+<body style=""font-family:Arial,sans-serif;background:#f4f6f8;padding:20px;"">
+<div style=""max-width:600px;margin:auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);"">
+  <div style=""background:#1677ff;color:#fff;padding:20px 24px;""><h2 style=""margin:0;font-size:18px;"">📋 Yêu cầu điều chuyển xe mới</h2></div>
+  <div style=""padding:24px;"">
+    <p style=""color:#333;margin-top:0;"">Xin chào,</p>
+    {urgency}
+    <p style=""color:#333;"">Một yêu cầu điều chuyển xe mới đã được tạo bởi Ban Giám đốc:</p>
+    <table style=""width:100%;border-collapse:collapse;margin:16px 0;"">
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;width:40%;"">🚗 Biển số xe</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.LicensePlate ?? "N/A"}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">📍 Chi nhánh gốc</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.FromBranchName ?? "N/A"}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">🏁 Chi nhánh đích</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.ToBranchName ?? "N/A"}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">📅 Khởi hành dự kiến</td><td style=""padding:10px 8px;font-weight:bold;color:#1677ff;"">{departure}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">📅 Đến nơi dự kiến</td><td style=""padding:10px 8px;font-weight:bold;color:#1677ff;"">{arrival}</td></tr>
+      <tr><td style=""padding:10px 8px;color:#666;"">👤 Người tạo</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.ManagerName ?? "N/A"}</td></tr>
+    </table>
+    <p style=""color:#333;"">Vui lòng đăng nhập hệ thống để xem chi tiết.</p>
+    <p style=""color:#999;font-size:12px;margin-bottom:0;"">Đây là email tự động, vui lòng không trả lời.</p>
+  </div>
+</div></body></html>";
+    }
+
+    private static string BuildDriverEmailBody(TransferPlanDto dto, string? driverName)
+    {
+        var departure = dto.PlannedDepartureDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A";
+        var arrival = dto.PlannedArrivalDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A";
+
+        return $@"<!DOCTYPE html><html><head><meta charset=""utf-8""></head>
+<body style=""font-family:Arial,sans-serif;background:#f4f6f8;padding:20px;"">
+<div style=""max-width:600px;margin:auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);"">
+  <div style=""background:#52c41a;color:#fff;padding:20px 24px;""><h2 style=""margin:0;font-size:18px;"">🚗 Thông báo chuyến điều chuyển xe</h2></div>
+  <div style=""padding:24px;"">
+    <p style=""color:#333;margin-top:0;"">Xin chào <strong>{driverName ?? "Tài xế"}</strong>,</p>
+    <p style=""color:#333;"">Bạn được giao nhiệm vụ điều chuyển xe theo kế hoạch dưới đây. Vui lòng chuẩn bị sẵn sàng.</p>
+    <table style=""width:100%;border-collapse:collapse;margin:16px 0;"">
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;width:40%;"">🚗 Biển số xe</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.LicensePlate ?? "N/A"}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">📍 Xuất phát</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.FromBranchName ?? "N/A"}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">🏁 Đến</td><td style=""padding:10px 8px;font-weight:bold;color:#333;"">{dto.ToBranchName ?? "N/A"}</td></tr>
+      <tr style=""border-bottom:1px solid #eee;""><td style=""padding:10px 8px;color:#666;"">📅 Khởi hành dự kiến</td><td style=""padding:10px 8px;font-weight:bold;color:#52c41a;"">{departure}</td></tr>
+      <tr><td style=""padding:10px 8px;color:#666;"">📅 Đến nơi dự kiến</td><td style=""padding:10px 8px;font-weight:bold;color:#52c41a;"">{arrival}</td></tr>
+    </table>
+    <p style=""color:#333;"">Nếu có thắc mắc, vui lòng liên hệ Operator chi nhánh của bạn.</p>
+    <p style=""color:#999;font-size:12px;margin-bottom:0;"">Đây là email tự động, vui lòng không trả lời.</p>
+  </div>
+</div></body></html>";
     }
 }

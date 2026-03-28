@@ -160,4 +160,12 @@ public sealed class VehicleAssetRepository : IVehicleAssetRepository
         return _context.Drivers
             .FirstOrDefaultAsync(d => d.Id == driverId && d.DeletedAt == null);
     }
+
+    public Task<bool> IsDriverAssignedToAnotherVehicleAsync(int driverId, int excludeVehicleId)
+    {
+        return _context.Vehicles.AsNoTracking()
+            .AnyAsync(v => v.CurrentDriverId == driverId
+                        && v.Id != excludeVehicleId
+                        && v.DeletedAt == null);
+    }
 }

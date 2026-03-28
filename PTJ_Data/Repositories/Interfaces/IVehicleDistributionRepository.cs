@@ -23,4 +23,6 @@ public interface IVehicleDistributionRepository
     Task<int?> GetUserBranchIdAsync(int userId);
     Task UpdateDriverBranchAsync(int driverId, int newBranchId);
     Task<int?> GetVehicleTransferDriverIdAsync(int vehicleId);
+    Task<List<string>> GetOperatorEmailsByBranchIdsAsync(params int[] branchIds);
+    Task<(int? DriverId, string? DriverEmail, string? DriverName)> GetVehicleDriverInfoAsync(int vehicleId);
 }

@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Data.Repositories.Drivers.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.Drivers;
@@ -16,6 +16,7 @@ public sealed class DriverRepository : IDriverRepository
         Name = d.Name,
         LicenseNumber = d.LicenseNumber,
         Phone = d.Phone,
+        Email = d.Email,
         HireDate = d.HireDate,
         Status = d.Status,
         BranchId = d.BranchId,

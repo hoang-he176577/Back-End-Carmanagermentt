@@ -225,4 +225,34 @@ public sealed class VehicleDistributionRepository : IVehicleDistributionReposito
             .Select(t => (int?)t.DriverId)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<List<string>> GetOperatorEmailsByBranchIdsAsync(params int[] branchIds)
+    {
+        return await _context.Users.AsNoTracking()
+            .Where(u => u.DeletedAt == null
+                && u.Email != null
+                && branchIds.Contains(u.BranchId ?? 0)
+                && u.Roles.Any(r => r.Name == "Operator"))
+            .Select(u => u.Email!)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<(int? DriverId, string? DriverEmail, string? DriverName)> GetVehicleDriverInfoAsync(int vehicleId)
+    {
+        var result = await _context.Vehicles.AsNoTracking()
+            .Where(v => v.Id == vehicleId && v.DeletedAt == null && v.CurrentDriverId != null)
+            .Select(v => new
+            {
+                DriverId = v.CurrentDriverId,
+                DriverEmail = v.CurrentDriver != null ? v.CurrentDriver.Email : null,
+                DriverName = v.CurrentDriver != null ? v.CurrentDriver.Name : null
+            })
+            .FirstOrDefaultAsync();
+
+        if (result == null)
+            return (null, null, null);
+
+        return (result.DriverId, result.DriverEmail, result.DriverName);
+    }
 }
