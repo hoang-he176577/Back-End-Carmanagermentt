@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +6,7 @@ using Data.Repositories.VehicleAssets.Interfaces;
 using Models.DTO.Vehicles;
 using Models.Models;
 using Service.Services.Common;
+using Service.Services.Interfaces;
 using Service.Services.VehicleAssets.Interfaces;
 
 namespace Service.Services.VehicleAssets.Implementations;
@@ -24,10 +25,12 @@ public sealed class VehicleAssetService : IVehicleAssetService
     };
 
     private readonly IVehicleAssetRepository _repository;
+    private readonly IVehicleDistributionService _distributionService;
 
-    public VehicleAssetService(IVehicleAssetRepository repository)
+    public VehicleAssetService(IVehicleAssetRepository repository, IVehicleDistributionService distributionService)
     {
         _repository = repository;
+        _distributionService = distributionService;
     }
 
     public async Task<ServiceResult<List<VehicleAssetDto>>> GetVehiclesAsync(
@@ -421,10 +424,18 @@ public sealed class VehicleAssetService : IVehicleAssetService
         if (request.DriverId <= 0 || !await _repository.DriverExistsAsync(request.DriverId))
             return ServiceResult<VehicleAssetDto>.Fail(400, "Driver not found.");
 
+        // Prevent assigning a driver who is already assigned to another vehicle
+        if (await _repository.IsDriverAssignedToAnotherVehicleAsync(request.DriverId, vehicleId))
+            return ServiceResult<VehicleAssetDto>.Fail(409, "Tài xế này đã được phân công cho xe khác. Vui lòng hủy phân công trước.");
+
         vehicle.CurrentDriverId = request.DriverId;
         vehicle.Status = "Assigned";
         vehicle.UpdatedAt = DateTime.Now;
         await _repository.SaveChangesAsync();
+
+        // Send email to driver if there is a pending transfer for this vehicle
+        try { await _distributionService.SendDriverAssignedTransferEmailAsync(vehicleId); }
+        catch { /* email failure must not affect API response */ }
 
         var dto = await _repository.GetVehicleByIdAsync(vehicle.Id);
         return ServiceResult<VehicleAssetDto>.SuccessResult(dto!);

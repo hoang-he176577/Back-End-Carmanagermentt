@@ -587,6 +587,9 @@ public partial class CarManagerContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.BranchId)

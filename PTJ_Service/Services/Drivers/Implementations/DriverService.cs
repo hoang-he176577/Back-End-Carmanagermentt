@@ -1,4 +1,4 @@
-﻿using Data.Repositories.Drivers.Interfaces;
+using Data.Repositories.Drivers.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.Drivers;
 using Models.Models;
@@ -82,6 +82,7 @@ public sealed class DriverService : IDriverService
             Name = name,
             LicenseNumber = license,
             Phone = request.Phone?.Trim(),
+            Email = request.Email?.Trim(),
             HireDate = request.HireDate,
             BranchId = targetBranchId,
             Status = "Active"
@@ -104,6 +105,7 @@ public sealed class DriverService : IDriverService
 
         if (!string.IsNullOrWhiteSpace(request.Name)) entity.Name = request.Name.Trim();
         if (!string.IsNullOrWhiteSpace(request.Phone)) entity.Phone = request.Phone.Trim();
+        if (request.Email != null) entity.Email = request.Email.Trim();
         if (request.HireDate.HasValue) entity.HireDate = request.HireDate.Value;
         if (!string.IsNullOrWhiteSpace(request.Status)) entity.Status = request.Status.Trim();
 

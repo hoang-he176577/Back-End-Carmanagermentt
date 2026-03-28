@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Models.DTO.Vehicles;
 using Models.Models;
@@ -26,4 +26,5 @@ public interface IVehicleAssetRepository
 
     // Assign operations
     Task<Driver?> GetDriverByIdAsync(int driverId);
+    Task<bool> IsDriverAssignedToAnotherVehicleAsync(int driverId, int excludeVehicleId);
 }

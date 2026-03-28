@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -12,6 +12,8 @@ public partial class Driver
     public string? LicenseNumber { get; set; }
 
     public string? Phone { get; set; }
+
+    public string? Email { get; set; }
 
     public DateOnly? HireDate { get; set; }
 

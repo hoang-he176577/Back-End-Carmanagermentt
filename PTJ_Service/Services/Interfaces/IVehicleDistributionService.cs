@@ -12,4 +12,5 @@ public interface IVehicleDistributionService
     Task<ServiceResult<TransferPlanDto>> CreateTransferPlanAsync(TransferPlanCreateRequestDto request, int managerId);
     Task<ServiceResult<TransferPlanDto>> UpdateTransferPlanStatusAsync(int id, TransferPlanUpdateStatusDto request, int userId, string userRole);
     Task<List<BranchStockSummaryDto>> GetBranchStockAsync();
+    Task SendDriverAssignedTransferEmailAsync(int vehicleId);
 }
