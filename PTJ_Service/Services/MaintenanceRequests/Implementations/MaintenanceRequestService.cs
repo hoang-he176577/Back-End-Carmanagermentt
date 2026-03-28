@@ -1,4 +1,5 @@
 using Data.Repositories.MaintenanceRequests.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Models.DTO.Maintenance;
 using Models.Models;
 using Service.Services.Common;
@@ -139,7 +140,17 @@ public sealed class MaintenanceRequestService : IMaintenanceRequestService
             UpdatedAt = now
         };
 
-        var created = await _repository.AddAsync(entity);
+        MaintenanceRequest created;
+        try
+        {
+            created = await _repository.AddAsync(entity);
+        }
+        catch (DbUpdateException dbEx)
+        {
+            var innerMsg = dbEx.InnerException?.Message ?? dbEx.Message;
+            return ServiceResult<MaintenanceRequestDto>.Fail(500, $"Database error: {innerMsg}");
+        }
+
         var dto = await _repository.GetByIdAsync(created.Id, includeDeleted: true);
         if (dto == null)
         {
