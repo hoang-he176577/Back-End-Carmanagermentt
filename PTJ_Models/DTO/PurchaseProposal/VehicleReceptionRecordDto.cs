@@ -23,7 +23,6 @@ public class VehicleReceptionRecordDto
 
     public string? LicensePlate { get; set; }
     public string? Vin { get; set; }
-    public string? TelematicsImei { get; set; }
 
     public string? Version { get; set; }
 

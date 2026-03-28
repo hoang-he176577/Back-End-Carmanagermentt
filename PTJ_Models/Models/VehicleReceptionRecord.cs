@@ -27,8 +27,6 @@ namespace Models.Models
 
         public string? EngineNumber { get; set; }
 
-        public string? TelematicsImei { get; set; }
-
         public DateOnly? RegistrationExpirationDate { get; set; }
 
         public DateOnly? InsuranceExpirationDate { get; set; }

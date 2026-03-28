@@ -441,8 +441,6 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.RoadMaintenanceFee).HasColumnType("decimal(15, 2)").HasColumnName("road_maintenance_fee");
             entity.Property(e => e.LicensePlateFee).HasColumnType("decimal(15, 2)").HasColumnName("license_plate_fee");
             entity.Property(e => e.InsuranceFee).HasColumnType("decimal(15, 2)").HasColumnName("insurance_fee");
-            entity.Property(e => e.HasCamera158).HasDefaultValue(false).HasColumnName("has_camera_158");
-            entity.Property(e => e.HasGsht).HasDefaultValue(false).HasColumnName("has_gsht");
             entity.Property(e => e.FuelNorm).HasColumnType("decimal(15, 2)").HasColumnName("fuel_norm");
 
             entity.HasOne(d => d.Branch).WithMany(p => p.BulkPurchaseDetails)
@@ -1180,7 +1178,6 @@ public partial class CarManagerContext : DbContext
             entity.Property(e => e.Vin).HasMaxLength(100).HasColumnName("vin");
             entity.Property(e => e.ChassisNumber).HasMaxLength(100).HasColumnName("chassis_number");
             entity.Property(e => e.EngineNumber).HasMaxLength(100).HasColumnName("engine_number");
-            entity.Property(e => e.TelematicsImei).HasMaxLength(100).HasColumnName("telematics_imei");
             entity.Property(e => e.RegistrationExpirationDate).HasColumnType("date").HasColumnName("registration_expiration_date");
             entity.Property(e => e.InsuranceExpirationDate).HasColumnType("date").HasColumnName("insurance_expiration_date");
             entity.Property(e => e.BadgeType).HasMaxLength(50).HasColumnName("badge_type");
@@ -1397,7 +1394,6 @@ public partial class CarManagerContext : DbContext
                 .HasColumnName("updated_at");
             entity.Property(e => e.Version).HasMaxLength(100).HasColumnName("version");
             entity.Property(e => e.Vin).HasMaxLength(100).HasColumnName("vin");
-            entity.Property(e => e.TelematicsImei).HasMaxLength(100).HasColumnName("telematics_imei");
             entity.Property(e => e.RegistrationExpirationDate).HasColumnType("date").HasColumnName("registration_expiration_date");
             entity.Property(e => e.InsuranceExpirationDate).HasColumnType("date").HasColumnName("insurance_expiration_date");
             entity.Property(e => e.BadgeType).HasMaxLength(50).HasColumnName("badge_type");

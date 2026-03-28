@@ -43,10 +43,10 @@ namespace Models.DTO.PurchaseProposal
 
         [Range(0, 9999999999999, ErrorMessage = "Phí bảo hiểm vượt quá giới hạn cho phép.")]
         public decimal? InsuranceFee { get; set; }
-
-        public bool? HasCamera158 { get; set; }
-
-        public bool? HasGsht { get; set; }
+        
+        [Required(ErrorMessage = "Định mức năng lượng không được để trống.")]
+        [Range(0.1, 100, ErrorMessage = "Định mức năng lượng phải từ 0.1 đến 100 L/100km.")]
+        public decimal? FuelNorm { get; set; }
 
         public string? Version { get; set; }
     }

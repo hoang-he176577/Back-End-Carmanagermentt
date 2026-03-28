@@ -27,7 +27,6 @@ namespace Models.Models
             string? vin,
             string? chassisNumber, 
             string? engineNumber, 
-            string? telematicsImei,
             DateOnly? registrationExpirationDate,
             DateOnly? insuranceExpirationDate,
             string? badgeType,
@@ -42,7 +41,6 @@ namespace Models.Models
             Vin = vin?.Trim();
             ChassisNumber = chassisNumber?.Trim();
             EngineNumber = engineNumber?.Trim();
-            TelematicsImei = telematicsImei?.Trim();
             RegistrationExpirationDate = registrationExpirationDate;
             InsuranceExpirationDate = insuranceExpirationDate;
             BadgeType = badgeType?.Trim();

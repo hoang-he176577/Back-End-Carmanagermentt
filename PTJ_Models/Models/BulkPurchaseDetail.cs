@@ -36,10 +36,6 @@ public partial class BulkPurchaseDetail
     public decimal? LicensePlateFee { get; set; }
 
     public decimal? InsuranceFee { get; set; }
-
-    public bool? HasCamera158 { get; set; } = false;
-
-    public bool? HasGsht { get; set; } = false;
     public decimal? FuelNorm { get; set; }
 
     public virtual Branch? Branch { get; set; }

@@ -8,8 +8,6 @@ export interface CreatePurchaseProposalDetailDto {
   roadMaintenanceFee?: number | null;
   licensePlateFee?: number | null;
   insuranceFee?: number | null;
-  hasCamera158: boolean;
-  hasGsht: boolean;
   enginePower?: number | null;
   payloadCapacity?: number | null;
   notes?: string | null;
@@ -25,7 +23,6 @@ export interface VehicleReceptionDto {
   branchId: number;
   licensePlate: string;
   vin: string;
-  telematicsImei: string;
   chassisNumber: string;
   engineNumber: string;
   badgeType?: string | null;

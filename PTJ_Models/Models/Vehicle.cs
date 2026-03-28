@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -40,8 +40,6 @@ public partial class Vehicle
     public string? ChassisNumber { get; set; }
 
     public string? EngineNumber { get; set; }
-
-    public string? TelematicsImei { get; set; }
 
     public DateOnly? RegistrationExpirationDate { get; set; }
 

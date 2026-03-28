@@ -79,7 +79,6 @@ namespace Service.Services.Implementations
             var vehicleDetail = proposal.BulkPurchaseDetails.FirstOrDefault(d => d.BranchId == dto.BranchId);
             if (vehicleDetail == null) throw new ArgumentException("Đề xuất này không có xe nào dành cho chi nhánh của bạn.");
             int branchProposedQuantity = vehicleDetail.ProposedQuantity ?? 0;
-            bool isGshtRequired = vehicleDetail.HasGsht ?? false;
 
             // 3. VALIDATION CẤM LỌT LỖI (FMS) - THEO CHUẨN CLEAN CODE
             var today = DateOnly.FromDateTime(DateTime.Now);
@@ -101,17 +100,6 @@ namespace Service.Services.Implementations
                 throw new ForbiddenCharacterException();
             if (!Regex.IsMatch(dto.Vin, @"^[A-HJ-NPR-Z0-9]{17}$"))
                 throw new ForbiddenCharacterException("Số VIN chứa ký tự không hợp lệ hoặc sai định dạng ISO.");
-
-            // 3.3 Thiết bị GSHT & Camera (Nghị định 10)
-            bool isDecree10Required = (vehicleDetail.Seats >= 9);
-            if (isGshtRequired || isDecree10Required)
-            {
-                if (string.IsNullOrWhiteSpace(dto.TelematicsImei))
-                    throw new LegalComplianceException(isGshtRequired ? "Xe yêu cầu GSHT, vui lòng nhập mã IMEI." : "Xe >= 9 chỗ, thiếu IMEI GSHT theo Nghị định 10.");
-                
-                if (!Regex.IsMatch(dto.TelematicsImei, @"^\d{15}$"))
-                    throw new LegalComplianceException("Mã IMEI phải là dãy 15 chữ số.");
-            }
 
             // 3.4 Quản lý Ngày tháng (Past Date Exception)
             if (!dto.RegistrationExpirationDate.HasValue || dto.RegistrationExpirationDate <= today)
@@ -155,7 +143,7 @@ namespace Service.Services.Implementations
             record.Status = VehicleReceptionRecord.ReceivedPendingPaymentStatus;
 
             record.UpdateReceptionDetails(
-                cleanPlate, dto.Vin, dto.ChassisNumber, dto.EngineNumber, dto.TelematicsImei,
+                cleanPlate, dto.Vin, dto.ChassisNumber, dto.EngineNumber,
                 dto.RegistrationExpirationDate, dto.InsuranceExpirationDate, dto.BadgeType,
                 dto.BadgeExpirationDate, dto.FuelNorm ?? vehicleDetail?.FuelNorm, dto.ReceiptImageUrl, dto.Notes,
                 dto.YearManufacture, dto.Mileage);
@@ -165,11 +153,11 @@ namespace Service.Services.Implementations
             var createdRecord = await _repository.AddAsync(record);
 
             int totalProposedQuantity = proposal.BulkPurchaseDetails.Sum(d => d.ProposedQuantity ?? 0);
-            int totalReceived = await _context.VehicleReceptionRecords
+            int totalReceivedInDb = await _context.VehicleReceptionRecords
                 .CountAsync(r => r.PurchaseProposalId == dto.PurchaseProposalId && r.Status != VehicleReceptionRecord.RejectedStatus);
 
-            // Nếu đã nhận / đang nhận chiếc cuối cùng thì mới chuyển status của Proposal
-            if (totalReceived >= totalProposedQuantity)
+            // Nếu đã nhận / đang nhận chiếc cuối cùng (bao gồm bản ghi đang tạo này) thì mới chuyển status của Proposal
+            if (totalReceivedInDb + 1 >= totalProposedQuantity)
             {
                 proposal.MarkAsReceived(dto.LicensePlate, operatorId); 
             }
@@ -212,7 +200,6 @@ namespace Service.Services.Implementations
                 Vin = dto.Vin,
                 ChassisNumber = dto.ChassisNumber,
                 EngineNumber = dto.EngineNumber,
-                TelematicsImei = dto.TelematicsImei,
                 RegistrationExpirationDate = dto.RegistrationExpirationDate,
                 InsuranceExpirationDate = dto.InsuranceExpirationDate,
                 BadgeType = dto.BadgeType,
@@ -273,7 +260,7 @@ namespace Service.Services.Implementations
             }
 
             record.UpdateReceptionDetails(
-                cleanPlate, dto.Vin, dto.ChassisNumber, dto.EngineNumber, dto.TelematicsImei,
+                cleanPlate, dto.Vin, dto.ChassisNumber, dto.EngineNumber,
                 dto.RegistrationExpirationDate, dto.InsuranceExpirationDate, dto.BadgeType,
                 dto.BadgeExpirationDate, dto.FuelNorm ?? record.FuelNorm, dto.ReceiptImageUrl, dto.Notes,
                 dto.YearManufacture, dto.Mileage);
@@ -315,7 +302,6 @@ namespace Service.Services.Implementations
                 vehicle.Vin = dto.Vin;
                 vehicle.ChassisNumber = dto.ChassisNumber;
                 vehicle.EngineNumber = dto.EngineNumber;
-                vehicle.TelematicsImei = dto.TelematicsImei;
                 vehicle.RegistrationExpirationDate = dto.RegistrationExpirationDate;
                 vehicle.InsuranceExpirationDate = dto.InsuranceExpirationDate;
                 vehicle.BadgeType = dto.BadgeType;

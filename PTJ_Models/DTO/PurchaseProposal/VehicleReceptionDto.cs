@@ -19,8 +19,6 @@ public class CreateVehicleReceptionDto
 
     public string? Vin { get; set; }
 
-    public string? TelematicsImei { get; set; }
-
     public DateOnly? RegistrationExpirationDate { get; set; }
 
     public DateOnly? InsuranceExpirationDate { get; set; }
@@ -124,8 +122,6 @@ public class BranchPurchaseDetailDto
     public decimal? RoadMaintenanceFee { get; set; }
     public decimal? LicensePlateFee { get; set; }
     public decimal? InsuranceFee { get; set; }
-    public bool HasCamera158 { get; set; }
-    public bool HasGsht { get; set; }
     public string? AcquisitionMethod { get; set; }
     public DateTime? CompletionDeadline { get; set; }
 }

@@ -59,8 +59,6 @@ using Microsoft.EntityFrameworkCore;
                         RoadMaintenanceFee = d.RoadMaintenanceFee,
                         LicensePlateFee = d.LicensePlateFee,
                         InsuranceFee = d.InsuranceFee,
-                        HasCamera158 = d.HasCamera158 ?? false,
-                        HasGsht = d.HasGsht ?? false,
                         AcquisitionMethod = d.AcquisitionMethod,
                         BranchNotes = d.BranchNotes,
                         RequestedDate = p.CreatedDate,
@@ -116,13 +114,9 @@ using Microsoft.EntityFrameworkCore;
                     if (detail.UnitPrice <= 0) throw new ArgumentException("Đơn giá xe phải lớn hơn 0.");
                     if (string.IsNullOrWhiteSpace(detail.Manufacturer)) throw new ArgumentException("Nhãn hiệu xe không được để trống.");
 
-                    // Legal Validation (Nghị định 158/2024)
-                    if ((detail.Seats.HasValue && detail.Seats.Value >= 8)) // Điều kiện xe kinh doanh/chở người
+                    if (detail.FuelNorm == null || detail.FuelNorm <= 0)
                     {
-                        if (detail.HasCamera158 != true || detail.HasGsht != true)
-                        {
-                            throw new ArgumentException("Theo Nghị định 158/2024, phương tiện kinh doanh/chở người trên 8 chỗ bắt buộc phải lắp đặt Camera và thiết bị GSHT.");
-                        }
+                        throw new ArgumentException("Định mức năng lượng là bắt buộc và phải lớn hơn 0.");
                     }
 
                     var bulkDetail = new BulkPurchaseDetail();
@@ -132,7 +126,6 @@ using Microsoft.EntityFrameworkCore;
                         detail.UnitPrice,
                         detail.Notes ?? detail.Description);
 
-                    // Map TCO & Legal fields
                     bulkDetail.Seats = detail.Seats;
                     bulkDetail.Manufacturer = detail.Manufacturer;
                     bulkDetail.Version = detail.Version;
@@ -141,8 +134,7 @@ using Microsoft.EntityFrameworkCore;
                     bulkDetail.RoadMaintenanceFee = detail.RoadMaintenanceFee;
                     bulkDetail.LicensePlateFee = detail.LicensePlateFee;
                     bulkDetail.InsuranceFee = detail.InsuranceFee;
-                    bulkDetail.HasCamera158 = detail.HasCamera158;
-                    bulkDetail.HasGsht = detail.HasGsht;
+                    bulkDetail.FuelNorm = detail.FuelNorm;
 
                     proposal.AddDetail(bulkDetail);
                 }
@@ -184,12 +176,9 @@ using Microsoft.EntityFrameworkCore;
                 if (detail.UnitPrice <= 0) throw new ArgumentException("Đơn giá xe phải lớn hơn 0.");
                 if (string.IsNullOrWhiteSpace(detail.Manufacturer)) throw new ArgumentException("Nhãn hiệu xe không được để trống.");
 
-                if ((detail.Seats.HasValue && detail.Seats.Value >= 8))
+                if (detail.FuelNorm == null || detail.FuelNorm <= 0)
                 {
-                    if (detail.HasCamera158 != true || detail.HasGsht != true)
-                    {
-                        throw new ArgumentException("Theo Nghị định 158/2024, phương tiện kinh doanh/chở người trên 8 chỗ bắt buộc phải lắp đặt Camera và thiết bị GSHT.");
-                    }
+                    throw new ArgumentException("Định mức năng lượng là bắt buộc và phải lớn hơn 0.");
                 }
 
                 var bulkDetail = new BulkPurchaseDetail();
@@ -202,8 +191,7 @@ using Microsoft.EntityFrameworkCore;
                 bulkDetail.RoadMaintenanceFee = detail.RoadMaintenanceFee;
                 bulkDetail.LicensePlateFee = detail.LicensePlateFee;
                 bulkDetail.InsuranceFee = detail.InsuranceFee;
-                bulkDetail.HasCamera158 = detail.HasCamera158;
-                bulkDetail.HasGsht = detail.HasGsht;
+                bulkDetail.FuelNorm = detail.FuelNorm;
 
                 bulkDetail.PurchaseProposalId = proposal.Id;
                 _context.BulkPurchaseDetails.Add(bulkDetail);
@@ -369,7 +357,6 @@ using Microsoft.EntityFrameworkCore;
                         Vin = record.Vin,
                         ChassisNumber = record.ChassisNumber,
                         EngineNumber = record.EngineNumber,
-                        TelematicsImei = record.TelematicsImei,
                         CurrentBranchId = record.BranchId,
                         ModelId = model.Id,
                         Status = "Active",
@@ -510,7 +497,6 @@ using Microsoft.EntityFrameworkCore;
                         BranchName = r.Branch?.Name,
                         LicensePlate = r.LicensePlate,
                         Vin = r.Vin,
-                        TelematicsImei = r.TelematicsImei,
                         Version = r.Version,
                         ChassisNumber = r.ChassisNumber,
                         EngineNumber = r.EngineNumber,
@@ -544,8 +530,6 @@ using Microsoft.EntityFrameworkCore;
                     RoadMaintenanceFee = d.RoadMaintenanceFee,
                     LicensePlateFee = d.LicensePlateFee,
                     InsuranceFee = d.InsuranceFee,
-                    HasCamera158 = d.HasCamera158 ?? false,
-                    HasGsht = d.HasGsht ?? false,
                     AcquisitionMethod = d.AcquisitionMethod
                 }).ToList()
             })
@@ -622,7 +606,6 @@ using Microsoft.EntityFrameworkCore;
                         Vin = record.Vin,
                         ChassisNumber = record.ChassisNumber,
                         EngineNumber = record.EngineNumber,
-                        TelematicsImei = record.TelematicsImei,
                         CurrentBranchId = record.BranchId,
                         ModelId = model.Id,
                         Status = "Active",
