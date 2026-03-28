@@ -68,13 +68,7 @@ public sealed partial class AccessoryService
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
                         .Sum(bs => (int?)bs.QuantityInStock) ?? 0
                     : x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
-                MinimumStock = scopedBranchId.HasValue
-                    ? x.BranchAccessoryStocks
-                        .Where(bs => bs.BranchId == scopedBranchId.Value)
-                        .OrderBy(bs => bs.StockCondition == "NEW" ? 0 : 1)
-                        .Select(bs => (int?)bs.MinimumStock)
-                        .FirstOrDefault()
-                    : x.MinimumStock,
+                MinimumStock = x.MinimumStock,
                 IsActive = x.IsActive,
                 ImageUrl = x.ImageUrl,
                 CreatedAt = x.CreatedAt,
@@ -107,13 +101,7 @@ public sealed partial class AccessoryService
                         .Where(bs => bs.BranchId == scopedBranchId.Value)
                         .Sum(bs => (int?)bs.QuantityInStock) ?? 0
                     : x.BranchAccessoryStocks.Sum(bs => (int?)bs.QuantityInStock) ?? 0,
-                MinimumStock = scopedBranchId.HasValue
-                    ? x.BranchAccessoryStocks
-                        .Where(bs => bs.BranchId == scopedBranchId.Value)
-                        .OrderBy(bs => bs.StockCondition == "NEW" ? 0 : 1)
-                        .Select(bs => (int?)bs.MinimumStock)
-                        .FirstOrDefault()
-                    : x.MinimumStock,
+                MinimumStock = x.MinimumStock,
                 IsActive = x.IsActive,
                 ImageUrl = x.ImageUrl,
                 CreatedAt = x.CreatedAt,

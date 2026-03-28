@@ -43,7 +43,7 @@ public sealed class BranchAccessoryStockController : ControllerBase
     }
 
     [HttpPut]
-    [Authorize(Roles = "Branch Asset Accountant,Manager,Executive Management")]
+    [Authorize(Roles = "Operator,Branch Asset Accountant,Manager,Executive Management")]
     [ProducesResponseType(typeof(BranchAccessoryStockDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<BranchAccessoryStockDto>> Upsert([FromBody] BranchAccessoryStockUpsertRequestDto request)
     {

@@ -30,6 +30,7 @@ public sealed partial class AccessoryService
 
     private static readonly HashSet<string> BranchStockWriteRoles = new(StringComparer.OrdinalIgnoreCase)
     {
+        "operator",
         "branchassetaccountant",
         "manager",
         "executivemanagement"
