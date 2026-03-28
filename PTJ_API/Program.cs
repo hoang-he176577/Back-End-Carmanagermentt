@@ -1,4 +1,4 @@
-﻿using API.Json;
+using API.Json;
 using API.Middlewares;
 using Data.Repositories.Auth.Implementations;
 using Data.Repositories.Auth.Interfaces;
@@ -269,6 +269,9 @@ app.UseCustomExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ≡ƒöÑ Tß╗▒ ─æß╗Öng cß║¡p nhß║¡t Database dß╗æn dß║╣p GSHT/IMEI
+API.DatabaseUpdateHelper.UpdateDatabase(app);
 
 // Serve uploaded files from wwwroot
 app.UseStaticFiles();
