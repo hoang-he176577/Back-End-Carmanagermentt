@@ -8,6 +8,8 @@ using Data.Repositories.MaintenanceRequests.Implementations;
 using Data.Repositories.MaintenanceRequests.Interfaces;
 using Data.Repositories.VehicleAssets.Implementations;
 using Data.Repositories.VehicleAssets.Interfaces;
+using Data.Repositories.VehicleSchedules.Implementations;
+using Data.Repositories.VehicleSchedules.Interfaces;
 using Data.Repositories.DisposalProposals.Implementations;
 using Data.Repositories.DisposalProposals.Interfaces;
 using Data.Repositories.DriverTransfer.Implementations;
@@ -27,6 +29,8 @@ using Service.Services.MaintenanceRequests.Implementations;
 using Service.Services.MaintenanceRequests.Interfaces;
 using Service.Services.VehicleAssets.Implementations;
 using Service.Services.VehicleAssets.Interfaces;
+using Service.Services.VehicleSchedules.Implementations;
+using Service.Services.VehicleSchedules.Interfaces;
 using Service.Services.DisposalProposals.Implementations;
 using Service.Services.DisposalProposals.Interfaces;
 using Service.Services.DriverTransfer.Implementations;
@@ -44,6 +48,7 @@ using Service.Services.Reports.Implementations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using API.HostedServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +108,8 @@ builder.Services.AddScoped<ITripLogRepository, TripLogRepository>();
 builder.Services.AddScoped<IMaintenanceRequestRepository, MaintenanceRequestRepository>();
 builder.Services.AddScoped<IMaintenanceRequestService, MaintenanceRequestService>();
 builder.Services.AddScoped<IBranchRepository, BranchRepository>();
+builder.Services.AddScoped<IVehicleScheduleRepository, VehicleScheduleRepository>();
+builder.Services.AddScoped<IVehicleScheduleService, VehicleScheduleService>();
 
 builder.Services.AddScoped<IAccessoryRepository, AccessoryRepository>();
 builder.Services.AddScoped<IAccessoryService, AccessoryService>();
@@ -235,6 +242,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IPostPurchaseService, PostPurchaseService>();
+builder.Services.AddHostedService<VehicleScheduleAutoRunner>();
 
 var app = builder.Build();
 
