@@ -41,7 +41,9 @@ public partial class User
 
     public virtual ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
 
-    public virtual ICollection<MaintenanceRequest> MaintenanceRequests { get; set; } = new List<MaintenanceRequest>();
+    public virtual ICollection<MaintenanceRequest> MaintenanceRequestAccountants { get; set; } = new List<MaintenanceRequest>();
+
+    public virtual ICollection<MaintenanceRequest> MaintenanceRequestOperators { get; set; } = new List<MaintenanceRequest>();
 
     public virtual ICollection<OverBudgetRepairProposal> OverBudgetRepairProposals { get; set; } = new List<OverBudgetRepairProposal>();
 

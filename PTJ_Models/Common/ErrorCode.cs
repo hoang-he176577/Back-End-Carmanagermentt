@@ -14,7 +14,8 @@ namespace Models.Common
         GeneralError,
         NotFound,
         BadRequest,
-        Forbidden
+        Forbidden,
+        Conflict
     }
 }
 
