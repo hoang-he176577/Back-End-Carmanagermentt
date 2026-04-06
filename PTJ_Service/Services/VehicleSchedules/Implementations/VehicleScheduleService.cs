@@ -172,6 +172,8 @@ namespace Service.Services.VehicleSchedules.Implementations
             {
                 throw BusinessErrors.Unauthorized("You can only manage schedules in your branch.");
             }
+            var effectiveBranchId = branchId != 0 ? branchId : schedule.BranchId;
+
 
             var plannedStart = request.PlannedStartTime ?? schedule.PlannedStartTime;
             var plannedEnd = request.PlannedEndTime ?? schedule.PlannedEndTime;
@@ -299,53 +301,25 @@ namespace Service.Services.VehicleSchedules.Implementations
             {
                 throw BusinessErrors.Unauthorized("You can only manage schedules in your branch.");
             }
+            var effectiveBranchId = branchId != 0 ? branchId : schedule.BranchId;
 
             var newEnd = schedule.PlannedEndTime.AddMinutes(request.ExtensionMinutes);
 
-            if (await _repository.HasDriverOverlapAsync(schedule.DriverId, schedule.PlannedStartTime, newEnd, schedule.Id))
-            {
-                var availableDrivers = await _repository.GetAvailableDriversAsync(branchId, schedule.PlannedStartTime, newEnd);
-                var driverDtos = availableDrivers.Select(MapDriverAvailability).ToList();
-
-                if (!request.AllowDriverSwap || !request.SwapDriverId.HasValue)
-                {
-                    return new VehicleScheduleExtendResultDto
-                    {
-                        Extended = false,
-                        AvailableDrivers = driverDtos
-                    };
-                }
-
-                if (!availableDrivers.Any(d => d.Id == request.SwapDriverId.Value))
-                {
-                    throw BusinessErrors.BadRequest("Selected swap driver is not available.");
-                }
-
-                schedule.DriverId = request.SwapDriverId.Value;
-                await _repository.AddAuditAsync(new VehicleScheduleAudit
-                {
-                    ScheduleId = schedule.Id,
-                    ActorUserId = actorUserId,
-                    Action = "SwapDriver",
-                    Note = "Swapped driver due to extension conflict",
-                    DataJson = $"{{\"newDriverId\":{request.SwapDriverId.Value}}}",
-                    CreatedAt = DateTime.Now
-                });
-            }
             var conflict = await _repository.GetNextScheduleAsync(schedule.VehicleId, schedule.PlannedEndTime, schedule.Id);
+            var hasDriverOverlap = await _repository.HasDriverOverlapAsync(schedule.DriverId, schedule.PlannedStartTime, newEnd, schedule.Id);
             if (conflict != null && conflict.PlannedStartTime < newEnd)
             {
                 var available = await _repository.GetAvailableVehiclesAsync(
-                    branchId,
-                    conflict.Vehicle?.ModelId,
+                    effectiveBranchId,
+                    null,
                     conflict.PlannedStartTime,
                     conflict.PlannedEndTime);
 
                 var availabilityDtos = available.Select(MapAvailability).ToList();
-                var driverAvailability = await _repository.GetAvailableDriversAsync(branchId, schedule.PlannedStartTime, newEnd);
+                var driverAvailability = await _repository.GetAvailableDriversAsync(effectiveBranchId, conflict.PlannedStartTime, conflict.PlannedEndTime);
                 var driverDtos = driverAvailability.Select(MapDriverAvailability).ToList();
 
-                if (!request.AllowSwap)
+                if (!request.AllowSwap || !request.AllowDriverSwap)
                 {
                     return new VehicleScheduleExtendResultDto
                     {
@@ -356,7 +330,7 @@ namespace Service.Services.VehicleSchedules.Implementations
                     };
                 }
 
-                if (!request.SwapVehicleId.HasValue)
+                if (!request.SwapVehicleId.HasValue || !request.SwapDriverId.HasValue)
                 {
                     return new VehicleScheduleExtendResultDto
                     {
@@ -368,13 +342,20 @@ namespace Service.Services.VehicleSchedules.Implementations
                 }
 
                 var swapVehicleId = request.SwapVehicleId.Value;
+                var swapDriverId = request.SwapDriverId.Value;
                 if (!available.Any(v => v.Id == swapVehicleId))
                 {
                     throw BusinessErrors.BadRequest("Selected swap vehicle is not available.");
                 }
+                if (!driverAvailability.Any(d => d.Id == swapDriverId))
+                {
+                    throw BusinessErrors.BadRequest("Selected swap driver is not available.");
+                }
 
                 var oldVehicleId = conflict.VehicleId;
+                var oldDriverId = conflict.DriverId;
                 conflict.VehicleId = swapVehicleId;
+                conflict.DriverId = swapDriverId;
                 conflict.SwappedVehicleId = oldVehicleId;
                 conflict.SwapFromScheduleId = schedule.Id;
                 conflict.UpdatedAt = DateTime.Now;
@@ -383,11 +364,24 @@ namespace Service.Services.VehicleSchedules.Implementations
                 {
                     ScheduleId = conflict.Id,
                     ActorUserId = actorUserId,
-                    Action = "SwapVehicle",
-                    Note = "Swapped vehicle due to extension conflict",
-                    DataJson = $"{{\"oldVehicleId\":{oldVehicleId},\"newVehicleId\":{swapVehicleId}}}",
+                    Action = "SwapVehicleDriver",
+                    Note = "Swapped vehicle and driver due to extension conflict",
+                    DataJson = $"{{\"oldVehicleId\":{oldVehicleId},\"newVehicleId\":{swapVehicleId},\"oldDriverId\":{oldDriverId},\"newDriverId\":{swapDriverId}}}",
                     CreatedAt = DateTime.Now
                 });
+                hasDriverOverlap = false;
+            }
+
+            if (hasDriverOverlap)
+            {
+                var availableDrivers = await _repository.GetAvailableDriversAsync(effectiveBranchId, schedule.PlannedStartTime, newEnd);
+                var driverDtos = availableDrivers.Select(MapDriverAvailability).ToList();
+
+                return new VehicleScheduleExtendResultDto
+                {
+                    Extended = false,
+                    AvailableDrivers = driverDtos
+                };
             }
 
             schedule.PlannedEndTime = newEnd;
