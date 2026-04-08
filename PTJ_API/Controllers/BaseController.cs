@@ -11,7 +11,7 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public abstract class BaseController : ControllerBase
     {
-        // ===== USER ID FROM JWT (int) =====
+        // ===== USER ID FROM JWT =====
         protected int GetUserId()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -21,7 +21,25 @@ namespace API.Controllers
 
             return userId;
         }
+        // ===== BRANCH ID FROM JWT (THÊM MỚI ĐỂ HẾT LỖI CS0103) =====
+        protected int GetBranchId()
+        {
+           
+            var branchIdClaim = User.FindFirst("branchId")?.Value;
 
+            if (!int.TryParse(branchIdClaim, out var branchId))
+                
+                throw BusinessErrors.Unauthorized("Chi nhánh không hợp lệ hoặc không tồn tại trong token.");
+
+            return branchId;
+        }
+
+        // ===== ROLES LIST FROM JWT =====
+        protected List<string>? GetUserRoles()
+        {
+            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            return roles.Count > 0 ? roles : null;
+        }
         // ===== STANDARD RESPONSE =====
         protected IActionResult HandleResult<T>(T result, string? message = null)
         {

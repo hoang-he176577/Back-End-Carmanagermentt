@@ -23,7 +23,5 @@ public sealed class VehicleCreateRequestDto
 
     public string? Status { get; set; }
 
-    public int? CurrentBranchId { get; set; }
-
     public int? CurrentDriverId { get; set; }
 }

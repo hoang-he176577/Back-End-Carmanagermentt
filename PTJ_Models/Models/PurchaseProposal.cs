@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -16,10 +16,13 @@ public partial class PurchaseProposal
     public DateOnly? CreatedDate { get; set; }
 
     public DateOnly? ApprovedDate { get; set; }
+    public DateTime? CompletionDeadline { get; set; }
 
     public string? Status { get; set; }
 
     public decimal? ProposedCost { get; set; }
+
+    public decimal? ActualCost { get; set; }
 
     public string? Description { get; set; }
 
@@ -36,4 +39,6 @@ public partial class PurchaseProposal
     public virtual User? Manager { get; set; }
 
     public virtual User? Proposer { get; set; }
+
+    public virtual ICollection<VehicleReceptionRecord> VehicleReceptionRecords { get; set; } = new List<VehicleReceptionRecord>();
 }

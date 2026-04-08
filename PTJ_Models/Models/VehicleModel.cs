@@ -21,11 +21,21 @@ public partial class VehicleModel
 
     public decimal? DefaultPrice { get; set; }
 
+    public string? EnginePower { get; set; }
+
+    public string? EmissionStandard { get; set; }
+
+    public decimal? PayloadCapacity { get; set; }
+
+    public string? FuelType { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+
+    public virtual ICollection<VehicleAccessoryRequirement> VehicleAccessoryRequirements { get; set; } = new List<VehicleAccessoryRequirement>();
 
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Models.Models;
@@ -27,25 +27,33 @@ public partial class Vehicle
 
     public int? CurrentDriverId { get; set; }
 
-    public string? Vin { get; set; }
-
-    public string? EngineNumber { get; set; }
-
-    public string? ChassisNumber { get; set; }
-
-    public string? Color { get; set; }
-
-    public int? SeatCount { get; set; }
-
-    public string? FuelType { get; set; }
-
-    public DateOnly? WarrantyExpiryDate { get; set; }
-
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+
+    public string? ImageUrl { get; set; }
+
+    public string? Vin { get; set; }
+
+    public string? ChassisNumber { get; set; }
+
+    public string? EngineNumber { get; set; }
+
+    public string? TelematicsImei { get; set; }
+
+    public DateOnly? RegistrationExpirationDate { get; set; }
+
+    public DateOnly? InsuranceExpirationDate { get; set; }
+
+    public string? BadgeType { get; set; }
+
+    public DateOnly? BadgeExpirationDate { get; set; }
+
+    public decimal? FuelNorm { get; set; }
+
+    public virtual ICollection<AccessoryTransaction> AccessoryTransactions { get; set; } = new List<AccessoryTransaction>();
 
     public virtual ICollection<AssetChangeLog> AssetChangeLogs { get; set; } = new List<AssetChangeLog>();
 
@@ -68,6 +76,8 @@ public partial class Vehicle
     public virtual ICollection<RegistrationRecord> RegistrationRecords { get; set; } = new List<RegistrationRecord>();
 
     public virtual ICollection<TransferPlan> TransferPlans { get; set; } = new List<TransferPlan>();
+
+    public virtual ICollection<TripLog> TripLogs { get; set; } = new List<TripLog>();
 
     public virtual ICollection<VehicleAccessory> VehicleAccessories { get; set; } = new List<VehicleAccessory>();
 
